@@ -411,7 +411,7 @@ def get_leaderboard(
 
 # Serve frontend — must be mounted last so /api routes take priority
 import os as _os
-_static_dir = _os.path.join(_os.path.dirname(__file__), "..")
+_static_dir = _os.path.dirname(__file__)
 if _os.path.exists(_os.path.join(_static_dir, "index.html")):
     app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
 

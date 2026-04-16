@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCAA Basketball Stats</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* ── Layout ── */
+        .page {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            padding: 18px 16px 24px;
+            position: sticky;
+            top: 16px;
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+        .sidebar-title {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .sidebar-title span { color: #667eea; }
+
+        .sidebar-field { margin-bottom: 10px; }
+
+        .sidebar-field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-field select,
+        .sidebar-field input[type=text] {
+            width: 100%;
+            padding: 6px 9px;
+            border: 2px solid #e8e8e8;
+            border-radius: 7px;
+            font-size: 13px;
+            outline: none;
+            color: #333;
+        }
+
+        .sidebar-field select:focus,
+        .sidebar-field input:focus { border-color: #667eea; }
+
+        /* ── Slider group ── */
+        .slider-group-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+            margin: 14px 0 8px;
+            padding-top: 10px;
+            border-top: 1px solid #f4f4f4;
+        }
+
+        .slider-row { margin-bottom: 12px; }
+
+        .slider-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .slider-label { font-size: 12px; font-weight: 600; color: #444; }
+
+        .slider-current {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .range-wrap {
+            position: relative;
+            height: 22px;
+            display: flex;
+            align-items: center;
+        }
+
+        .range-track {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            background: #eaeaea;
+            border-radius: 2px;
+        }
+
+        .range-fill {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .range-wrap input[type=range] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            background: none;
+            pointer-events: none;
+            outline: none;
+        }
+
+        .range-wrap input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: border-color 0.12s, box-shadow 0.12s;
+        }
+
+        .range-wrap input[type=range]::-webkit-slider-thumb:hover {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.18);
+        }
+
+        .range-wrap input[type=range]::-moz-range-thumb {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            pointer-events: all;
+        }
+
+        .range-bounds {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2px;
+        }
+
+        .range-bounds span {
+            font-size: 10px;
+            color: #ccc;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Position chips ── */
+        .pos-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .pos-chip {
+            padding: 3px 9px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            color: #777;
+            transition: all 0.12s;
+        }
+
+        .pos-chip.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        /* ── Reset button ── */
+        .btn-reset {
+            width: 100%;
+            margin-top: 16px;
+            padding: 7px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            background: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .btn-reset:hover { border-color: #667eea; color: #667eea; }
+
+        /* ── Main content ── */
+        .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+        .main-topbar {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-topbar h1 { font-size: 1.2em; color: #333; }
+        .results-count { margin-left: auto; font-size: 12px; color: #aaa; }
+
+        /* ── Table ── */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+        thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 10px 9px;
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:nth-child(-n+5) { text-align: left; }
+        th:hover { background: rgba(255,255,255,0.12); }
+        th.sort-asc::after  { content: ' ↑'; }
+        th.sort-desc::after { content: ' ↓'; }
+
+        td {
+            padding: 7px 9px;
+            border-bottom: 1px solid #f2f2f2;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        td:nth-child(-n+5) { text-align: left; }
+        tr:hover { background: #f8f9ff; cursor: pointer; }
+
+        .player-name { font-weight: 600; color: #667eea; }
+        .rating-cell { font-weight: bold; color: #10b981; }
+
+        .two-way-badge {
+            display: inline-block;
+            padding: 1px 5px;
+            background: linear-gradient(135deg, #f59e0b, #dc2626);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            margin-left: 3px;
+            vertical-align: middle;
+        }
+
+        .loading { text-align: center; padding: 50px; font-size: 1.1em; color: #666; }
+        .more-row td { text-align: center; color: #bbb; padding: 10px; font-size: 11px; }
+
+        /* ── Modal ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .modal.show { display: block; }
+
+        .modal-content {
+            background: white;
+            max-width: 960px;
+            margin: 40px auto;
+            border-radius: 15px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute; top: 14px; right: 18px;
+            font-size: 24px; font-weight: bold; color: #bbb;
+            cursor: pointer; background: none; border: none;
+        }
+        .close-btn:hover { color: #333; }
+
+        .player-header { margin-bottom: 16px; padding-bottom: 13px; border-bottom: 2px solid #f0f0f0; }
+        .player-header h2 { font-size: 1.6em; color: #333; margin-bottom: 4px; }
+        .player-header .meta { color: #777; font-size: 0.9em; }
+
+        .player-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px,1fr));
+            gap: 7px;
+            margin-bottom: 20px;
+        }
+
+        .info-item { padding: 10px; background: #f8f9ff; border-radius: 7px; }
+        .info-label { font-size: 0.72em; color: #aaa; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+        .info-value { font-size: 1.05em; font-weight: bold; color: #333; }
+
+        .stats-section { margin-bottom: 18px; }
+        .stats-section h3 { color: #667eea; margin-bottom: 8px; font-size: 1em; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 6px; }
+
+        .stat-box { padding: 8px 10px; background: #f8f9ff; border-radius: 7px; border-left: 3px solid #667eea; }
+        .stat-label { font-size: 0.72em; color: #aaa; text-transform: uppercase; letter-spacing: 0.3px; }
+        .stat-value { font-size: 1.1em; font-weight: bold; color: #333; margin-top: 1px; }
+
+        .percentile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 6px; }
+        .pct-box { padding: 7px 9px; border-radius: 7px; border: 1px solid #eee; }
+        .pct-label { font-size: 0.72em; color: #aaa; }
+        .pct-bar-wrap { background: #eee; border-radius: 3px; height: 4px; margin: 3px 0; }
+        .pct-bar { height: 4px; border-radius: 3px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .pct-value { font-size: 0.8em; font-weight: bold; color: #555; }
+
+        .realgm-link {
+            display: inline-block; margin-top: 9px; padding: 5px 11px;
+            background: #667eea; color: white; border-radius: 6px;
+            text-decoration: none; font-size: 0.82em;
+        }
+        .realgm-link:hover { background: #5a6fd4; }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+        <div class="sidebar-title">NCAA <span>D1</span> Basketball</div>
+
+        <div class="sidebar-field">
+            <label>Season</label>
+            <select id="seasonSelect">
+                <option value="2025-26">2025-26</option>
+                <option value="2024-25">2024-25</option>
+                <option value="2023-24">2023-24</option>
+                <option value="2022-23">2022-23</option>
+                <option value="2021-22">2021-22</option>
+            </select>
+        </div>
+
+        <div class="sidebar-field">
+            <label>Search</label>
+            <input type="text" id="searchBox" placeholder="Player name...">
+        </div>
+
+        <!-- Sliders injected here -->
+        <div id="sliderContainer"></div>
+
+        <!-- Position chips -->
+        <div class="slider-group-label">Position</div>
+        <div class="pos-group" id="posChips"></div>
+
+        <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
+    </aside>
+
+    <!-- ── Main ── -->
+    <div class="main">
+        <div class="main-topbar">
+            <h1>Player Stats &amp; Ratings</h1>
+            <span class="results-count" id="resultsCount"></span>
+        </div>
+
+        <div id="loading" class="loading">Loading data...</div>
+
+        <div class="table-container" id="tableContainer" style="display:none">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="cursor:default">#</th>
+                        <th data-col="full_name" style="min-width:145px">Player</th>
+                        <th data-col="team" style="min-width:115px">Team</th>
+                        <th data-col="position">Pos</th>
+                        <th data-col="class_year">Yr</th>
+                        <th data-col="gp">GP</th>
+                        <th data-col="min">MIN</th>
+                        <th data-col="pts">PPG</th>
+                        <th data-col="reb">RPG</th>
+                        <th data-col="ast">APG</th>
+                        <th data-col="stl">SPG</th>
+                        <th data-col="blk">BPG</th>
+                        <th data-col="tov">TOV</th>
+                        <th data-col="fg_pct">FG%</th>
+                        <th data-col="fg3_pct">3P%</th>
+                        <th data-col="ft_pct">FT%</th>
+                        <th data-col="ts_pct">TS%</th>
+                        <th data-col="per">PER</th>
+                        <th data-col="usg_pct">USG%</th>
+                        <th data-col="ws">WS</th>
+                        <th data-col="final_rating" class="sort-desc">Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="playerModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+        <div id="playerDetails"></div>
+    </div>
+</div>
+
+<script>
+const API_BASE = '/api';
+
+const STAT_DEFS = [
+    { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
+    { key: 'pts',          label: 'PPG',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'min',          label: 'MIN',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'fg_pct',       label: 'FG%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'fg3_pct',      label: '3P%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'ft_pct',       label: 'FT%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'ast',          label: 'APG',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'tov',          label: 'TOV',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'reb',          label: 'RPG',          group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'stl',          label: 'SPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'blk',          label: 'BPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'ts_pct',       label: 'TS%',          group: 'EFFICIENCY',  pct: true,  decimals: 1 },
+    { key: 'per',          label: 'PER',          group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'usg_pct',      label: 'USG%',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'ws',           label: 'Win Shares',   group: 'EFFICIENCY',  pct: false, decimals: 2 },
+];
+
+const sliderState = {};
+let allPlayers = [];
+let currentSeason = '2025-26';
+let sortCol = 'final_rating';
+let sortDir = -1;
+let activePositions = new Set();
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('seasonSelect').addEventListener('change', e => {
+        currentSeason = e.target.value;
+        loadPlayers();
+    });
+    document.getElementById('searchBox').addEventListener('input', applyFilters);
+
+    document.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            sortDir = sortCol === col ? sortDir * -1 : -1;
+            sortCol = col;
+            document.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+            th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
+            applyFilters();
+        });
+    });
+
+    loadPlayers();
+});
+
+// ── Data load ─────────────────────────────────────────────────────────────
+async function loadPlayers() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('tableContainer').style.display = 'none';
+
+    try {
+        const res = await fetch(`${API_BASE}/players/${currentSeason}?limit=15000`);
+        const data = await res.json();
+        allPlayers = data.data;
+
+        buildSliders();
+        buildPositionChips();
+        applyFilters();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('tableContainer').style.display = 'block';
+    } catch (err) {
+        document.getElementById('loading').textContent = 'Error loading data — is the API running?';
+        console.error(err);
+    }
+}
+
+// ── Sliders ───────────────────────────────────────────────────────────────
+function buildSliders() {
+    const container = document.getElementById('sliderContainer');
+    container.innerHTML = '';
+    let lastGroup = null;
+
+    STAT_DEFS.forEach(def => {
+        const vals = allPlayers
+            .map(p => p[def.key] != null ? (def.pct ? Number(p[def.key]) * 100 : Number(p[def.key])) : null)
+            .filter(v => v != null);
+
+        if (!vals.length) return;
+
+        const dataMin = Math.floor(Math.min(...vals) * 10) / 10;
+        const dataMax = Math.ceil(Math.max(...vals) * 10) / 10;
+        sliderState[def.key] = { dataMin, dataMax, curMin: dataMin, curMax: dataMax };
+
+        const fmtBound = v => def.pct ? v.toFixed(0) + '%' : v.toFixed(def.decimals);
+
+        const row = document.createElement('div');
+        row.className = 'slider-row';
+        row.innerHTML = `
+            <div class="slider-top">
+                <span class="slider-label">${def.label}</span>
+                <span class="slider-current" id="${def.key}-current">any</span>
+            </div>
+            <div class="range-wrap">
+                <div class="range-track">
+                    <div class="range-fill" id="${def.key}-fill"></div>
+                </div>
+                <input type="range" id="${def.key}-min" min="${dataMin}" max="${dataMax}" value="${dataMin}" step="any">
+                <input type="range" id="${def.key}-max" min="${dataMin}" max="${dataMax}" value="${dataMax}" step="any">
+            </div>
+            <div class="range-bounds">
+                <span>${fmtBound(dataMin)}</span>
+                <span>${fmtBound(dataMax)}</span>
+            </div>
+        `;
+        container.appendChild(row);
+
+        document.getElementById(`${def.key}-min`).addEventListener('input', () => onSlider(def, 'min'));
+        document.getElementById(`${def.key}-max`).addEventListener('input', () => onSlider(def, 'max'));
+    });
+}
+
+function onSlider(def, handle) {
+    const minEl = document.getElementById(`${def.key}-min`);
+    const maxEl = document.getElementById(`${def.key}-max`);
+    let minVal = parseFloat(minEl.value);
+    let maxVal = parseFloat(maxEl.value);
+
+    if (handle === 'min' && minVal > maxVal) { minEl.value = maxVal; minVal = maxVal; }
+    if (handle === 'max' && maxVal < minVal) { maxEl.value = minVal; maxVal = minVal; }
+
+    sliderState[def.key].curMin = minVal;
+    sliderState[def.key].curMax = maxVal;
+
+    updateSliderUI(def);
+    applyFilters();
+}
+
+function updateSliderUI(def) {
+    const s = sliderState[def.key];
+    if (!s) return;
+
+    const { dataMin, dataMax, curMin, curMax } = s;
+    const span = dataMax - dataMin || 1;
+    const leftPct  = (curMin - dataMin) / span * 100;
+    const rightPct = (curMax - dataMin) / span * 100;
+
+    document.getElementById(`${def.key}-fill`).style.cssText =
+        `left:${leftPct}%; width:${rightPct - leftPct}%`;
+
+    const fmtV = v => def.pct ? v.toFixed(def.decimals) + '%' : v.toFixed(def.decimals);
+    document.getElementById(`${def.key}-current`).textContent =
+        (curMin === dataMin && curMax === dataMax) ? 'any' : `${fmtV(curMin)} – ${fmtV(curMax)}`;
+}
+
+// ── Position chips ────────────────────────────────────────────────────────
+function buildPositionChips() {
+    const positions = [...new Set(allPlayers.map(p => p.position).filter(Boolean))].sort();
+    const container = document.getElementById('posChips');
+    container.innerHTML = '';
+    activePositions.clear();
+
+    positions.forEach(pos => {
+        const chip = document.createElement('div');
+        chip.className = 'pos-chip';
+        chip.textContent = pos;
+        chip.addEventListener('click', () => {
+            if (activePositions.has(pos)) { activePositions.delete(pos); chip.classList.remove('active'); }
+            else                          { activePositions.add(pos);    chip.classList.add('active'); }
+            applyFilters();
+        });
+        container.appendChild(chip);
+    });
+}
+
+// ── Filter + render ───────────────────────────────────────────────────────
+function applyFilters() {
+    const search = document.getElementById('searchBox').value.toLowerCase().trim();
+
+    let filtered = allPlayers.filter(p => {
+        if (search && !p.full_name.toLowerCase().includes(search)) return false;
+        if (activePositions.size > 0 && !activePositions.has(p.position)) return false;
+
+        for (const def of STAT_DEFS) {
+            const s = sliderState[def.key];
+            if (!s || (s.curMin === s.dataMin && s.curMax === s.dataMax)) continue;
+            const raw = p[def.key];
+            if (raw == null) return false;
+            const v = def.pct ? Number(raw) * 100 : Number(raw);
+            if (v < s.curMin || v > s.curMax) return false;
+        }
+
+        return true;
+    });
+
+    filtered.sort((a, b) => {
+        const av = a[sortCol], bv = b[sortCol];
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
+    });
+
+    document.getElementById('resultsCount').textContent =
+        `${filtered.length.toLocaleString()} player${filtered.length !== 1 ? 's' : ''}`;
+    renderTable(filtered);
+}
+
+function fmt(v, d = 1)  { return v != null ? Number(v).toFixed(d) : '-'; }
+function fmtP(v, d = 1) { return v != null ? (Number(v) * 100).toFixed(d) + '%' : '-'; }
+
+function renderTable(players) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    const MAX = 500;
+
+    players.slice(0, MAX).forEach((p, i) => {
+        const tr = document.createElement('tr');
+        tr.addEventListener('click', () => showModal(p.player_id));
+        tr.innerHTML = `
+            <td style="color:#ccc;font-size:.88em">${i + 1}</td>
+            <td><span class="player-name">${p.full_name}</span></td>
+            <td>${p.team || '-'}</td>
+            <td>${p.position || '-'}</td>
+            <td style="color:#aaa">${p.class_year || '-'}</td>
+            <td>${p.gp ?? '-'}</td>
+            <td>${fmt(p.min)}</td>
+            <td>${fmt(p.pts)}</td>
+            <td>${fmt(p.reb)}</td>
+            <td>${fmt(p.ast)}</td>
+            <td>${fmt(p.stl)}</td>
+            <td>${fmt(p.blk)}</td>
+            <td>${fmt(p.tov)}</td>
+            <td>${fmtP(p.fg_pct)}</td>
+            <td>${fmtP(p.fg3_pct)}</td>
+            <td>${fmtP(p.ft_pct)}</td>
+            <td>${fmtP(p.ts_pct)}</td>
+            <td>${fmt(p.per)}</td>
+            <td>${p.usg_pct != null ? Number(p.usg_pct).toFixed(1) : '-'}</td>
+            <td>${fmt(p.ws, 2)}</td>
+            <td class="rating-cell">${fmt(p.final_rating)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (players.length > MAX) {
+        const tr = document.createElement('tr');
+        tr.className = 'more-row';
+        tr.innerHTML = `<td colspan="21">Showing ${MAX} of ${players.length.toLocaleString()} — use filters to narrow results</td>`;
+        tbody.appendChild(tr);
+    }
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────
+function resetFilters() {
+    STAT_DEFS.forEach(def => {
+        const s = sliderState[def.key];
+        if (!s) return;
+        s.curMin = s.dataMin;
+        s.curMax = s.dataMax;
+        const minEl = document.getElementById(`${def.key}-min`);
+        const maxEl = document.getElementById(`${def.key}-max`);
+        if (minEl) minEl.value = s.dataMin;
+        if (maxEl) maxEl.value = s.dataMax;
+        updateSliderUI(def);
+    });
+    activePositions.clear();
+    document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('searchBox').value = '';
+    applyFilters();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+function showModal(playerId) {
+    const p = allPlayers.find(x => x.player_id == playerId);
+    if (!p) return;
+    document.getElementById('playerModal').classList.add('show');
+
+    document.getElementById('playerDetails').innerHTML = `
+        <div class="player-header">
+            <h2>${p.full_name}</h2>
+            <div class="meta">
+                ${p.team || '-'} &nbsp;|&nbsp; ${p.position || '-'} &nbsp;|&nbsp;
+                ${p.class_year || '-'} &nbsp;|&nbsp;
+                ${p.height || '-'} &nbsp;|&nbsp; ${p.weight ? p.weight + ' lbs' : '-'}
+                ${p.hometown ? ' &nbsp;|&nbsp; ' + p.hometown : ''}
+            </div>
+            <a class="realgm-link" href="https://basketball.realgm.com/player/x/Summary/${p.player_id}" target="_blank">View on RealGM</a>
+        </div>
+
+        <div class="player-overview">
+            ${iBox('Rating', `<span style="color:#10b981;font-size:1.35em">${fmt(p.final_rating)}</span>`)}
+            ${iBox('Two-Way', p.two_way === 'Y' ? 'Yes' : 'No')}
+            ${iBox('GP', p.gp ?? '-')}
+            ${iBox('MIN/G', fmt(p.min))}
+            ${iBox('PER', fmt(p.per))}
+            ${iBox('TS%', fmtP(p.ts_pct))}
+            ${iBox('Win Shares', fmt(p.ws, 2))}
+            ${iBox('USG%', p.usg_pct != null ? Number(p.usg_pct).toFixed(1) + '%' : '-')}
+        </div>
+
+        <div class="stats-section">
+            <h3>Per-Game Stats</h3>
+            <div class="stats-grid">
+                ${sBox('Points', fmt(p.pts))}
+                ${sBox('Rebounds', fmt(p.reb))}
+                ${sBox('Assists', fmt(p.ast))}
+                ${sBox('Steals', fmt(p.stl))}
+                ${sBox('Blocks', fmt(p.blk))}
+                ${sBox('Turnovers', fmt(p.tov))}
+                ${sBox('Off Reb', fmt(p.off_reb))}
+                ${sBox('Def Reb', fmt(p.def_reb))}
+                ${sBox('Fouls', fmt(p.pf))}
+                ${sBox('FGM–FGA', `${fmt(p.fgm)}–${fmt(p.fga)}`)}
+                ${sBox('FG%', fmtP(p.fg_pct))}
+                ${sBox('3PM–3PA', `${fmt(p.fg3m)}–${fmt(p.fg3a)}`)}
+                ${sBox('3P%', fmtP(p.fg3_pct))}
+                ${sBox('FTM–FTA', `${fmt(p.ftm)}–${fmt(p.fta)}`)}
+                ${sBox('FT%', fmtP(p.ft_pct))}
+            </div>
+        </div>
+
+        ${p.t_pts != null ? `
+        <div class="stats-section">
+            <h3>Season Totals</h3>
+            <div class="stats-grid">
+                ${sBox('Total MIN', fmt(p.t_min, 0))}
+                ${sBox('Total PTS', fmt(p.t_pts, 0))}
+                ${sBox('Total REB', fmt(p.t_reb, 0))}
+                ${sBox('Total AST', fmt(p.t_ast, 0))}
+                ${sBox('Total STL', fmt(p.t_stl, 0))}
+                ${sBox('Total BLK', fmt(p.t_blk, 0))}
+                ${sBox('Total TOV', fmt(p.t_tov, 0))}
+                ${sBox('Total FGM', fmt(p.t_fgm, 0))}
+                ${sBox('Total FGA', fmt(p.t_fga, 0))}
+                ${sBox('Total 3PM', fmt(p.t_fg3m, 0))}
+                ${sBox('Total 3PA', fmt(p.t_fg3a, 0))}
+                ${sBox('Total FTM', fmt(p.t_ftm, 0))}
+                ${sBox('Total FTA', fmt(p.t_fta, 0))}
+            </div>
+        </div>` : ''}
+
+        <div class="stats-section">
+            <h3>Advanced Stats</h3>
+            <div class="stats-grid">
+                ${sBox('PER', fmt(p.per))}
+                ${sBox('TS%', fmtP(p.ts_pct))}
+                ${sBox('eFG%', fmtP(p.efg_pct))}
+                ${sBox('USG%', p.usg_pct != null ? Number(p.usg_pct).toFixed(1) + '%' : '-')}
+                ${sBox('ORtg', fmt(p.ortg))}
+                ${sBox('DRtg', fmt(p.drtg))}
+                ${sBox('OReb%', p.orb_pct != null ? Number(p.orb_pct).toFixed(1) + '%' : '-')}
+                ${sBox('DReb%', p.drb_pct != null ? Number(p.drb_pct).toFixed(1) + '%' : '-')}
+                ${sBox('Ast%', p.ast_pct != null ? Number(p.ast_pct).toFixed(1) + '%' : '-')}
+                ${sBox('Tov%', p.tov_pct != null ? Number(p.tov_pct).toFixed(1) + '%' : '-')}
+                ${sBox('Stl%', p.stl_pct != null ? Number(p.stl_pct).toFixed(1) + '%' : '-')}
+                ${sBox('Blk%', p.blk_pct != null ? Number(p.blk_pct).toFixed(1) + '%' : '-')}
+                ${sBox('PPR', fmt(p.ppr))}
+                ${sBox('PPS', fmt(p.pps))}
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>Misc</h3>
+            <div class="stats-grid">
+                ${sBox('Dbl-Dbl', p.dbl_dbl ?? '-')}
+                ${sBox('Tri-Dbl', p.tpl_dbl ?? '-')}
+                ${sBox('Ast/TO', fmt(p.ast_to_ratio))}
+                ${sBox('Stl/TO', fmt(p.stl_to_ratio))}
+                ${sBox('Win Shares', fmt(p.ws, 2))}
+                ${sBox('OWS', fmt(p.ows, 2))}
+                ${sBox('DWS', fmt(p.dws, 2))}
+                ${sBox('Win%', p.win_pct != null ? (Number(p.win_pct) * 100).toFixed(1) + '%' : '-')}
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>Rating Breakdown</h3>
+            <div class="percentile-grid">
+                ${pctBox('Points', p.pts_per)}
+                ${pctBox('Rebounds', p.reb_per)}
+                ${pctBox('Assists', p.ast_per)}
+                ${pctBox('Steals', p.stl_per)}
+                ${pctBox('Blocks', p.blk_per)}
+                ${pctBox('Minutes', p.min_per)}
+                ${pctBox('FG Made', p.fgm_per)}
+                ${pctBox('FG%', p.fgpct_per)}
+                ${pctBox('3PM', p.pm3_per)}
+                ${pctBox('3P%', p.p3pct_per)}
+                ${pctBox('FT%', p.ftpct_per)}
+            </div>
+            <div class="stats-grid" style="margin-top:7px">
+                ${sBox('Base', fmt(p.base_rating))}
+                ${sBox('Game Adj', fmt(p.game_adj))}
+                ${sBox('Min', fmt(p.min_boost))}
+                ${sBox('3P', fmt(p.three_boost))}
+                ${sBox('FG', fmt(p.fg_boost))}
+                ${sBox('Ast', fmt(p.ast_boost))}
+                ${sBox('Blk', fmt(p.blk_boost))}
+                ${sBox('DD', fmt(p.double_double_boost))}
+                ${sBox('TD', fmt(p.triple_double_boost))}
+                ${sBox('FT', fmt(p.free_throw_boost))}
+                ${sBox('Final', fmt(p.final_rating), '#10b981')}
+            </div>
+        </div>
+    `;
+}
+
+function iBox(label, val) {
+    return `<div class="info-item"><div class="info-label">${label}</div><div class="info-value">${val}</div></div>`;
+}
+function sBox(label, val, color) {
+    return `<div class="stat-box"><div class="stat-label">${label}</div><div class="stat-value"${color ? ` style="color:${color}"` : ''}>${val}</div></div>`;
+}
+function pctBox(label, val) {
+    const v = val != null ? Math.min(100, Math.max(0, Number(val))) : 0;
+    return `<div class="pct-box">
+        <div class="pct-label">${label}</div>
+        <div class="pct-bar-wrap"><div class="pct-bar" style="width:${v}%"></div></div>
+        <div class="pct-value">${val != null ? val + 'th' : '-'}</div>
+    </div>`;
+}
+
+function closeModal() { document.getElementById('playerModal').classList.remove('show'); }
+window.onclick = e => { if (e.target === document.getElementById('playerModal')) closeModal(); };
+</script>
+</body>
+</html>
