@@ -1,0 +1,40 @@
+22:03:08  INFO      __main__  Using browser-based fetcher (Playwright)
+22:03:08  INFO      __main__  === PHASE 1: SEED ===
+22:03:08  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2021/Averages/All/All/Season/All/desc/1
+22:03:08  INFO      fetcher_browser  Initializing browser...
+22:03:09  INFO      fetcher_browser  Browser initialized successfully
+22:03:10  INFO      parsers.listing  Season 2021 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:10  INFO      parsers.listing  Season 2021: parsed 5034 players
+22:03:10  INFO      __main__  Season 2021: 5034 players (total unique so far: 5034)
+22:03:10  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2022/Averages/All/All/Season/All/desc/1
+22:03:11  INFO      parsers.listing  Season 2022 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:11  INFO      parsers.listing  Season 2022: parsed 5109 players
+22:03:11  INFO      __main__  Season 2022: 5109 players (total unique so far: 6590)
+22:03:11  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2023/Averages/All/All/Season/All/desc/1
+22:03:12  INFO      parsers.listing  Season 2023 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:13  INFO      parsers.listing  Season 2023: parsed 5167 players
+22:03:13  INFO      __main__  Season 2023: 5167 players (total unique so far: 8347)
+22:03:13  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2024/Averages/All/All/Season/All/desc/1
+22:03:14  INFO      parsers.listing  Season 2024 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:14  INFO      parsers.listing  Season 2024: parsed 5186 players
+22:03:14  INFO      __main__  Season 2024: 5186 players (total unique so far: 10017)
+22:03:14  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2025/Averages/All/All/Season/All/desc/1
+22:03:15  INFO      parsers.listing  Season 2025 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:15  INFO      parsers.listing  Season 2025: parsed 5300 players
+22:03:15  INFO      __main__  Season 2025: 5300 players (total unique so far: 11739)
+22:03:15  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1
+22:03:15  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:15  INFO      parsers.listing  Season 2026: parsed 100 players
+22:03:15  INFO      __main__  Season 2026: 100 players (total unique so far: 11794)
+22:03:15  INFO      __main__    Fetching page 2: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/2/desc/1
+22:03:15  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:15  INFO      parsers.listing  Season 2026: parsed 100 players
+22:03:15  INFO      __main__    Page 2: 100 players (100 new for season, 200 total this season, 11811 total unique)
+22:03:15  INFO      __main__    Fetching page 3: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/3/desc/1
+22:03:15  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:03:15  INFO      parsers.listing  Season 2026: parsed 100 players
+22:03:15  INFO      __main__    Page 3: 100 players (0 new for season, 200 total this season, 11811 total unique)
+22:03:15  INFO      __main__    Page 3: no new players for season 2026, stopping pagination
+22:03:15  INFO      __main__  Seed complete. 11811 unique player IDs found.
+22:03:15  INFO      checkpoint  Checkpoint seeded with 11811 player records
+22:03:15  INFO      fetcher_browser  Browser closed

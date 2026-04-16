@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealGM Player Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .level-badge {
+            @apply px-2 py-1 text-xs font-semibold rounded-full;
+        }
+        .level-NCAA_DI { @apply bg-blue-100 text-blue-800; }
+        .level-NBA { @apply bg-purple-100 text-purple-800; }
+        .level-G_LEAGUE { @apply bg-orange-100 text-orange-800; }
+        .level-INTERNATIONAL { @apply bg-green-100 text-green-800; }
+        .level-AAU { @apply bg-yellow-100 text-yellow-800; }
+        .level-HIGH_SCHOOL { @apply bg-gray-100 text-gray-800; }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 1rem;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0.5rem;
+            bottom: -1rem;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-item:last-child:before {
+            display: none;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0.25rem;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px currentColor;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">RealGM Player Explorer</h1>
+                    <p class="text-gray-600"><span id="playerCount">0</span> players scraped | Multi-level career tracking</p>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-gray-600">Auto-updating every 10s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="mb-6 flex gap-4">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search players by name..."
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <select id="levelFilter" class="px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">All Levels</option>
+                <option value="NCAA_DI">NCAA D-I</option>
+                <option value="NBA">NBA</option>
+                <option value="G_LEAGUE">G-League</option>
+                <option value="INTERNATIONAL">International</option>
+                <option value="AAU">AAU</option>
+            </select>
+        </div>
+
+        <!-- Player List -->
+        <div id="playerList" class="grid grid-cols-1 gap-4 mb-8">
+            <!-- Players will be inserted here -->
+        </div>
+
+        <!-- Player Detail Modal -->
+        <div id="playerDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" style="display: none;">
+            <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+                    <h2 id="modalPlayerName" class="text-2xl font-bold"></h2>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div id="modalContent" class="p-6">
+                    <!-- Content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data will be loaded from CSV files
+        let players = [];
+        let stats = [];
+        let advancedStats = [];
+        let miscStats = [];
+        let awards = [];
+        let transactions = [];
+        let events = [];
+        let currentFilter = { search: '', level: '' };
+
+        // Indexes for O(1) lookup performance
+        let playerIndex = {}; // player_id -> player object
+        let statsIndex = {}; // player_id -> array of stats
+        let advancedStatsIndex = {}; // player_id -> array of advanced stats
+        let miscStatsIndex = {}; // player_id -> array of misc stats
+        let awardsIndex = {}; // player_id -> array of awards
+        let transactionsIndex = {}; // player_id -> array of transactions
+        let eventsIndex = {}; // player_id -> array of events
+        let levelsIndex = {}; // player_id -> Set of levels
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Parse CSV helper (handles quoted fields with commas)
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+
+            // Parse CSV line respecting quotes
+            function parseLine(line) {
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                return values;
+            }
+
+            const headers = parseLine(lines[0]);
+            return lines.slice(1).map(line => {
+                const values = parseLine(line);
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] || '';
+                });
+                return obj;
+            });
+        }
+
+        // Load all data
+        async function loadData() {
+            try {
+                // Add timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                const [playersText, statsText, advStatsText, miscStatsText, awardsText, transText, eventsText] = await Promise.all([
+                    fetch(`data/processed/players.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_stats_pergame.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_stats_advanced.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_stats_misc.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_awards.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_transactions.csv?t=${timestamp}`).then(r => r.text()),
+                    fetch(`data/processed/player_events.csv?t=${timestamp}`).then(r => r.text())
+                ]);
+
+                players = parseCSV(playersText);
+                stats = parseCSV(statsText);
+                advancedStats = parseCSV(advStatsText);
+                miscStats = parseCSV(miscStatsText);
+                awards = parseCSV(awardsText);
+                transactions = parseCSV(transText);
+                events = parseCSV(eventsText);
+
+                // Build indexes for O(1) lookups (one-time cost)
+                console.time('Building indexes');
+                playerIndex = {};
+                statsIndex = {};
+                advancedStatsIndex = {};
+                miscStatsIndex = {};
+                awardsIndex = {};
+                transactionsIndex = {};
+                eventsIndex = {};
+                levelsIndex = {};
+
+                players.forEach(p => {
+                    playerIndex[p.player_id] = p;
+                });
+
+                stats.forEach(s => {
+                    if (!statsIndex[s.player_id]) statsIndex[s.player_id] = [];
+                    statsIndex[s.player_id].push(s);
+
+                    if (!levelsIndex[s.player_id]) levelsIndex[s.player_id] = new Set();
+                    if (s.level) levelsIndex[s.player_id].add(s.level);
+                });
+
+                advancedStats.forEach(s => {
+                    if (!advancedStatsIndex[s.player_id]) advancedStatsIndex[s.player_id] = [];
+                    advancedStatsIndex[s.player_id].push(s);
+                });
+
+                miscStats.forEach(s => {
+                    if (!miscStatsIndex[s.player_id]) miscStatsIndex[s.player_id] = [];
+                    miscStatsIndex[s.player_id].push(s);
+                });
+
+                awards.forEach(a => {
+                    if (!awardsIndex[a.player_id]) awardsIndex[a.player_id] = [];
+                    awardsIndex[a.player_id].push(a);
+                });
+
+                transactions.forEach(t => {
+                    if (!transactionsIndex[t.player_id]) transactionsIndex[t.player_id] = [];
+                    transactionsIndex[t.player_id].push(t);
+                });
+
+                events.forEach(e => {
+                    if (!eventsIndex[e.player_id]) eventsIndex[e.player_id] = [];
+                    eventsIndex[e.player_id].push(e);
+                });
+
+                console.timeEnd('Building indexes');
+
+                const prevCount = parseInt(document.getElementById('playerCount').textContent) || 0;
+                const newCount = players.length;
+
+                document.getElementById('playerCount').textContent = newCount;
+
+                // Show notification if new players were added
+                if (prevCount > 0 && newCount > prevCount) {
+                    const diff = newCount - prevCount;
+                    showNotification(`${diff} new player${diff > 1 ? 's' : ''} added!`);
+                }
+
+                renderPlayers();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('playerList').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                        <p class="font-semibold">Error loading data</p>
+                        <p class="text-sm mt-1">Make sure you're running this from a web server (not file://)</p>
+                        <p class="text-sm mt-1">Try: <code class="bg-red-100 px-2 py-1 rounded">python3 -m http.server 8000</code></p>
+                    </div>
+                `;
+            }
+        }
+
+        // Get levels played by player (using index for O(1) lookup)
+        function getLevelsPlayed(playerId) {
+            return levelsIndex[playerId] ? Array.from(levelsIndex[playerId]) : [];
+        }
+
+        // Render player list
+        function renderPlayers() {
+            const filtered = players.filter(p => {
+                const matchesSearch = !currentFilter.search ||
+                    p.full_name.toLowerCase().includes(currentFilter.search.toLowerCase());
+                const matchesLevel = !currentFilter.level ||
+                    getLevelsPlayed(p.player_id).includes(currentFilter.level);
+                return matchesSearch && matchesLevel;
+            });
+
+            const html = filtered.map(player => {
+                const levels = getLevelsPlayed(player.player_id);
+                const playerAwards = awardsIndex[player.player_id] || [];
+
+                return `
+                    <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 cursor-pointer"
+                         onclick="showPlayerDetail('${player.player_id}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">${player.full_name}</h3>
+                                <p class="text-sm text-gray-600">${player.position || 'N/A'} | ${player.height_ft || 'N/A'} | ${player.weight_lbs ? player.weight_lbs + ' lbs' : 'N/A'}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-semibold ${player.nba_status?.includes('Contract') ? 'text-green-600' : 'text-gray-600'}">
+                                    ${player.nba_status || 'N/A'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            ${levels.map(level => `<span class="level-badge level-${level}">${level.replace(/_/g, ' ')}</span>`).join('')}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>${player.hometown || 'Unknown hometown'} | ${player.nationality || 'Unknown'}</p>
+                            ${player.draft_year ? `<p class="mt-1">Draft: ${player.draft_raw}</p>` : ''}
+                            ${playerAwards.length > 0 ? `<p class="mt-1 text-blue-600">${playerAwards.length} award(s)</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('playerList').innerHTML = html || '<p class="text-gray-500 text-center py-8">No players found</p>';
+        }
+
+        // Show player detail (using indexes for O(1) lookups)
+        function showPlayerDetail(playerId) {
+            const player = playerIndex[playerId];
+            if (!player) return;
+
+            const playerStats = statsIndex[playerId] || [];
+            const playerAdvStats = advancedStatsIndex[playerId] || [];
+            const playerMiscStats = miscStatsIndex[playerId] || [];
+            const playerAwards = awardsIndex[playerId] || [];
+            const playerTrans = transactionsIndex[playerId] || [];
+            const playerEvents = eventsIndex[playerId] || [];
+
+            // Group stats by level
+            const statsByLevel = {};
+            playerStats.forEach(s => {
+                if (!statsByLevel[s.level]) statsByLevel[s.level] = [];
+                statsByLevel[s.level].push(s);
+            });
+
+            const advStatsByLevel = {};
+            playerAdvStats.forEach(s => {
+                if (!advStatsByLevel[s.level]) advStatsByLevel[s.level] = [];
+                advStatsByLevel[s.level].push(s);
+            });
+
+            const miscStatsByLevel = {};
+            playerMiscStats.forEach(s => {
+                if (!miscStatsByLevel[s.level]) miscStatsByLevel[s.level] = [];
+                miscStatsByLevel[s.level].push(s);
+            });
+
+            // Career Timeline
+            const timeline = playerStats
+                .sort((a, b) => a.season.localeCompare(b.season))
+                .map(s => `
+                    <div class="timeline-item">
+                        <div class="timeline-dot level-${s.level}"></div>
+                        <div class="ml-4">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="level-badge level-${s.level}">${s.level.replace(/_/g, ' ')}</span>
+                                <span class="font-semibold">${s.season}</span>
+                                <span class="text-gray-600">${s.team || s.league_name || 'Unknown'}</span>
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                ${s.pts} PPG, ${s.trb} RPG, ${s.ast} APG in ${s.gp} games
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            // Stats table by level
+            const statsTables = Object.entries(statsByLevel).map(([level, levelStats]) => `
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <span class="level-badge level-${level}">${level.replace(/_/g, ' ')}</span>
+                        <span class="text-gray-600 text-sm">(${levelStats.length} seasons)</span>
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">Season</th>
+                                    <th class="px-3 py-2 text-left">Team</th>
+                                    <th class="px-3 py-2 text-right">GP</th>
+                                    <th class="px-3 py-2 text-right">MIN</th>
+                                    <th class="px-3 py-2 text-right">PTS</th>
+                                    <th class="px-3 py-2 text-right">REB</th>
+                                    <th class="px-3 py-2 text-right">AST</th>
+                                    <th class="px-3 py-2 text-right">FG%</th>
+                                    <th class="px-3 py-2 text-right">3P%</th>
+                                    <th class="px-3 py-2 text-right">FT%</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${levelStats.map(s => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-3 py-2">${s.season}</td>
+                                        <td class="px-3 py-2">${s.team || s.league_name || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.gp}</td>
+                                        <td class="px-3 py-2 text-right">${s.min}</td>
+                                        <td class="px-3 py-2 text-right font-semibold">${s.pts}</td>
+                                        <td class="px-3 py-2 text-right">${s.trb}</td>
+                                        <td class="px-3 py-2 text-right">${s.ast}</td>
+                                        <td class="px-3 py-2 text-right">${s.fg_pct}</td>
+                                        <td class="px-3 py-2 text-right">${s.fg3_pct}</td>
+                                        <td class="px-3 py-2 text-right">${s.ft_pct}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `).join('');
+
+            // Advanced stats tables by level
+            const advStatsTables = Object.entries(advStatsByLevel).map(([level, levelStats]) => {
+                const miscForLevel = miscStatsByLevel[level] || [];
+                return `
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <span class="level-badge level-${level}">${level.replace(/_/g, ' ')}</span>
+                        <span class="text-gray-600 text-sm">Advanced Metrics</span>
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">Season</th>
+                                    <th class="px-3 py-2 text-right" title="Player Efficiency Rating">PER</th>
+                                    <th class="px-3 py-2 text-right" title="True Shooting %">TS%</th>
+                                    <th class="px-3 py-2 text-right" title="Effective FG%">eFG%</th>
+                                    <th class="px-3 py-2 text-right" title="Usage %">USG%</th>
+                                    <th class="px-3 py-2 text-right" title="Offensive Rating">ORtg</th>
+                                    <th class="px-3 py-2 text-right" title="Defensive Rating">DRtg</th>
+                                    <th class="px-3 py-2 text-right" title="Total Rebound %">TRB%</th>
+                                    <th class="px-3 py-2 text-right" title="Assist %">AST%</th>
+                                    <th class="px-3 py-2 text-right" title="Win Shares">WS</th>
+                                    <th class="px-3 py-2 text-right" title="Double-Doubles">2x2</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${levelStats.map((s, idx) => {
+                                    const misc = miscForLevel[idx] || {};
+                                    return `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-3 py-2">${s.season}</td>
+                                        <td class="px-3 py-2 text-right font-semibold ${parseFloat(s.per) > 15 ? 'text-green-600' : ''}">${s.per || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.ts_pct || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.efg_pct || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.usg_pct || '-'}</td>
+                                        <td class="px-3 py-2 text-right ${parseFloat(s.ortg) > 100 ? 'text-green-600' : 'text-red-600'}">${s.ortg || '-'}</td>
+                                        <td class="px-3 py-2 text-right ${parseFloat(s.drtg) < 100 ? 'text-green-600' : 'text-red-600'}">${s.drtg || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.trb_pct || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${s.ast_pct || '-'}</td>
+                                        <td class="px-3 py-2 text-right ${parseFloat(misc.ws) > 0 ? 'text-green-600' : ''}">${misc.ws || '-'}</td>
+                                        <td class="px-3 py-2 text-right">${misc.dbl_dbl || '0'}</td>
+                                    </tr>
+                                `}).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Key Insights -->
+                    ${levelStats.length > 0 ? `
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${(() => {
+                                const avgPER = (levelStats.reduce((sum, s) => sum + parseFloat(s.per || 0), 0) / levelStats.length).toFixed(1);
+                                const avgTS = (levelStats.reduce((sum, s) => sum + parseFloat(s.ts_pct || 0), 0) / levelStats.length).toFixed(3);
+                                const avgUSG = (levelStats.reduce((sum, s) => sum + parseFloat(s.usg_pct || 0), 0) / levelStats.length).toFixed(1);
+                                const totalDD = miscForLevel.reduce((sum, s) => sum + parseInt(s.dbl_dbl || 0), 0);
+
+                                return `
+                                    <div class="bg-blue-50 rounded-lg p-3">
+                                        <p class="text-xs text-gray-600">Avg PER</p>
+                                        <p class="text-xl font-bold text-blue-600">${avgPER}</p>
+                                    </div>
+                                    <div class="bg-green-50 rounded-lg p-3">
+                                        <p class="text-xs text-gray-600">Avg TS%</p>
+                                        <p class="text-xl font-bold text-green-600">${avgTS}</p>
+                                    </div>
+                                    <div class="bg-purple-50 rounded-lg p-3">
+                                        <p class="text-xs text-gray-600">Avg Usage</p>
+                                        <p class="text-xl font-bold text-purple-600">${avgUSG}%</p>
+                                    </div>
+                                    <div class="bg-yellow-50 rounded-lg p-3">
+                                        <p class="text-xs text-gray-600">Double-Doubles</p>
+                                        <p class="text-xl font-bold text-yellow-600">${totalDD}</p>
+                                    </div>
+                                `;
+                            })()}
+                        </div>
+                    ` : ''}
+                </div>
+            `}).join('');
+
+            document.getElementById('modalPlayerName').textContent = player.full_name;
+            document.getElementById('modalContent').innerHTML = `
+                <!-- Quick Stats Summary -->
+                ${playerAdvStats.length > 0 ? `
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 mb-6 text-white">
+                        <h3 class="text-lg font-semibold mb-4 opacity-90">Career Highlights</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            ${(() => {
+                                const careerPER = (playerAdvStats.reduce((sum, s) => sum + parseFloat(s.per || 0), 0) / playerAdvStats.length).toFixed(1);
+                                const careerTS = (playerAdvStats.reduce((sum, s) => sum + parseFloat(s.ts_pct || 0), 0) / playerAdvStats.length).toFixed(3);
+                                const bestPER = Math.max(...playerAdvStats.map(s => parseFloat(s.per || 0))).toFixed(1);
+                                const careerGP = playerStats.reduce((sum, s) => sum + parseInt(s.gp || 0), 0);
+                                const totalDD = playerMiscStats.reduce((sum, s) => sum + parseInt(s.dbl_dbl || 0), 0);
+
+                                return `
+                                    <div class="text-center">
+                                        <p class="text-3xl font-bold">${careerGP}</p>
+                                        <p class="text-sm opacity-80">Games</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-3xl font-bold">${careerPER}</p>
+                                        <p class="text-sm opacity-80">Avg PER</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-3xl font-bold">${bestPER}</p>
+                                        <p class="text-sm opacity-80">Best PER</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-3xl font-bold">${(parseFloat(careerTS) * 100).toFixed(1)}%</p>
+                                        <p class="text-sm opacity-80">TS%</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-3xl font-bold">${totalDD}</p>
+                                        <p class="text-sm opacity-80">Dbl-Dbls</p>
+                                    </div>
+                                `;
+                            })()}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Profile Card -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Position</p>
+                            <p class="font-semibold">${player.position || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Height / Weight</p>
+                            <p class="font-semibold">${player.height_ft || 'N/A'} / ${player.weight_lbs ? player.weight_lbs + ' lbs' : 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Born</p>
+                            <p class="font-semibold">${player.dob || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Hometown</p>
+                            <p class="font-semibold">${player.hometown || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Nationality</p>
+                            <p class="font-semibold">${player.nationality || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Draft</p>
+                            <p class="font-semibold">${player.draft_raw || 'Undrafted'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Status</p>
+                            <p class="font-semibold text-sm">${player.nba_status || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">High School</p>
+                            <p class="font-semibold text-sm">${player.high_school || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career Timeline -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">Career Timeline</h3>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        ${timeline || '<p class="text-gray-500">No career data available</p>'}
+                    </div>
+                </div>
+
+                <!-- Stats by Level -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">Statistics by Level</h3>
+                    ${statsTables || '<p class="text-gray-500">No stats available</p>'}
+                </div>
+
+                <!-- Advanced Stats by Level -->
+                ${Object.keys(advStatsByLevel).length > 0 ? `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Advanced Statistics</h3>
+                        ${advStatsTables}
+                    </div>
+                ` : ''}
+
+                <!-- Awards -->
+                ${playerAwards.length > 0 ? `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Awards & Honors</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${playerAwards.map(a => `
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-2xl">🏆</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">${a.award_name}</p>
+                                            <p class="text-sm text-gray-600">${a.level.replace(/_/g, ' ')} | ${a.award_date}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Transactions -->
+                ${playerTrans.length > 0 ? `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Transaction History</h3>
+                        <div class="space-y-2">
+                            ${playerTrans.map(t => `
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <p class="text-sm text-gray-600">${t.transaction_date}</p>
+                                    <p class="font-semibold">${t.transaction_type}</p>
+                                    <p class="text-sm text-gray-700">${t.description}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('playerDetailModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('playerDetailModal').style.display = 'none';
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            currentFilter.search = e.target.value;
+            renderPlayers();
+        });
+
+        document.getElementById('levelFilter').addEventListener('change', (e) => {
+            currentFilter.level = e.target.value;
+            renderPlayers();
+        });
+
+        // Close modal on background click
+        document.getElementById('playerDetailModal').addEventListener('click', (e) => {
+            if (e.target.id === 'playerDetailModal') {
+                closeModal();
+            }
+        });
+
+        // Load data on page load
+        loadData().then(() => {
+            // Check for player query parameter and auto-open modal
+            const urlParams = new URLSearchParams(window.location.search);
+            const playerId = urlParams.get('player');
+            if (playerId) {
+                showPlayerDetail(playerId);
+            }
+        });
+
+        // Auto-reload data every 10 seconds to show newly scraped players
+        setInterval(() => {
+            const currentScroll = window.scrollY;
+            loadData().then(() => {
+                // Restore scroll position after reload
+                window.scrollTo(0, currentScroll);
+            });
+        }, 10000);
+    </script>
+</body>
+</html>

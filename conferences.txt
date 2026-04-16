@@ -1,0 +1,31 @@
+18,America-East-Conference,
+4,American-Conference,
+10,Atlantic-10-Conference,
+1,Atlantic-Coast-Conference,#1 Duke
+19,Atlantic-Sun-Conference,
+3,Big-12-Conference,#2 Arizona
+59,Big-East-Conference,#7 UConn
+20,Big-Sky-Conference,
+21,Big-South-Conference,
+2,Big-Ten-Conference,#3 Michigan
+22,Big-West-Conference,
+15,Coastal-Athletic-Association,
+9,Conference-USA,
+12,Horizon-League,
+14,Ivy-League,
+17,Metro-Atlantic-Athletic-Conference,
+25,Mid-American-Conference,
+26,Mid-Eastern-Athletic-Conference,
+5,Missouri-Valley-Conference,
+6,Mountain-West-Conference,
+27,Northeast-Conference,
+16,Ohio-Valley-Conference,
+28,Patriot-League,
+8,Southeastern-Conference,#4 Florida
+29,Southern-Conference,
+30,Southland-Conference,
+31,Southwestern-Athletic-Conference,
+33,Sun-Belt-Conference,
+32,The-Summit-League,
+11,West-Coast-Conference,#12 Gonzaga
+13,Western-Athletic-Conference,

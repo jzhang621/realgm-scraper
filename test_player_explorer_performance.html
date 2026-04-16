@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player Explorer Performance Test</title>
+</head>
+<body>
+    <h1>Testing Performance Optimization</h1>
+    <div id="results"></div>
+
+    <script>
+        // Simulate data
+        const playerCount = 7000;
+        const statsPerPlayer = 4;
+
+        console.log(`Testing with ${playerCount} players, ${statsPerPlayer} stats each`);
+
+        // Generate test data
+        const players = [];
+        const stats = [];
+        for (let i = 0; i < playerCount; i++) {
+            players.push({ player_id: `${i}`, full_name: `Player ${i}` });
+            for (let j = 0; j < statsPerPlayer; j++) {
+                stats.push({ player_id: `${i}`, season: `2024-${j}`, pts: '10.0', level: 'NCAA_DI' });
+            }
+        }
+
+        console.log(`Generated ${players.length} players and ${stats.length} stats`);
+
+        // OLD METHOD: Filter arrays
+        console.time('OLD: 100 lookups with filter()');
+        for (let i = 0; i < 100; i++) {
+            const playerId = `${Math.floor(Math.random() * playerCount)}`;
+            const playerStats = stats.filter(s => s.player_id === playerId);
+        }
+        console.timeEnd('OLD: 100 lookups with filter()');
+
+        // NEW METHOD: Build index then lookup
+        console.time('NEW: Build index');
+        const statsIndex = {};
+        stats.forEach(s => {
+            if (!statsIndex[s.player_id]) statsIndex[s.player_id] = [];
+            statsIndex[s.player_id].push(s);
+        });
+        console.timeEnd('NEW: Build index');
+
+        console.time('NEW: 100 lookups with index');
+        for (let i = 0; i < 100; i++) {
+            const playerId = `${Math.floor(Math.random() * playerCount)}`;
+            const playerStats = statsIndex[playerId] || [];
+        }
+        console.timeEnd('NEW: 100 lookups with index');
+
+        // Display results
+        document.getElementById('results').innerHTML = `
+            <p>Check browser console for timing results</p>
+            <p>The indexed approach should be 100-1000x faster for lookups!</p>
+        `;
+    </script>
+</body>
+</html>

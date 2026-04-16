@@ -1,0 +1,66 @@
+06:12:05  INFO      __main__  Using browser-based fetcher (Playwright)
+06:12:05  INFO      __main__  === PHASE 2: SCRAPE ===
+06:12:05  INFO      __main__  5186 players pending
+06:12:05  INFO      __main__  Limiting to 50 players
+06:12:05  INFO      __main__  [1/50] Player 100000 (Chol-Marial)
+06:12:05  INFO      fetcher_browser  Initializing browser...
+06:12:05  INFO      fetcher_browser  Browser initialized successfully
+06:12:05  INFO      __main__  [2/50] Player 103891 (Ethan-Anderson)
+06:12:05  INFO      __main__  [3/50] Player 103898 (Nick-Blake)
+06:12:05  INFO      __main__  [4/50] Player 103901 (Doctor-Bradley)
+06:12:05  INFO      __main__  [5/50] Player 103908 (Pierre-Crockrell-Jr)
+06:12:05  INFO      __main__  [6/50] Player 103915 (Jared-Garcia)
+06:12:05  INFO      __main__  [7/50] Player 103921 (Jay-Heath-Jr)
+06:12:05  INFO      __main__  [8/50] Player 103923 (Gianni-Hunt)
+06:12:05  INFO      __main__  [9/50] Player 103927 (Isaac-Johnson)
+06:12:05  INFO      __main__  [10/50] Player 103928 (Rylan-Jones)
+06:12:05  INFO      __main__  [11/50] Player 103930 (Sherif-Gross-Bullock)
+06:12:05  INFO      __main__  [12/50] Player 103932 (Jake-Kyman)
+06:12:06  INFO      __main__  [13/50] Player 103933 (Ryan-Langborg)
+06:12:06  INFO      __main__  [14/50] Player 103937 (Jarod-Lucas)
+06:12:06  INFO      __main__  [15/50] Player 103945 (Justin-Moore)
+06:12:06  INFO      __main__  [16/50] Player 103949 (Cade-Potter)
+06:12:06  INFO      __main__  [17/50] Player 103952 (Jace-Roquemore)
+06:12:06  INFO      __main__  [18/50] Player 103954 (Kyle-Sturdivant)
+06:12:06  INFO      __main__  [19/50] Player 103955 (Marcus-Tsohonis)
+06:12:06  INFO      __main__  [20/50] Player 103956 (Josh-Vazquez)
+06:12:06  INFO      __main__  [21/50] Player 103957 (Justin-Webster)
+06:12:06  INFO      __main__  [22/50] Player 104347 (Immanuel-Allen)
+06:12:06  INFO      __main__  [23/50] Player 104348 (DeSean-Allen-Eikens)
+06:12:06  INFO      __main__  [24/50] Player 104354 (Darius-Beane)
+06:12:06  INFO      __main__  [25/50] Player 104361 (Robby-Carmody)
+06:12:06  INFO      __main__  [26/50] Player 104362 (Grayson-Carter)
+06:12:06  INFO      __main__  [27/50] Player 104365 (Jarron-Coleman)
+06:12:06  INFO      __main__  [28/50] Player 104376 (Naseem-Gaskin)
+06:12:06  INFO      __main__  [29/50] Player 104377 (Philmon-Gebrewhit)
+06:12:06  INFO      __main__  [30/50] Player 104382 (Malik-Hall)
+06:12:06  INFO      __main__  [31/50] Player 104398 (Antwann-Jones)
+06:12:06  INFO      __main__  [32/50] Player 104400 (Keonte-Kennedy)
+06:12:06  INFO      __main__  [33/50] Player 104443 (Jan-Zidek)
+06:12:06  INFO      __main__  [34/50] Player 104826 (Jahvon-Quinerly)
+06:12:06  INFO      __main__  [35/50] Player 104837 (Atiba-Taylor)
+06:12:06  INFO      __main__  [36/50] Player 104842 (EJ-Williams)
+06:12:06  INFO      __main__  [37/50] Player 104846 (Jack-Wilson)
+06:12:06  INFO      __main__  [38/50] Player 104847 (Diante-Wood)
+06:12:06  INFO      __main__  [39/50] Player 104848 (Zion-Young)
+06:12:06  INFO      __main__  [40/50] Player 104911 (DJ-Jeffries)
+06:12:07  INFO      __main__  [41/50] Player 104913 (Chandler-Lawson)
+06:12:07  INFO      __main__  [42/50] Player 105343 (Blake-Hinson)
+06:12:07  INFO      __main__  [43/50] Player 106474 (Branden-Carlson)
+06:12:07  INFO      __main__  [44/50] Player 106678 (DeJuan-Clayton)
+06:12:07  INFO      __main__  [45/50] Player 106824 (Aanen-Moody)
+06:12:07  INFO      __main__  [46/50] Player 107362 (Karim-Coulibaly)
+06:12:07  INFO      __main__  [47/50] Player 107387 (Noah-Carter)
+06:12:07  INFO      __main__  [48/50] Player 107388 (Nobal-Days)
+06:12:07  INFO      __main__  [49/50] Player 107389 (Tanner-Holden)
+06:12:07  INFO      __main__  [50/50] Player 107393 (Patrick-McCaffery)
+06:12:07  INFO      __main__  Scrape complete. 50 done, 0 failed.
+
+===================================
+  CHECKPOINT SUMMARY (5186 total)
+===================================
+  done           50  (1.0%)
+  pending      5136  (99.0%)
+===================================
+
+06:12:07  INFO      fetcher_browser  Browser closed

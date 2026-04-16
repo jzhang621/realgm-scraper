@@ -1,0 +1,144 @@
+22:22:22  INFO      __main__  Using browser-based fetcher (Playwright)
+22:22:22  INFO      __main__  === PHASE 2: SCRAPE ===
+22:22:22  INFO      __main__  11530 players pending
+22:22:22  INFO      __main__  [1/11530] Player 103906 (Marvin-Coleman-II)
+22:22:22  INFO      fetcher_browser  Initializing browser...
+22:22:22  INFO      fetcher_browser  Browser initialized successfully
+22:22:22  INFO      __main__  [2/11530] Player 103908 (Pierre-Crockrell-Jr)
+22:22:26  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Pierre-Crockrell-Jr/Summary/103908 (attempt 1) [BROWSER]
+22:22:26  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Pierre-Crockrell-Jr/Summary/103908 (282041 bytes)
+22:22:27  INFO      __main__  [3/11530] Player 103909 (Taylor-Currie)
+22:22:30  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Taylor-Currie/Summary/103909 (attempt 1) [BROWSER]
+22:22:31  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Taylor-Currie/Summary/103909 (140173 bytes)
+22:22:31  INFO      __main__  [4/11530] Player 103910 (Samari-Curtis)
+22:22:35  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Samari-Curtis/Summary/103910 (attempt 1) [BROWSER]
+22:22:35  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Samari-Curtis/Summary/103910 (193542 bytes)
+22:22:35  INFO      __main__  [5/11530] Player 103913 (Amari-Davis)
+22:22:41  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Amari-Davis/Summary/103913 (attempt 1) [BROWSER]
+22:22:41  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Amari-Davis/Summary/103913 (152970 bytes)
+22:22:41  INFO      __main__  [6/11530] Player 128603 (Lefteris-Mantzoukas)
+22:22:46  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Lefteris-Mantzoukas/Summary/128603 (attempt 1) [BROWSER]
+22:22:46  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Lefteris-Mantzoukas/Summary/128603 (230712 bytes)
+22:22:46  INFO      __main__  [7/11530] Player 132301 (Keshawn-Justice)
+22:22:51  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Keshawn-Justice/Summary/132301 (attempt 1) [BROWSER]
+22:22:52  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Keshawn-Justice/Summary/132301 (326299 bytes)
+22:22:52  INFO      __main__  [8/11530] Player 132303 (Christian-Lorng)
+22:22:55  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Christian-Lorng/Summary/132303 (attempt 1) [BROWSER]
+22:22:55  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Christian-Lorng/Summary/132303 (141835 bytes)
+22:22:55  INFO      __main__  [9/11530] Player 132304 (Dre-Fuller-Jr)
+22:22:58  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Dre-Fuller-Jr/Summary/132304 (attempt 1) [BROWSER]
+22:22:59  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Dre-Fuller-Jr/Summary/132304 (120173 bytes)
+22:22:59  INFO      __main__  [10/11530] Player 132305 (DaQuan-Smith)
+22:23:02  INFO      fetcher_browser  GET https://basketball.realgm.com/player/DaQuan-Smith/Summary/132305 (attempt 1) [BROWSER]
+22:23:03  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/DaQuan-Smith/Summary/132305 (147397 bytes)
+22:23:03  INFO      __main__  [11/11530] Player 132306 (Curtis-Aiken-Jr)
+22:23:06  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Curtis-Aiken-Jr/Summary/132306 (attempt 1) [BROWSER]
+22:23:07  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Curtis-Aiken-Jr/Summary/132306 (142187 bytes)
+22:23:07  INFO      __main__  [12/11530] Player 132307 (Philip-Pepple-Jr)
+22:23:11  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Philip-Pepple-Jr/Summary/132307 (attempt 1) [BROWSER]
+22:23:12  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Philip-Pepple-Jr/Summary/132307 (168650 bytes)
+22:23:12  INFO      __main__  [13/11530] Player 132308 (Yahell-Hill)
+22:23:17  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Yahell-Hill/Summary/132308 (attempt 1) [BROWSER]
+22:23:17  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Yahell-Hill/Summary/132308 (113737 bytes)
+22:23:17  INFO      __main__  [14/11530] Player 132309 (Chase-Audige)
+22:23:23  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Chase-Audige/Summary/132309 (attempt 1) [BROWSER]
+22:23:23  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Chase-Audige/Summary/132309 (353162 bytes)
+22:23:23  INFO      __main__  [15/11530] Player 132310 (Trevon-Faulkner)
+22:23:29  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Trevon-Faulkner/Summary/132310 (attempt 1) [BROWSER]
+22:23:29  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Trevon-Faulkner/Summary/132310 (165590 bytes)
+22:23:29  INFO      __main__  [16/11530] Player 132311 (Tyron-Brewer)
+22:23:34  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Tyron-Brewer/Summary/132311 (attempt 1) [BROWSER]
+22:23:35  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Tyron-Brewer/Summary/132311 (215329 bytes)
+22:23:35  INFO      __main__  [17/11530] Player 132312 (Justin-Lee)
+22:23:40  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Justin-Lee/Summary/132312 (attempt 1) [BROWSER]
+22:23:41  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Justin-Lee/Summary/132312 (117895 bytes)
+22:23:41  INFO      __main__  [18/11530] Player 132314 (Joe-Hedstrom)
+22:23:46  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Joe-Hedstrom/Summary/132314 (attempt 1) [BROWSER]
+22:23:47  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Joe-Hedstrom/Summary/132314 (145320 bytes)
+22:23:47  INFO      __main__  [19/11530] Player 132315 (Jayden-Gardner)
+22:23:52  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Jayden-Gardner/Summary/132315 (attempt 1) [BROWSER]
+22:23:52  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Jayden-Gardner/Summary/132315 (157469 bytes)
+22:23:52  INFO      __main__  [20/11530] Player 132316 (Javonni-Bickham)
+22:23:56  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Javonni-Bickham/Summary/132316 (attempt 1) [BROWSER]
+22:23:56  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Javonni-Bickham/Summary/132316 (126624 bytes)
+22:23:56  INFO      __main__  [21/11530] Player 132317 (Sean-Good)
+22:24:00  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Sean-Good/Summary/132317 (attempt 1) [BROWSER]
+22:24:01  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Sean-Good/Summary/132317 (130443 bytes)
+22:24:01  INFO      __main__  [22/11530] Player 132319 (Trey-Wertz)
+22:24:05  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Trey-Wertz/Summary/132319 (attempt 1) [BROWSER]
+22:24:05  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Trey-Wertz/Summary/132319 (161304 bytes)
+22:24:05  INFO      __main__  [23/11530] Player 132320 (Markeese-Hastings)
+22:24:10  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Markeese-Hastings/Summary/132320 (attempt 1) [BROWSER]
+22:24:10  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Markeese-Hastings/Summary/132320 (181536 bytes)
+22:24:10  INFO      __main__  [24/11530] Player 132321 (Amir-Harris)
+22:24:15  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Amir-Harris/Summary/132321 (attempt 1) [BROWSER]
+22:24:15  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Amir-Harris/Summary/132321 (112524 bytes)
+22:24:15  INFO      __main__  [25/11530] Player 132322 (Caleb-Catto)
+22:24:21  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Caleb-Catto/Summary/132322 (attempt 1) [BROWSER]
+22:24:21  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Caleb-Catto/Summary/132322 (175087 bytes)
+22:24:21  INFO      __main__  [26/11530] Player 132342 (Matthue-Cotton)
+22:24:26  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Matthue-Cotton/Summary/132342 (attempt 1) [BROWSER]
+22:24:26  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Matthue-Cotton/Summary/132342 (147772 bytes)
+22:24:26  INFO      __main__  [27/11530] Player 132343 (Jason-Wade)
+22:24:30  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Jason-Wade/Summary/132343 (attempt 1) [BROWSER]
+22:24:30  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Jason-Wade/Summary/132343 (148288 bytes)
+22:24:30  INFO      __main__  [28/11530] Player 132344 (Rashun-Williams)
+22:24:35  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Rashun-Williams/Summary/132344 (attempt 1) [BROWSER]
+22:24:35  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Rashun-Williams/Summary/132344 (162980 bytes)
+22:24:35  INFO      __main__  [29/11530] Player 132345 (Vincent-Lee)
+22:24:40  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Vincent-Lee/Summary/132345 (attempt 1) [BROWSER]
+22:24:40  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Vincent-Lee/Summary/132345 (142547 bytes)
+22:24:40  INFO      __main__  [30/11530] Player 132346 (Luis-Rodriguez)
+22:24:46  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Luis-Rodriguez/Summary/132346 (attempt 1) [BROWSER]
+22:24:46  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Luis-Rodriguez/Summary/132346 (249241 bytes)
+22:24:46  INFO      __main__  [31/11530] Player 132347 (Jahmar-Young-Jr)
+22:24:51  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Jahmar-Young-Jr/Summary/132347 (attempt 1) [BROWSER]
+22:24:52  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Jahmar-Young-Jr/Summary/132347 (149034 bytes)
+22:24:52  INFO      __main__  [32/11530] Player 132348 (Elijah-Parquet)
+22:24:57  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Elijah-Parquet/Summary/132348 (attempt 1) [BROWSER]
+22:24:58  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Elijah-Parquet/Summary/132348 (125977 bytes)
+22:24:58  INFO      __main__  [33/11530] Player 132349 (Brady-Heiman)
+22:25:03  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Brady-Heiman/Summary/132349 (attempt 1) [BROWSER]
+22:25:03  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Brady-Heiman/Summary/132349 (108626 bytes)
+22:25:03  INFO      __main__  [34/11530] Player 132350 (Kalu-Ezikpe)
+22:25:06  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Kalu-Ezikpe/Summary/132350 (attempt 1) [BROWSER]
+22:25:07  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Kalu-Ezikpe/Summary/132350 (174213 bytes)
+22:25:07  INFO      __main__  [35/11530] Player 132351 (Berrick-JeanLouis)
+22:25:12  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Berrick-JeanLouis/Summary/132351 (attempt 1) [BROWSER]
+22:25:12  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Berrick-JeanLouis/Summary/132351 (156035 bytes)
+22:25:12  INFO      __main__  [36/11530] Player 132352 (Tye-Fagan)
+22:25:17  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Tye-Fagan/Summary/132352 (attempt 1) [BROWSER]
+22:25:18  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Tye-Fagan/Summary/132352 (114063 bytes)
+22:25:18  INFO      __main__  [37/11530] Player 132353 (Duncan-Demuth)
+22:25:21  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Duncan-Demuth/Summary/132353 (attempt 1) [BROWSER]
+22:25:21  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Duncan-Demuth/Summary/132353 (112089 bytes)
+22:25:21  INFO      __main__  [38/11530] Player 132354 (Michael-Wynn)
+22:25:24  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Michael-Wynn/Summary/132354 (attempt 1) [BROWSER]
+22:25:25  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Michael-Wynn/Summary/132354 (109271 bytes)
+22:25:25  INFO      __main__  [39/11530] Player 132356 (Cooper-Kaifes)
+22:25:29  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Cooper-Kaifes/Summary/132356 (attempt 1) [BROWSER]
+22:25:29  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Cooper-Kaifes/Summary/132356 (113736 bytes)
+22:25:29  INFO      __main__  [40/11530] Player 132358 (Qwanzi-Samuels)
+22:25:35  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Qwanzi-Samuels/Summary/132358 (attempt 1) [BROWSER]
+22:25:35  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Qwanzi-Samuels/Summary/132358 (151237 bytes)
+22:25:35  INFO      __main__  [41/11530] Player 132359 (Mikey-Frazier)
+22:25:40  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Mikey-Frazier/Summary/132359 (attempt 1) [BROWSER]
+22:25:40  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Mikey-Frazier/Summary/132359 (118832 bytes)
+22:25:40  WARNING   parsers.profile  Player 132359: no section_tabs found
+22:25:40  INFO      __main__  [42/11530] Player 132363 (Jake-Wojcik)
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: write EPIPE
+    at WriteWrap.onWriteComplete [as oncomplete] (node:internal/stream_base_commons:87:19)
+Emitted 'error' event on Socket instance at:
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {
+  errno: -32,
+  code: 'EPIPE',
+  syscall: 'write'
+}
+
+Node.js v24.13.0

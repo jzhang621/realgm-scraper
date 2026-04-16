@@ -1,0 +1,25 @@
+11:29:03  INFO      __main__  Using browser-based fetcher (Playwright)
+11:29:03  INFO      __main__  === PHASE 2: SCRAPE ===
+11:29:03  INFO      __main__  3 players pending
+11:29:03  INFO      __main__  [1/3] Player 180213 (Cameron-Faas)
+11:29:03  INFO      fetcher_browser  Initializing browser...
+11:29:04  INFO      fetcher_browser  Browser initialized successfully
+11:29:09  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Cameron-Faas/Summary/180213 (attempt 1) [BROWSER]
+11:29:10  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Cameron-Faas/Summary/180213 (149625 bytes)
+11:29:10  WARNING   parsers.profile  Player 180213: no section_tabs found
+11:29:10  INFO      __main__  [2/3] Player 204759 (Theo-Pierre-Justin)
+11:29:15  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Theo-Pierre-Justin/Summary/204759 (attempt 1) [BROWSER]
+11:29:15  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Theo-Pierre-Justin/Summary/204759 (146800 bytes)
+11:29:15  INFO      __main__  [3/3] Player 239569 (Michael-Amador)
+11:29:18  INFO      fetcher_browser  GET https://basketball.realgm.com/player/Michael-Amador/Summary/239569 (attempt 1) [BROWSER]
+11:29:19  INFO      fetcher_browser  Successfully fetched https://basketball.realgm.com/player/Michael-Amador/Summary/239569 (133722 bytes)
+11:29:19  WARNING   parsers.profile  Player 239569: no section_tabs found
+11:29:19  INFO      __main__  Scrape complete. 3 done, 0 failed.
+
+===================================
+  CHECKPOINT SUMMARY (7315 total)
+===================================
+  done         7315  (100.0%)
+===================================
+
+11:29:19  INFO      fetcher_browser  Browser closed

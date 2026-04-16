@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCAA D1 Player Ratings 2025-26</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        th.sortable::after {
+            content: ' ↕';
+            opacity: 0.5;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .rank-cell {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .top-10 {
+            background-color: #fff9e6;
+        }
+
+        .top-10 .rank-cell {
+            color: #f59e0b;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .player-name:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .rating-cell {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .rating-90-plus {
+            color: #10b981;
+        }
+
+        .rating-80-89 {
+            color: #3b82f6;
+        }
+
+        .rating-70-79 {
+            color: #8b5cf6;
+        }
+
+        .rating-60-69 {
+            color: #6b7280;
+        }
+
+        .two-way-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+            color: white;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .expand-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+        .expand-btn:hover {
+            background: #764ba2;
+        }
+
+        .rating-breakdown {
+            background: #f8f9ff;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .rating-breakdown.show {
+            display: block;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .breakdown-item {
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .breakdown-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .breakdown-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .breakdown-value.positive {
+            color: #10b981;
+        }
+
+        .breakdown-value.negative {
+            color: #ef4444;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #764ba2;
+        }
+
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏀 NCAA D1 Player Ratings</h1>
+            <p>NextOnes Rating System | RealGM Data</p>
+            <div class="nav-links">
+                <a href="player_explorer.html">Player Explorer</a>
+                <a href="player_explorer_by_season.html">By Season Explorer</a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="filter-group">
+                <label for="seasonFilter">Season:</label>
+                <select id="seasonFilter">
+                    <option value="2026" selected>2025-26</option>
+                    <option value="2025">2024-25</option>
+                    <option value="2024">2023-24</option>
+                    <option value="2023">2022-23</option>
+                    <option value="2022">2021-22</option>
+                </select>
+
+                <label for="ratingTierFilter">Rating Tier:</label>
+                <select id="ratingTierFilter">
+                    <option value="all">All Players</option>
+                    <option value="90+">90+ Elite</option>
+                    <option value="80-89">80-89 Excellent</option>
+                    <option value="70-79">70-79 Good</option>
+                    <option value="60-69">60-69 Average</option>
+                </select>
+
+                <label for="twoWayFilter">Two-Way:</label>
+                <select id="twoWayFilter">
+                    <option value="all">All</option>
+                    <option value="Y">Two-Way Only</option>
+                    <option value="N">Non Two-Way</option>
+                </select>
+
+                <label for="positionFilter">Position:</label>
+                <select id="positionFilter">
+                    <option value="all">All Positions</option>
+                </select>
+
+                <label for="teamFilter">Team:</label>
+                <select id="teamFilter">
+                    <option value="all">All Teams</option>
+                </select>
+
+                <label for="searchFilter">Search:</label>
+                <input type="text" id="searchFilter" placeholder="Player name...">
+
+                <label for="pageSize">Per Page:</label>
+                <select id="pageSize">
+                    <option value="25">25</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPlayers">-</div>
+                    <div class="stat-label">Total Players</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="count90Plus">-</div>
+                    <div class="stat-label">90+ Elite</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="count80to89">-</div>
+                    <div class="stat-label">80-89 Excellent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="countTwoWay">-</div>
+                    <div class="stat-label">Two-Way Players</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgRating">-</div>
+                    <div class="stat-label">Avg Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="loading" id="loading">Loading player ratings...</div>
+            <table id="ratingsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="rank">Rank</th>
+                        <th class="sortable" data-column="full_name">Player</th>
+                        <th class="sortable" data-column="team">Team</th>
+                        <th class="sortable" data-column="position">Pos</th>
+                        <th class="sortable" data-column="gp">GP</th>
+                        <th class="sortable" data-column="minutes">MIN</th>
+                        <th class="sortable" data-column="pts">PTS</th>
+                        <th class="sortable" data-column="ast">AST</th>
+                        <th class="sortable" data-column="reb">REB</th>
+                        <th class="sortable" data-column="blk">BLK</th>
+                        <th class="sortable" data-column="stl">STL</th>
+                        <th class="sortable" data-column="final_rating">Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ratingsBody">
+                </tbody>
+            </table>
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prevPage">Previous</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button id="nextPage">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allRatings = [];
+        let filteredRatings = [];
+        let currentPage = 1;
+        let currentSort = { column: 'final_rating', direction: 'desc' };
+        let currentSeason = '2026';
+
+        // Load data
+        async function loadData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                const seasonLabels = { '2026': '2025-26', '2025': '2024-25', '2024': '2023-24', '2023': '2022-23', '2022': '2021-22' };
+                const season = seasonLabels[currentSeason] || currentSeason;
+                document.getElementById('loading').textContent = `Loading ${season} season data...`;
+                document.getElementById('ratingsTable').style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
+                const response = await fetch(`http://localhost:8000/api/ratings/${season}?limit=10000`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const jsonData = await response.json();
+                console.log('API Response:', jsonData);
+
+                if (!jsonData.data || !Array.isArray(jsonData.data)) {
+                    throw new Error('Invalid API response format');
+                }
+
+                // Map API response to frontend format
+                allRatings = jsonData.data.map(player => ({
+                    player_id: player.player_id,
+                    full_name: player.full_name,
+                    team: player.team,
+                    position: player.position,
+                    height: player.height,
+                    weight: player.weight,
+                    hometown: player.hometown,
+                    gp: player.gp,
+                    minutes: player.minutes,
+                    pts: player.pts,
+                    fg3m: player.fg3m,
+                    fg3_pct: player.fg3_pct,
+                    fgm: player.fgm,
+                    fg_pct: player.fg_pct,
+                    ft_pct: player.ft_pct,
+                    ast: player.ast,
+                    reb: player.reb,
+                    blk: player.blk,
+                    stl: player.stl,
+                    double_doubles: player.double_doubles,
+                    triple_doubles: player.triple_doubles,
+                    MIN_PER: player.min_per,
+                    PTS_PER: player.pts_per,
+                    PM3_PER: player.pm3_per,
+                    P3PCT_PER: player.p3pct_per,
+                    FGM_PER: player.fgm_per,
+                    FGPCT_PER: player.fgpct_per,
+                    FTPCT_PER: player.ftpct_per,
+                    AST_PER: player.ast_per,
+                    REB_PER: player.reb_per,
+                    BLK_PER: player.blk_per,
+                    STL_PER: player.stl_per,
+                    base_rating: player.base_rating,
+                    game_adj: player.game_adj,
+                    min_boost: player.min_boost,
+                    three_boost: player.three_boost,
+                    fg_boost: player.fg_boost,
+                    ast_boost: player.ast_boost,
+                    blk_boost: player.blk_boost,
+                    double_double_boost: player.double_double_boost,
+                    triple_double_boost: player.triple_double_boost,
+                    free_throw_boost: player.free_throw_boost,
+                    final_rating: player.final_rating,
+                    two_way: player.two_way
+                }));
+
+                // Populate filter dropdowns
+                populateFilters();
+
+                // Apply initial filters and render
+                applyFilters();
+
+                // Update summary stats
+                updateSummaryStats();
+
+                // Show table
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('ratingsTable').style.display = 'table';
+                document.getElementById('pagination').style.display = 'flex';
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').textContent = 'Error loading data. Please check console.';
+            }
+        }
+
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current);
+
+            return values;
+        }
+
+        function populateFilters() {
+            // Positions
+            const positions = [...new Set(allRatings.map(p => p.position).filter(Boolean))].sort();
+            const posSelect = document.getElementById('positionFilter');
+            positions.forEach(pos => {
+                const option = document.createElement('option');
+                option.value = pos;
+                option.textContent = pos;
+                posSelect.appendChild(option);
+            });
+
+            // Teams
+            const teams = [...new Set(allRatings.map(p => p.team).filter(Boolean))].sort();
+            const teamSelect = document.getElementById('teamFilter');
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                teamSelect.appendChild(option);
+            });
+        }
+
+        function updateSummaryStats() {
+            document.getElementById('totalPlayers').textContent = allRatings.length.toLocaleString();
+            document.getElementById('count90Plus').textContent = allRatings.filter(p => p.final_rating >= 90).length;
+            document.getElementById('count80to89').textContent = allRatings.filter(p => p.final_rating >= 80 && p.final_rating < 90).length;
+            document.getElementById('countTwoWay').textContent = allRatings.filter(p => p.two_way === 'Y').length;
+
+            const avgRating = allRatings.reduce((sum, p) => sum + p.final_rating, 0) / allRatings.length;
+            document.getElementById('avgRating').textContent = avgRating.toFixed(2);
+        }
+
+        function applyFilters() {
+            const ratingTier = document.getElementById('ratingTierFilter').value;
+            const twoWay = document.getElementById('twoWayFilter').value;
+            const position = document.getElementById('positionFilter').value;
+            const team = document.getElementById('teamFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredRatings = allRatings.filter(player => {
+                // Rating tier filter
+                if (ratingTier !== 'all') {
+                    if (ratingTier === '90+' && player.final_rating < 90) return false;
+                    if (ratingTier === '80-89' && (player.final_rating < 80 || player.final_rating >= 90)) return false;
+                    if (ratingTier === '70-79' && (player.final_rating < 70 || player.final_rating >= 80)) return false;
+                    if (ratingTier === '60-69' && (player.final_rating < 60 || player.final_rating >= 70)) return false;
+                }
+
+                // Two-way filter
+                if (twoWay !== 'all' && player.two_way !== twoWay) return false;
+
+                // Position filter
+                if (position !== 'all' && player.position !== position) return false;
+
+                // Team filter
+                if (team !== 'all' && player.team !== team) return false;
+
+                // Search filter
+                if (search && !player.full_name.toLowerCase().includes(search)) return false;
+
+                return true;
+            });
+
+            // Sort
+            sortData();
+
+            // Reset to page 1
+            currentPage = 1;
+            renderTable();
+        }
+
+        function sortData() {
+            filteredRatings.sort((a, b) => {
+                let aVal = a[currentSort.column];
+                let bVal = b[currentSort.column];
+
+                // Handle string comparison
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (currentSort.direction === 'asc') {
+                    return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                }
+            });
+        }
+
+        function renderTable() {
+            const pageSize = document.getElementById('pageSize').value;
+            const startIdx = pageSize === 'all' ? 0 : (currentPage - 1) * parseInt(pageSize);
+            const endIdx = pageSize === 'all' ? filteredRatings.length : startIdx + parseInt(pageSize);
+            const pageData = filteredRatings.slice(startIdx, endIdx);
+
+            const tbody = document.getElementById('ratingsBody');
+            tbody.innerHTML = '';
+
+            pageData.forEach((player, idx) => {
+                const actualRank = startIdx + idx + 1;
+                const row = document.createElement('tr');
+                if (actualRank <= 10) row.classList.add('top-10');
+
+                const ratingClass = player.final_rating >= 90 ? 'rating-90-plus' :
+                                   player.final_rating >= 80 ? 'rating-80-89' :
+                                   player.final_rating >= 70 ? 'rating-70-79' : 'rating-60-69';
+
+                row.innerHTML = `
+                    <td class="rank-cell">${actualRank}</td>
+                    <td class="player-name" onclick="showPlayerDetail('${player.player_id}')">
+                        ${player.full_name}
+                        ${player.two_way === 'Y' ? '<span class="two-way-badge">TWO-WAY</span>' : ''}
+                    </td>
+                    <td>${player.team}</td>
+                    <td>${player.position}</td>
+                    <td>${player.gp}</td>
+                    <td>${player.minutes.toFixed(1)}</td>
+                    <td>${player.pts.toFixed(1)}</td>
+                    <td>${player.ast.toFixed(1)}</td>
+                    <td>${player.reb.toFixed(1)}</td>
+                    <td>${player.blk.toFixed(1)}</td>
+                    <td>${player.stl.toFixed(1)}</td>
+                    <td class="rating-cell ${ratingClass}">${player.final_rating.toFixed(2)}</td>
+                    <td><button class="expand-btn" onclick="toggleBreakdown(this, '${player.player_id}')">Details</button></td>
+                `;
+
+                tbody.appendChild(row);
+
+                // Add breakdown row (hidden by default)
+                const breakdownRow = document.createElement('tr');
+                breakdownRow.innerHTML = `
+                    <td colspan="13">
+                        <div class="rating-breakdown" id="breakdown-${player.player_id}">
+                            ${generateBreakdown(player)}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(breakdownRow);
+            });
+
+            updatePagination();
+            updateSortIndicators();
+        }
+
+        function generateBreakdown(player) {
+            const getPercentileColor = (percentile) => {
+                if (percentile >= 90) return '#10b981';
+                if (percentile >= 75) return '#3b82f6';
+                if (percentile >= 50) return '#8b5cf6';
+                if (percentile >= 25) return '#f59e0b';
+                return '#ef4444';
+            };
+
+            return `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 5px;">📊 Statistical Percentile Rankings</h3>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Minutes per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.MIN_PER)}">
+                                ${player.minutes.toFixed(1)} (${player.MIN_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Points per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.PTS_PER)}">
+                                ${player.pts.toFixed(1)} (${player.PTS_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">3-Pointers Made</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.PM3_PER)}">
+                                ${player.fg3m.toFixed(1)} (${player.PM3_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">3-Point %</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.P3PCT_PER)}">
+                                ${(player.fg3_pct * 100).toFixed(1)}% (${player.P3PCT_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Field Goals Made</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.FGM_PER)}">
+                                ${player.fgm.toFixed(1)} (${player.FGM_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Field Goal %</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.FGPCT_PER)}">
+                                ${(player.fg_pct * 100).toFixed(1)}% (${player.FGPCT_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Free Throw %</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.FTPCT_PER)}">
+                                ${(player.ft_pct * 100).toFixed(1)}% (${player.FTPCT_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Assists per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.AST_PER)}">
+                                ${player.ast.toFixed(1)} (${player.AST_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Rebounds per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.REB_PER)}">
+                                ${player.reb.toFixed(1)} (${player.REB_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Blocks per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.BLK_PER)}">
+                                ${player.blk.toFixed(1)} (${player.BLK_PER}th %ile)
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Steals per Game</div>
+                            <div class="breakdown-value" style="color: ${getPercentileColor(player.STL_PER)}">
+                                ${player.stl.toFixed(1)} (${player.STL_PER}th %ile)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 5px;">🎯 Rating Components</h3>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Base Rating</div>
+                            <div class="breakdown-value">${player.base_rating.toFixed(2)}</div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Game Adjustment</div>
+                            <div class="breakdown-value ${player.game_adj >= 0 ? 'positive' : 'negative'}">
+                                ${player.game_adj >= 0 ? '+' : ''}${player.game_adj.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Minute Boost</div>
+                            <div class="breakdown-value ${player.min_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.min_boost >= 0 ? '+' : ''}${player.min_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Three-Point Boost</div>
+                            <div class="breakdown-value ${player.three_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.three_boost >= 0 ? '+' : ''}${player.three_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Field Goal Boost</div>
+                            <div class="breakdown-value ${player.fg_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.fg_boost >= 0 ? '+' : ''}${player.fg_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Assist Boost</div>
+                            <div class="breakdown-value ${player.ast_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.ast_boost >= 0 ? '+' : ''}${player.ast_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Block Boost</div>
+                            <div class="breakdown-value ${player.blk_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.blk_boost >= 0 ? '+' : ''}${player.blk_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Double-Double Boost</div>
+                            <div class="breakdown-value ${player.double_double_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.double_double_boost >= 0 ? '+' : ''}${player.double_double_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Triple-Double Boost</div>
+                            <div class="breakdown-value ${player.triple_double_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.triple_double_boost >= 0 ? '+' : ''}${player.triple_double_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">Free Throw Boost</div>
+                            <div class="breakdown-value ${player.free_throw_boost >= 0 ? 'positive' : 'negative'}">
+                                ${player.free_throw_boost >= 0 ? '+' : ''}${player.free_throw_boost.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="breakdown-item" style="grid-column: span 2; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <div class="breakdown-label" style="color: white; opacity: 0.9;">FINAL RATING</div>
+                            <div class="breakdown-value" style="color: white; font-size: 1.5em;">${player.final_rating.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleBreakdown(button, playerId) {
+            const breakdown = document.getElementById(`breakdown-${playerId}`);
+            breakdown.classList.toggle('show');
+            button.textContent = breakdown.classList.contains('show') ? 'Hide' : 'Details';
+        }
+
+        function showPlayerDetail(playerId) {
+            // Open player explorer with this player
+            window.open(`player_explorer.html#${playerId}`, '_blank');
+        }
+
+        function updatePagination() {
+            const pageSize = document.getElementById('pageSize').value;
+            const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredRatings.length / parseInt(pageSize));
+
+            document.getElementById('pageInfo').textContent =
+                `Page ${currentPage} of ${totalPages} (${filteredRatings.length} players)`;
+
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.column === currentSort.column) {
+                    th.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        // Event listeners
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const column = th.dataset.column;
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = column === 'final_rating' || column === 'rank' ? 'desc' : 'asc';
+                }
+                sortData();
+                renderTable();
+            });
+        });
+
+        document.getElementById('seasonFilter').addEventListener('change', (e) => {
+            currentSeason = e.target.value;
+            // Reset all filters
+            document.getElementById('ratingTierFilter').value = 'all';
+            document.getElementById('twoWayFilter').value = 'all';
+            document.getElementById('positionFilter').innerHTML = '<option value="all">All Positions</option>';
+            document.getElementById('teamFilter').innerHTML = '<option value="all">All Teams</option>';
+            document.getElementById('searchFilter').value = '';
+            currentPage = 1;
+            loadData();
+        });
+
+        document.getElementById('ratingTierFilter').addEventListener('change', applyFilters);
+        document.getElementById('twoWayFilter').addEventListener('change', applyFilters);
+        document.getElementById('positionFilter').addEventListener('change', applyFilters);
+        document.getElementById('teamFilter').addEventListener('change', applyFilters);
+        document.getElementById('searchFilter').addEventListener('input', applyFilters);
+        document.getElementById('pageSize').addEventListener('change', () => {
+            currentPage = 1;
+            renderTable();
+        });
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const pageSize = document.getElementById('pageSize').value;
+            const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredRatings.length / parseInt(pageSize));
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>

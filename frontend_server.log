@@ -1,0 +1,47 @@
+::1 - - [14/Apr/2026 11:06:19] "GET / HTTP/1.1" 200 -
+::1 - - [14/Apr/2026 11:06:19] code 404, message File not found
+::1 - - [14/Apr/2026 11:06:19] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:06:24] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:11:59] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:12:06] code 404, message File not found
+::1 - - [14/Apr/2026 11:12:06] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:12:12] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:12:12] code 404, message File not found
+::1 - - [14/Apr/2026 11:12:12] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:15:44] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:20:52] code 404, message File not found
+::1 - - [14/Apr/2026 11:20:52] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:20:55] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:20:55] code 404, message File not found
+::1 - - [14/Apr/2026 11:20:55] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:22:27] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:22:27] code 404, message File not found
+::1 - - [14/Apr/2026 11:22:27] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 11:23:30] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 11:23:30] code 404, message File not found
+::1 - - [14/Apr/2026 11:23:30] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+::1 - - [14/Apr/2026 15:20:20] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 15:25:14] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 15:25:23] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 15:25:25] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 15:25:42] "GET / HTTP/1.1" 304 -
+::1 - - [14/Apr/2026 15:26:11] "GET / HTTP/1.1" 200 -
+::1 - - [14/Apr/2026 15:45:32] "GET / HTTP/1.1" 200 -
+::1 - - [14/Apr/2026 15:58:25] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 10:44:34] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 11:24:37] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 12:23:36] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 12:32:15] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 12:35:45] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 12:40:58] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 13:09:18] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 13:12:00] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 13:17:34] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 14:02:23] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 16:37:08] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 16:42:03] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 16:48:47] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 16:55:24] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 16:57:27] "GET / HTTP/1.1" 304 -
+::1 - - [15/Apr/2026 17:42:35] "GET / HTTP/1.1" 200 -
+::1 - - [15/Apr/2026 17:44:33] "GET / HTTP/1.1" 200 -

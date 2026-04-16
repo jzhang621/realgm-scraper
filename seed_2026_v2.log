@@ -1,0 +1,273 @@
+22:13:57  INFO      __main__  Using browser-based fetcher (Playwright)
+22:13:57  INFO      __main__  === PHASE 1: SEED ===
+22:13:57  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1
+22:13:57  INFO      __main__    Season 2026 uses JS pagination, fetching all pages...
+22:13:57  INFO      fetcher_browser  Initializing browser...
+22:13:58  INFO      fetcher_browser  Browser initialized successfully
+22:13:58  INFO      fetcher_browser  Fetching paginated listing: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1 (up to 60 pages)
+22:14:01  INFO      fetcher_browser  Loading page 1...
+22:14:04  INFO      fetcher_browser    Page 1: captured
+22:14:04  INFO      fetcher_browser  Found 52 total pages
+22:14:06  INFO      fetcher_browser    Clicking page 2...
+22:14:07  INFO      fetcher_browser    Page 2: captured
+22:14:09  INFO      fetcher_browser    Clicking page 3...
+22:14:10  INFO      fetcher_browser    Page 3: captured
+22:14:13  INFO      fetcher_browser    Clicking page 4...
+22:14:14  INFO      fetcher_browser    Page 4: captured
+22:14:15  INFO      fetcher_browser    Clicking page 5...
+22:14:16  INFO      fetcher_browser    Page 5: captured
+22:14:18  INFO      fetcher_browser    Clicking page 6...
+22:14:19  INFO      fetcher_browser    Page 6: captured
+22:14:21  INFO      fetcher_browser    Clicking page 7...
+22:14:21  INFO      fetcher_browser    Page 7: captured
+22:14:24  INFO      fetcher_browser    Clicking page 8...
+22:14:24  INFO      fetcher_browser    Page 8: captured
+22:14:26  INFO      fetcher_browser    Clicking page 9...
+22:14:27  INFO      fetcher_browser    Page 9: captured
+22:14:29  INFO      fetcher_browser    Clicking page 10...
+22:14:30  INFO      fetcher_browser    Page 10: captured
+22:14:33  INFO      fetcher_browser    Clicking page 11...
+22:14:33  INFO      fetcher_browser    Page 11: captured
+22:14:35  INFO      fetcher_browser    Clicking page 12...
+22:14:36  INFO      fetcher_browser    Page 12: captured
+22:14:38  INFO      fetcher_browser    Clicking page 13...
+22:14:39  INFO      fetcher_browser    Page 13: captured
+22:14:41  INFO      fetcher_browser    Clicking page 14...
+22:14:42  INFO      fetcher_browser    Page 14: captured
+22:14:44  INFO      fetcher_browser    Clicking page 15...
+22:14:45  INFO      fetcher_browser    Page 15: captured
+22:14:47  INFO      fetcher_browser    Clicking page 16...
+22:14:48  INFO      fetcher_browser    Page 16: captured
+22:14:51  INFO      fetcher_browser    Clicking page 17...
+22:14:51  INFO      fetcher_browser    Page 17: captured
+22:14:54  INFO      fetcher_browser    Clicking page 18...
+22:14:55  INFO      fetcher_browser    Page 18: captured
+22:14:57  INFO      fetcher_browser    Clicking page 19...
+22:14:57  INFO      fetcher_browser    Page 19: captured
+22:14:59  INFO      fetcher_browser    Clicking page 20...
+22:15:00  INFO      fetcher_browser    Page 20: captured
+22:15:03  INFO      fetcher_browser    Clicking page 21...
+22:15:04  INFO      fetcher_browser    Page 21: captured
+22:15:05  INFO      fetcher_browser    Clicking page 22...
+22:15:06  INFO      fetcher_browser    Page 22: captured
+22:15:08  INFO      fetcher_browser    Clicking page 23...
+22:15:09  INFO      fetcher_browser    Page 23: captured
+22:15:11  INFO      fetcher_browser    Clicking page 24...
+22:15:11  INFO      fetcher_browser    Page 24: captured
+22:15:14  INFO      fetcher_browser    Clicking page 25...
+22:15:15  INFO      fetcher_browser    Page 25: captured
+22:15:18  INFO      fetcher_browser    Clicking page 26...
+22:15:18  INFO      fetcher_browser    Page 26: captured
+22:15:20  INFO      fetcher_browser    Clicking page 27...
+22:15:21  INFO      fetcher_browser    Page 27: captured
+22:15:23  INFO      fetcher_browser    Clicking page 28...
+22:15:24  INFO      fetcher_browser    Page 28: captured
+22:15:26  INFO      fetcher_browser    Clicking page 29...
+22:15:26  INFO      fetcher_browser    Page 29: captured
+22:15:29  INFO      fetcher_browser    Clicking page 30...
+22:15:30  INFO      fetcher_browser    Page 30: captured
+22:15:32  INFO      fetcher_browser    Clicking page 31...
+22:15:33  INFO      fetcher_browser    Page 31: captured
+22:15:35  INFO      fetcher_browser    Clicking page 32...
+22:15:36  INFO      fetcher_browser    Page 32: captured
+22:15:39  INFO      fetcher_browser    Clicking page 33...
+22:15:40  INFO      fetcher_browser    Page 33: captured
+22:15:43  INFO      fetcher_browser    Clicking page 34...
+22:15:43  INFO      fetcher_browser    Page 34: captured
+22:15:46  INFO      fetcher_browser    Clicking page 35...
+22:15:47  INFO      fetcher_browser    Page 35: captured
+22:15:49  INFO      fetcher_browser    Clicking page 36...
+22:15:49  INFO      fetcher_browser    Page 36: captured
+22:15:52  INFO      fetcher_browser    Clicking page 37...
+22:15:53  INFO      fetcher_browser    Page 37: captured
+22:15:55  INFO      fetcher_browser    Clicking page 38...
+22:15:56  INFO      fetcher_browser    Page 38: captured
+22:15:58  INFO      fetcher_browser    Clicking page 39...
+22:15:59  INFO      fetcher_browser    Page 39: captured
+22:16:01  INFO      fetcher_browser    Clicking page 40...
+22:16:02  INFO      fetcher_browser    Page 40: captured
+22:16:04  INFO      fetcher_browser    Clicking page 41...
+22:16:04  INFO      fetcher_browser    Page 41: captured
+22:16:07  INFO      fetcher_browser    Clicking page 42...
+22:16:08  INFO      fetcher_browser    Page 42: captured
+22:16:09  INFO      fetcher_browser    Clicking page 43...
+22:16:10  INFO      fetcher_browser    Page 43: captured
+22:16:13  INFO      fetcher_browser    Clicking page 44...
+22:16:13  INFO      fetcher_browser    Page 44: captured
+22:16:15  INFO      fetcher_browser    Clicking page 45...
+22:16:16  INFO      fetcher_browser    Page 45: captured
+22:16:19  INFO      fetcher_browser    Clicking page 46...
+22:16:19  INFO      fetcher_browser    Page 46: captured
+22:16:22  INFO      fetcher_browser    Clicking page 47...
+22:16:22  INFO      fetcher_browser    Page 47: captured
+22:16:24  INFO      fetcher_browser    Clicking page 48...
+22:16:25  INFO      fetcher_browser    Page 48: captured
+22:16:28  INFO      fetcher_browser    Clicking page 49...
+22:16:28  INFO      fetcher_browser    Page 49: captured
+22:16:31  INFO      fetcher_browser    Clicking page 50...
+22:16:32  INFO      fetcher_browser    Page 50: captured
+22:16:35  INFO      fetcher_browser    Clicking page 51...
+22:16:36  INFO      fetcher_browser    Page 51: captured
+22:16:38  INFO      fetcher_browser    Clicking page 52...
+22:16:39  INFO      fetcher_browser    Page 52: captured
+22:16:39  INFO      fetcher_browser  Fetched 52 pages total
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 1: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 2: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 3: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 4: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 5: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 6: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 7: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 8: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 9: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 10: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 11: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 12: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 13: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 14: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 15: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 16: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 17: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 18: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 19: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 20: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 21: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 22: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 23: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:39  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:39  INFO      __main__    Page 24: parsed 100 players
+22:16:39  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 25: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 26: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 27: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 28: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 29: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 30: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 31: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 32: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 33: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 34: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 35: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 36: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 37: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 38: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 39: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 40: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 41: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 42: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 43: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 44: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 45: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 46: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 47: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 48: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 49: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 50: parsed 100 players
+22:16:40  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:40  INFO      parsers.listing  Season 2026: parsed 100 players
+22:16:40  INFO      __main__    Page 51: parsed 100 players
+22:16:41  INFO      parsers.listing  Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+22:16:41  INFO      parsers.listing  Season 2026: parsed 18 players
+22:16:41  INFO      __main__    Page 52: parsed 18 players
+22:16:41  INFO      __main__  Season 2026: 5118 players (total unique so far: 5118)
+22:16:41  INFO      __main__  Seed complete. 5118 unique player IDs found.
+22:16:41  INFO      checkpoint  Checkpoint seeded with 5118 player records
+22:16:41  INFO      fetcher_browser  Browser closed

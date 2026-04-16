@@ -1,0 +1,276 @@
+INFO Initializing browser...
+INFO Browser initialized successfully
+INFO Fetching paginated listing: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1 (up to 60 pages)
+INFO Loading page 1...
+INFO   Page 1: captured
+INFO Found 52 total pages
+INFO   Clicking page 2...
+INFO   Page 2: captured
+INFO   Clicking page 3...
+INFO   Page 3: captured
+INFO   Clicking page 4...
+INFO   Page 4: captured
+INFO   Clicking page 5...
+INFO   Page 5: captured
+INFO   Clicking page 6...
+INFO   Page 6: captured
+INFO   Clicking page 7...
+INFO   Page 7: captured
+INFO   Clicking page 8...
+INFO   Page 8: captured
+INFO   Clicking page 9...
+INFO   Page 9: captured
+INFO   Clicking page 10...
+INFO   Page 10: captured
+INFO   Clicking page 11...
+INFO   Page 11: captured
+INFO   Clicking page 12...
+INFO   Page 12: captured
+INFO   Clicking page 13...
+INFO   Page 13: captured
+INFO   Clicking page 14...
+INFO   Page 14: captured
+INFO   Clicking page 15...
+INFO   Page 15: captured
+INFO   Clicking page 16...
+INFO   Page 16: captured
+INFO   Clicking page 17...
+INFO   Page 17: captured
+INFO   Clicking page 18...
+INFO   Page 18: captured
+INFO   Clicking page 19...
+INFO   Page 19: captured
+INFO   Clicking page 20...
+INFO   Page 20: captured
+INFO   Clicking page 21...
+INFO   Page 21: captured
+INFO   Clicking page 22...
+INFO   Page 22: captured
+INFO   Clicking page 23...
+INFO   Page 23: captured
+INFO   Clicking page 24...
+INFO   Page 24: captured
+INFO   Clicking page 25...
+INFO   Page 25: captured
+INFO   Clicking page 26...
+INFO   Page 26: captured
+INFO   Clicking page 27...
+INFO   Page 27: captured
+INFO   Clicking page 28...
+INFO   Page 28: captured
+INFO   Clicking page 29...
+INFO   Page 29: captured
+INFO   Clicking page 30...
+INFO   Page 30: captured
+INFO   Clicking page 31...
+INFO   Page 31: captured
+INFO   Clicking page 32...
+INFO   Page 32: captured
+INFO   Clicking page 33...
+INFO   Page 33: captured
+INFO   Clicking page 34...
+INFO   Page 34: captured
+INFO   Clicking page 35...
+INFO   Page 35: captured
+INFO   Clicking page 36...
+INFO   Page 36: captured
+INFO   Clicking page 37...
+INFO   Page 37: captured
+INFO   Clicking page 38...
+INFO   Page 38: captured
+INFO   Clicking page 39...
+INFO   Page 39: captured
+INFO   Clicking page 40...
+INFO   Page 40: captured
+INFO   Clicking page 41...
+INFO   Page 41: captured
+INFO   Clicking page 42...
+INFO   Page 42: captured
+INFO   Clicking page 43...
+INFO   Page 43: captured
+INFO   Clicking page 44...
+INFO   Page 44: captured
+INFO   Clicking page 45...
+INFO   Page 45: captured
+INFO   Clicking page 46...
+INFO   Page 46: captured
+INFO   Clicking page 47...
+INFO   Page 47: captured
+INFO   Clicking page 48...
+INFO   Page 48: captured
+INFO   Clicking page 49...
+INFO   Page 49: captured
+INFO   Clicking page 50...
+INFO   Page 50: captured
+INFO   Clicking page 51...
+INFO   Page 51: captured
+INFO   Clicking page 52...
+INFO   Page 52: captured
+INFO Fetched 52 pages total
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 100 players
+INFO Season 2026 columns: ['#', 'Player', 'Team', 'GP', 'MPG', 'PPG', 'FGM', 'FGA', 'FG%', '3PM', '3PA', '3P%', 'FTM', 'FTA', 'FT%', 'ORB', 'DRB', 'RPG', 'APG', 'SPG', 'BPG', 'TOV', 'PF']
+INFO Season 2026: parsed 18 players
+INFO Browser closed
+Testing pagination for 2026...
+URL: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1
+
+
+Fetched 52 HTML pages
+Page 1: 100 parsed, 100 new, total unique: 100
+Page 2: 100 parsed, 100 new, total unique: 200
+Page 3: 100 parsed, 100 new, total unique: 300
+Page 4: 100 parsed, 100 new, total unique: 400
+Page 5: 100 parsed, 100 new, total unique: 500
+Page 6: 100 parsed, 100 new, total unique: 600
+Page 7: 100 parsed, 100 new, total unique: 700
+Page 8: 100 parsed, 100 new, total unique: 800
+Page 9: 100 parsed, 100 new, total unique: 900
+Page 10: 100 parsed, 100 new, total unique: 1000
+Page 11: 100 parsed, 100 new, total unique: 1100
+Page 12: 100 parsed, 100 new, total unique: 1200
+Page 13: 100 parsed, 100 new, total unique: 1300
+Page 14: 100 parsed, 100 new, total unique: 1400
+Page 15: 100 parsed, 100 new, total unique: 1500
+Page 16: 100 parsed, 100 new, total unique: 1600
+Page 17: 100 parsed, 100 new, total unique: 1700
+Page 18: 100 parsed, 100 new, total unique: 1800
+Page 19: 100 parsed, 100 new, total unique: 1900
+Page 20: 100 parsed, 100 new, total unique: 2000
+Page 21: 100 parsed, 100 new, total unique: 2100
+Page 22: 100 parsed, 100 new, total unique: 2200
+Page 23: 100 parsed, 100 new, total unique: 2300
+Page 24: 100 parsed, 100 new, total unique: 2400
+Page 25: 100 parsed, 100 new, total unique: 2500
+Page 26: 100 parsed, 100 new, total unique: 2600
+Page 27: 100 parsed, 100 new, total unique: 2700
+Page 28: 100 parsed, 100 new, total unique: 2800
+Page 29: 100 parsed, 100 new, total unique: 2900
+Page 30: 100 parsed, 100 new, total unique: 3000
+Page 31: 100 parsed, 100 new, total unique: 3100
+Page 32: 100 parsed, 100 new, total unique: 3200
+Page 33: 100 parsed, 100 new, total unique: 3300
+Page 34: 100 parsed, 100 new, total unique: 3400
+Page 35: 100 parsed, 100 new, total unique: 3500
+Page 36: 100 parsed, 100 new, total unique: 3600
+Page 37: 100 parsed, 100 new, total unique: 3700
+Page 38: 100 parsed, 100 new, total unique: 3800
+Page 39: 100 parsed, 100 new, total unique: 3900
+Page 40: 100 parsed, 100 new, total unique: 4000
+Page 41: 100 parsed, 100 new, total unique: 4100
+Page 42: 100 parsed, 100 new, total unique: 4200
+Page 43: 100 parsed, 100 new, total unique: 4300
+Page 44: 100 parsed, 100 new, total unique: 4400
+Page 45: 100 parsed, 100 new, total unique: 4500
+Page 46: 100 parsed, 100 new, total unique: 4600
+Page 47: 100 parsed, 100 new, total unique: 4700
+Page 48: 100 parsed, 100 new, total unique: 4800
+Page 49: 100 parsed, 100 new, total unique: 4900
+Page 50: 100 parsed, 100 new, total unique: 5000
+Page 51: 100 parsed, 100 new, total unique: 5100
+Page 52: 18 parsed, 18 new, total unique: 5118
+
+✓ Total unique players for 2026: 5118
+Expected: ~5200
+
+✓ Found Darryn Peterson: {'player_id': '196886', 'player_name': 'Darryn Peterson', 'url_slug': 'Darryn-Peterson', 'season': 2026, 'team': 'KU', 'conference': None, 'position': None, 'class_year': None}

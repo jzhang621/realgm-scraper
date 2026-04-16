@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Comparison - NCAA D1 Ratings</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .player-selectors {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .player-select {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-select label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9ff;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .vs-divider {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .season-filter {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .season-filter select {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .comparison-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .comparison-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .player-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .player-info-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .player-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .player-details {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .player-details div {
+            margin-bottom: 5px;
+        }
+
+        .rating-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .stats-table th {
+            background: #f8f9ff;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .stats-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stats-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .stat-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stat-value {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .better {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .worse {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .two-way-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+            color: white;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .player-selectors {
+                grid-template-columns: 1fr;
+            }
+
+            .vs-divider {
+                display: none;
+            }
+
+            .player-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏀 Player Comparison Tool</h1>
+            <p>Compare NCAA D1 Player Ratings & Stats</p>
+            <div class="nav-links">
+                <a href="player_ratings_viewer.html">Rankings</a>
+                <a href="player_explorer.html">Player Explorer</a>
+                <a href="player_explorer_by_season.html">By Season Explorer</a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="player-selectors">
+                <div class="player-select">
+                    <label>Player 1</label>
+                    <div class="search-container">
+                        <input type="text" id="player1Search" placeholder="Search player name...">
+                        <div class="suggestions" id="player1Suggestions"></div>
+                    </div>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="player-select">
+                    <label>Player 2</label>
+                    <div class="search-container">
+                        <input type="text" id="player2Search" placeholder="Search player name...">
+                        <div class="suggestions" id="player2Suggestions"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="season-filter">
+                <label for="seasonSelect">Season: </label>
+                <select id="seasonSelect">
+                    <option value="2026" selected>2025-26</option>
+                    <option value="2025">2024-25</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="comparisonContent">
+            <div class="comparison-card">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚡</div>
+                    <p>Select two players to compare their stats and ratings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allPlayers = [];
+        let player1 = null;
+        let player2 = null;
+        let currentSeason = '2026';
+        let radarChart = null;
+        let boostsChart = null;
+
+        // Load data
+        async function loadData() {
+            try {
+                const response = await fetch(`data/processed/player_ratings_${currentSeason}.csv`);
+                const text = await response.text();
+
+                const lines = text.trim().split('\n');
+                const headers = lines[0].split(',');
+
+                allPlayers = lines.slice(1).map(line => {
+                    const values = parseCSVLine(line);
+                    const obj = {};
+                    headers.forEach((header, i) => {
+                        obj[header] = values[i] || '';
+                    });
+
+                    // Convert numeric fields
+                    ['gp', 'minutes', 'pts', 'fg3m', 'fg3_pct', 'fgm', 'fg_pct', 'ft_pct',
+                     'ast', 'reb', 'blk', 'stl', 'double_doubles', 'triple_doubles',
+                     'MIN_PER', 'PTS_PER', 'PM3_PER', 'P3PCT_PER', 'FGM_PER', 'FGPCT_PER',
+                     'FTPCT_PER', 'AST_PER', 'REB_PER', 'BLK_PER', 'STL_PER',
+                     'base_rating', 'game_adj', 'min_boost', 'three_boost', 'fg_boost',
+                     'ast_boost', 'blk_boost', 'double_double_boost', 'triple_double_boost',
+                     'free_throw_boost', 'final_rating'].forEach(field => {
+                        if (obj[field]) obj[field] = parseFloat(obj[field]);
+                    });
+
+                    return obj;
+                });
+
+                console.log(`Loaded ${allPlayers.length} players`);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current);
+
+            return values;
+        }
+
+        // Search functionality
+        function setupSearch(inputId, suggestionsId, playerSlot) {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+
+                if (query.length < 2) {
+                    suggestions.classList.remove('show');
+                    return;
+                }
+
+                const matches = allPlayers.filter(p =>
+                    p.full_name.toLowerCase().includes(query)
+                ).slice(0, 10);
+
+                if (matches.length === 0) {
+                    suggestions.classList.remove('show');
+                    return;
+                }
+
+                suggestions.innerHTML = matches.map(p => `
+                    <div class="suggestion-item" data-player-id="${p.player_id}">
+                        ${p.full_name} - ${p.team} (${p.final_rating.toFixed(1)} rating)
+                    </div>
+                `).join('');
+
+                suggestions.querySelectorAll('.suggestion-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const playerId = item.dataset.playerId;
+                        const player = allPlayers.find(p => p.player_id === playerId);
+
+                        if (playerSlot === 1) {
+                            player1 = player;
+                            input.value = player.full_name;
+                        } else {
+                            player2 = player;
+                            input.value = player.full_name;
+                        }
+
+                        suggestions.classList.remove('show');
+
+                        if (player1 && player2) {
+                            renderComparison();
+                        }
+                    });
+                });
+
+                suggestions.classList.add('show');
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    suggestions.classList.remove('show');
+                }
+            });
+        }
+
+        function renderComparison() {
+            if (!player1 || !player2) return;
+
+            const content = document.getElementById('comparisonContent');
+
+            content.innerHTML = `
+                <div class="comparison-card">
+                    <div class="card-header">Player Overview</div>
+                    <div class="player-info-grid">
+                        ${renderPlayerCard(player1)}
+                        ${renderPlayerCard(player2)}
+                    </div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="card-header">Per Game Statistics</div>
+                    ${renderStatsTable()}
+                </div>
+
+                <div class="comparison-card">
+                    <div class="card-header">Percentile Rankings</div>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="card-header">Rating Breakdown</div>
+                    ${renderRatingBreakdown()}
+                    <div class="chart-container">
+                        <canvas id="boostsChart"></canvas>
+                    </div>
+                </div>
+            `;
+
+            renderRadarChart();
+            renderBoostsChart();
+        }
+
+        function renderPlayerCard(player) {
+            return `
+                <div class="player-info-card">
+                    <div class="player-name">
+                        ${player.full_name}
+                        ${player.two_way === 'Y' ? '<span class="two-way-badge">TWO-WAY</span>' : ''}
+                    </div>
+                    <div class="player-details">
+                        <div><strong>Team:</strong> ${player.team}</div>
+                        <div><strong>Position:</strong> ${player.position || 'N/A'}</div>
+                        <div><strong>Height/Weight:</strong> ${player.height || 'N/A'} / ${player.weight || 'N/A'} lbs</div>
+                        <div><strong>Hometown:</strong> ${player.hometown || 'N/A'}</div>
+                        <div><strong>Games Played:</strong> ${player.gp}</div>
+                    </div>
+                    <div class="rating-display">${player.final_rating.toFixed(2)}</div>
+                </div>
+            `;
+        }
+
+        function renderStatsTable() {
+            const stats = [
+                { name: 'Minutes', key: 'minutes', format: v => v.toFixed(1) },
+                { name: 'Points', key: 'pts', format: v => v.toFixed(1) },
+                { name: 'Assists', key: 'ast', format: v => v.toFixed(1) },
+                { name: 'Rebounds', key: 'reb', format: v => v.toFixed(1) },
+                { name: 'Steals', key: 'stl', format: v => v.toFixed(1) },
+                { name: 'Blocks', key: 'blk', format: v => v.toFixed(1) },
+                { name: 'FG%', key: 'fg_pct', format: v => (v * 100).toFixed(1) + '%' },
+                { name: '3PT%', key: 'fg3_pct', format: v => (v * 100).toFixed(1) + '%' },
+                { name: 'FT%', key: 'ft_pct', format: v => (v * 100).toFixed(1) + '%' },
+                { name: 'Double-Doubles', key: 'double_doubles', format: v => v },
+                { name: 'Triple-Doubles', key: 'triple_doubles', format: v => v }
+            ];
+
+            return `
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Stat</th>
+                            <th class="stat-value">${player1.full_name}</th>
+                            <th class="stat-value">${player2.full_name}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${stats.map(stat => {
+                            const val1 = player1[stat.key];
+                            const val2 = player2[stat.key];
+                            const better1 = val1 > val2 ? 'better' : (val1 < val2 ? 'worse' : '');
+                            const better2 = val2 > val1 ? 'better' : (val2 < val1 ? 'worse' : '');
+
+                            return `
+                                <tr>
+                                    <td class="stat-name">${stat.name}</td>
+                                    <td class="stat-value ${better1}">${stat.format(val1)}</td>
+                                    <td class="stat-value ${better2}">${stat.format(val2)}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderRatingBreakdown() {
+            const components = [
+                { name: 'Base Rating', key: 'base_rating' },
+                { name: 'Game Adjustment', key: 'game_adj' },
+                { name: 'Minute Boost', key: 'min_boost' },
+                { name: 'Three-Point Boost', key: 'three_boost' },
+                { name: 'Field Goal Boost', key: 'fg_boost' },
+                { name: 'Assist Boost', key: 'ast_boost' },
+                { name: 'Block Boost', key: 'blk_boost' },
+                { name: 'Double-Double Boost', key: 'double_double_boost' },
+                { name: 'Triple-Double Boost', key: 'triple_double_boost' },
+                { name: 'Free Throw Boost', key: 'free_throw_boost' }
+            ];
+
+            return `
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th class="stat-value">${player1.full_name}</th>
+                            <th class="stat-value">${player2.full_name}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${components.map(comp => {
+                            const val1 = player1[comp.key];
+                            const val2 = player2[comp.key];
+                            const better1 = val1 > val2 ? 'better' : (val1 < val2 ? 'worse' : '');
+                            const better2 = val2 > val1 ? 'better' : (val2 < val1 ? 'worse' : '');
+
+                            return `
+                                <tr>
+                                    <td class="stat-name">${comp.name}</td>
+                                    <td class="stat-value ${better1}">${val1 >= 0 ? '+' : ''}${val1.toFixed(2)}</td>
+                                    <td class="stat-value ${better2}">${val2 >= 0 ? '+' : ''}${val2.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                        <tr style="border-top: 3px solid #667eea; font-weight: bold;">
+                            <td class="stat-name">FINAL RATING</td>
+                            <td class="stat-value ${player1.final_rating > player2.final_rating ? 'better' : 'worse'}">
+                                ${player1.final_rating.toFixed(2)}
+                            </td>
+                            <td class="stat-value ${player2.final_rating > player1.final_rating ? 'better' : 'worse'}">
+                                ${player2.final_rating.toFixed(2)}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderRadarChart() {
+            const ctx = document.getElementById('radarChart');
+            if (!ctx) return;
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            const percentiles = ['PTS_PER', 'AST_PER', 'REB_PER', 'BLK_PER', 'STL_PER', 'MIN_PER'];
+            const labels = ['Points', 'Assists', 'Rebounds', 'Blocks', 'Steals', 'Minutes'];
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: player1.full_name,
+                            data: percentiles.map(p => player1[p]),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: player2.full_name,
+                            data: percentiles.map(p => player2[p]),
+                            borderColor: '#764ba2',
+                            backgroundColor: 'rgba(118, 75, 162, 0.2)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Percentile Rankings Comparison',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderBoostsChart() {
+            const ctx = document.getElementById('boostsChart');
+            if (!ctx) return;
+
+            if (boostsChart) {
+                boostsChart.destroy();
+            }
+
+            const boosts = ['min_boost', 'three_boost', 'fg_boost', 'ast_boost',
+                           'blk_boost', 'double_double_boost', 'triple_double_boost', 'free_throw_boost'];
+            const labels = ['Minutes', '3PT', 'FG', 'Assists', 'Blocks', 'DD', 'TD', 'FT'];
+
+            boostsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: player1.full_name,
+                            data: boosts.map(b => player1[b]),
+                            backgroundColor: '#667eea'
+                        },
+                        {
+                            label: player2.full_name,
+                            data: boosts.map(b => player2[b]),
+                            backgroundColor: '#764ba2'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Rating Boosts Comparison',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Season change handler
+        document.getElementById('seasonSelect').addEventListener('change', async (e) => {
+            currentSeason = e.target.value;
+            player1 = null;
+            player2 = null;
+            document.getElementById('player1Search').value = '';
+            document.getElementById('player2Search').value = '';
+
+            const content = document.getElementById('comparisonContent');
+            content.innerHTML = `
+                <div class="comparison-card">
+                    <div class="loading">Loading ${currentSeason === '2026' ? '2025-26' : '2024-25'} season data...</div>
+                </div>
+            `;
+
+            await loadData();
+
+            content.innerHTML = `
+                <div class="comparison-card">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚡</div>
+                        <p>Select two players to compare their stats and ratings</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Initialize
+        async function init() {
+            await loadData();
+            setupSearch('player1Search', 'player1Suggestions', 1);
+            setupSearch('player2Search', 'player2Suggestions', 2);
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+22:13:25  INFO      __main__  Using browser-based fetcher (Playwright)
+22:13:25  INFO      __main__  === PHASE 1: SEED ===
+22:13:25  INFO      __main__  Fetching listing: https://basketball.realgm.com/ncaa/stats/2026/Averages/All/All/Season/All/desc/1
+22:13:25  INFO      __main__    Season 2026 uses JS pagination, fetching all pages...
+22:13:25  ERROR     __main__  Failed to fetch listing for season 2026: 'NoneType' object has no attribute 'get_paginated_listing'
+22:13:25  INFO      __main__  Seed complete. 0 unique player IDs found.
+22:13:25  INFO      checkpoint  Checkpoint seeded with 0 player records
