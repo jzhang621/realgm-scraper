@@ -53,20 +53,6 @@ def rows_to_dict(rows, result):
     columns = result.keys()
     return [dict(zip(columns, row)) for row in rows]
 
-@app.get("/")
-def read_root():
-    return {
-        "message": "NCAA Basketball Stats API",
-        "version": "1.0.0",
-        "endpoints": {
-            "ratings": "/api/ratings/{season}",
-            "player": "/api/player/{player_id}",
-            "stats": "/api/stats/{player_id}/{season}",
-            "compare": "/api/compare",
-            "search": "/api/search",
-            "teams": "/api/teams/{season}"
-        }
-    }
 
 @app.get("/api/ratings/{season}")
 def get_ratings(
