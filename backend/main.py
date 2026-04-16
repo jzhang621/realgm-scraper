@@ -395,6 +395,57 @@ def get_leaderboard(
             "leaders": leaders
         }, cls=DecimalEncoder))
 
+@app.get("/api/similarity/{player_id}/{season}")
+def get_similarity(player_id: str, season: str):
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos, sim_rating, score
+            FROM player_similarity
+            WHERE player_id = :player_id AND season = :season
+            ORDER BY segment, rank
+        """), {'player_id': player_id, 'season': season})
+        rows = rows_to_dict(result.fetchall(), result)
+        rows = json.loads(json.dumps(rows, cls=DecimalEncoder))
+
+        segments = {}
+        for r in rows:
+            segments.setdefault(r['segment'], []).append(r)
+
+        return {'player_id': player_id, 'season': season, 'segments': segments}
+
+
+@app.get("/api/search")
+def search_players(q: str = '', limit: int = 10):
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT DISTINCT player_id, full_name
+            FROM player_similarity
+            WHERE full_name ILIKE :q OR player_id = :pid
+            LIMIT :limit
+        """), {'q': f'%{q}%', 'pid': q, 'limit': limit})
+        rows = rows_to_dict(result.fetchall(), result)
+
+        # Also search by name in player_season_stats for 2025-26 top 100
+        result2 = conn.execute(text("""
+            SELECT DISTINCT player_id, full_name
+            FROM player_season_stats
+            WHERE full_name ILIKE :q AND season = '2025-26'
+            ORDER BY full_name
+            LIMIT :limit
+        """), {'q': f'%{q}%', 'limit': limit})
+        rows2 = rows_to_dict(result2.fetchall(), result2)
+
+        # Merge, deduplicate
+        seen = set()
+        merged = []
+        for r in list(rows) + list(rows2):
+            if r['player_id'] not in seen:
+                seen.add(r['player_id'])
+                merged.append(r)
+
+        return {'results': merged[:limit]}
+
+
 # Serve frontend — must be mounted last so /api routes take priority
 import os as _os
 _static_dir = _os.path.dirname(__file__)

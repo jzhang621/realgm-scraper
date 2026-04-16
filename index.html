@@ -223,21 +223,46 @@
 
         .btn-reset:hover { border-color: #667eea; color: #667eea; }
 
-        /* ── Main content ── */
-        .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-
-        .main-topbar {
+        /* ── Nav tabs ── */
+        .nav-tabs {
             background: white;
             border-radius: 10px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-            padding: 12px 18px;
+            padding: 0 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0;
         }
 
-        .main-topbar h1 { font-size: 1.2em; color: #333; }
-        .results-count { margin-left: auto; font-size: 12px; color: #aaa; }
+        .nav-brand {
+            font-size: 1em;
+            font-weight: 700;
+            color: #333;
+            margin-right: 20px;
+            padding: 14px 0;
+            white-space: nowrap;
+        }
+
+        .nav-brand span { color: #667eea; }
+
+        .nav-tab {
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #aaa;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            transition: color 0.12s, border-color 0.12s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover { color: #667eea; }
+        .nav-tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+        .results-count { margin-left: auto; font-size: 12px; color: #aaa; padding: 14px 0; }
+
+        /* ── Main content ── */
+        .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 
         /* ── Table ── */
         .table-container {
@@ -363,6 +388,7 @@
             text-decoration: none; font-size: 0.82em;
         }
         .realgm-link:hover { background: #5a6fd4; }
+
     </style>
 </head>
 <body>
@@ -370,7 +396,7 @@
 
     <!-- ── Sidebar ── -->
     <aside class="sidebar">
-        <div class="sidebar-title">NCAA <span>D1</span> Basketball</div>
+        <div class="sidebar-title">NIL <span>PRO</span></div>
 
         <div class="sidebar-field">
             <label>Season</label>
@@ -391,8 +417,8 @@
         <!-- Sliders injected here -->
         <div id="sliderContainer"></div>
 
-        <!-- Position chips -->
-        <div class="slider-group-label">Position</div>
+        <!-- Position group chips -->
+        <div class="slider-group-label">Position Group</div>
         <div class="pos-group" id="posChips"></div>
 
         <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
@@ -400,8 +426,10 @@
 
     <!-- ── Main ── -->
     <div class="main">
-        <div class="main-topbar">
-            <h1>Player Stats &amp; Ratings</h1>
+        <div class="nav-tabs">
+            <div class="nav-brand">NIL <span>PRO</span></div>
+            <a href="/index.html" class="nav-tab active">Rankings</a>
+            <a href="/similarity.html" class="nav-tab">Similar Players</a>
             <span class="results-count" id="resultsCount"></span>
         </div>
 
@@ -425,6 +453,8 @@
                         <th data-col="blk">BPG</th>
                         <th data-col="tov">TOV</th>
                         <th data-col="fg_pct">FG%</th>
+                        <th data-col="fg3m">3PM</th>
+                        <th data-col="fg3a">3PA</th>
                         <th data-col="fg3_pct">3P%</th>
                         <th data-col="ft_pct">FT%</th>
                         <th data-col="ts_pct">TS%</th>
@@ -449,7 +479,10 @@
 </div>
 
 <script>
-const API_BASE = '/api';
+const API_BASE = (location.port === '3000' || location.port === '5500' || location.port === '5173')
+    ? 'http://localhost:8000/api'
+    : '/api';
+
 
 const STAT_DEFS = [
     { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
@@ -598,14 +631,14 @@ function updateSliderUI(def) {
         (curMin === dataMin && curMax === dataMax) ? 'any' : `${fmtV(curMin)} – ${fmtV(curMax)}`;
 }
 
-// ── Position chips ────────────────────────────────────────────────────────
+// ── Position chips (pos_group) ────────────────────────────────────────────
 function buildPositionChips() {
-    const positions = [...new Set(allPlayers.map(p => p.position).filter(Boolean))].sort();
+    const groups = ['Guard', 'Wing', 'Big'];
     const container = document.getElementById('posChips');
     container.innerHTML = '';
     activePositions.clear();
 
-    positions.forEach(pos => {
+    groups.forEach(pos => {
         const chip = document.createElement('div');
         chip.className = 'pos-chip';
         chip.textContent = pos;
@@ -618,13 +651,14 @@ function buildPositionChips() {
     });
 }
 
+
 // ── Filter + render ───────────────────────────────────────────────────────
 function applyFilters() {
     const search = document.getElementById('searchBox').value.toLowerCase().trim();
 
     let filtered = allPlayers.filter(p => {
         if (search && !p.full_name.toLowerCase().includes(search)) return false;
-        if (activePositions.size > 0 && !activePositions.has(p.position)) return false;
+        if (activePositions.size > 0 && !activePositions.has(p.pos_group)) return false;
 
         for (const def of STAT_DEFS) {
             const s = sliderState[def.key];
@@ -677,6 +711,8 @@ function renderTable(players) {
             <td>${fmt(p.blk)}</td>
             <td>${fmt(p.tov)}</td>
             <td>${fmtP(p.fg_pct)}</td>
+            <td>${fmt(p.fg3m)}</td>
+            <td>${fmt(p.fg3a)}</td>
             <td>${fmtP(p.fg3_pct)}</td>
             <td>${fmtP(p.ft_pct)}</td>
             <td>${fmtP(p.ts_pct)}</td>
@@ -691,7 +727,7 @@ function renderTable(players) {
     if (players.length > MAX) {
         const tr = document.createElement('tr');
         tr.className = 'more-row';
-        tr.innerHTML = `<td colspan="21">Showing ${MAX} of ${players.length.toLocaleString()} — use filters to narrow results</td>`;
+        tr.innerHTML = `<td colspan="23">Showing ${MAX} of ${players.length.toLocaleString()} — use filters to narrow results</td>`;
         tbody.appendChild(tr);
     }
 }
@@ -728,6 +764,7 @@ function showModal(playerId) {
                 ${p.team || '-'} &nbsp;|&nbsp; ${p.position || '-'} &nbsp;|&nbsp;
                 ${p.class_year || '-'} &nbsp;|&nbsp;
                 ${p.height || '-'} &nbsp;|&nbsp; ${p.weight ? p.weight + ' lbs' : '-'}
+                ${p.age != null ? ' &nbsp;|&nbsp; Age ' + p.age : ''}
                 ${p.hometown ? ' &nbsp;|&nbsp; ' + p.hometown : ''}
             </div>
             <a class="realgm-link" href="https://basketball.realgm.com/player/x/Summary/${p.player_id}" target="_blank">View on RealGM</a>
@@ -735,7 +772,7 @@ function showModal(playerId) {
 
         <div class="player-overview">
             ${iBox('Rating', `<span style="color:#10b981;font-size:1.35em">${fmt(p.final_rating)}</span>`)}
-            ${iBox('Two-Way', p.two_way === 'Y' ? 'Yes' : 'No')}
+            ${iBox('Age', p.age ?? '-')}
             ${iBox('GP', p.gp ?? '-')}
             ${iBox('MIN/G', fmt(p.min))}
             ${iBox('PER', fmt(p.per))}
