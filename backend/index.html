@@ -1004,7 +1004,7 @@ function renderTable(players, offset = 0) {
 
     players.forEach((p, i) => {
         const tr = document.createElement('tr');
-        tr.addEventListener('click', () => showModal(p.player_id));
+        tr.addEventListener('click', () => window.location.href = `/player.html?id=${p.player_id}`);
         const varCells = cols.map(c => `<td>${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
@@ -1377,7 +1377,7 @@ function updateMapMarkers() {
 
         const popupHtml = players.map(p =>
             `<div style="margin-bottom:4px">
-                <strong style="color:#667eea;cursor:pointer" onclick="showModal('${p.player_id}')">${p.full_name}</strong>
+                <a href="/player.html?id=${p.player_id}" style="color:#667eea;font-weight:700;text-decoration:none">${p.full_name}</a>
                 <span style="color:#aaa;font-size:11px"> · ${p.team} · ${fmt(p.final_rating)}</span>
             </div>`
         ).join('');

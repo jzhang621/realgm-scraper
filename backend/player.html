@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Player Profile | NIL PRO</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f8;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* ── Nav ── */
+        .nav-tabs {
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .nav-brand {
+            font-size: 1em;
+            font-weight: 800;
+            color: #667eea;
+            letter-spacing: -0.5px;
+            padding: 14px 16px 14px 0;
+            margin-right: 4px;
+        }
+        .nav-brand span { color: #764ba2; }
+        .nav-tab {
+            padding: 14px 14px;
+            text-decoration: none;
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .nav-tab:hover { color: #667eea; }
+        .nav-tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+        /* ── Page ── */
+        .profile-page {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        /* ── Header ── */
+        .profile-header {
+            padding: 24px 28px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .profile-name {
+            font-size: 2em;
+            font-weight: 800;
+            color: #222;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .meta-pill {
+            background: #f4f4f8;
+            color: #555;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .meta-pill.team { background: #ede9fe; color: #667eea; }
+        .meta-pill.two-way { background: #d1fae5; color: #059669; }
+
+        .rating-badge {
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .rating-badge .rating-num {
+            font-size: 3em;
+            font-weight: 800;
+            color: #10b981;
+            line-height: 1;
+        }
+        .rating-badge .rating-label {
+            font-size: 11px;
+            color: #aaa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* ── Rating sparkline ── */
+        .sparkline-section {
+            padding: 0 28px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .sparkline-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+        .sparkline {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 48px;
+        }
+        .spark-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+        }
+        .spark-bar {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            background: #e0e3f7;
+            transition: background 0.15s;
+            min-height: 4px;
+        }
+        .spark-bar-wrap.active .spark-bar,
+        .spark-bar-wrap:hover .spark-bar { background: #667eea; }
+        .spark-season {
+            font-size: 9px;
+            color: #bbb;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .spark-bar-wrap.active .spark-season { color: #667eea; }
+
+        /* ── Career table section ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 0;
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-toggle {
+            display: flex;
+            gap: 4px;
+        }
+        .stat-toggle-btn {
+            padding: 4px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            background: none;
+            font-size: 11px;
+            font-weight: 700;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .stat-toggle-btn.active { background: #667eea; border-color: #667eea; color: white; }
+
+        .career-table-wrap {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+        thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            position: sticky;
+            top: 45px;
+            z-index: 10;
+        }
+        th {
+            padding: 9px 10px;
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:first-child, th:nth-child(2), th:nth-child(3), th:nth-child(4) { text-align: left; }
+
+        tbody tr {
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        tbody tr:hover { background: #f7f8ff; }
+        tbody tr.selected { background: #ede9fe; }
+
+        td {
+            padding: 9px 10px;
+            text-align: right;
+            white-space: nowrap;
+            color: #444;
+        }
+        td:first-child, td:nth-child(2), td:nth-child(3), td:nth-child(4) { text-align: left; }
+
+        .season-cell { font-weight: 700; color: #333; }
+        .team-cell { font-weight: 600; color: #667eea; }
+        .level-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: #fef3c7;
+            color: #92400e;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .rating-cell { font-weight: 700; color: #10b981; }
+        .null-cell { color: #ddd; }
+
+        /* ── Bottom panels ── */
+        .bottom-panels {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 14px;
+        }
+
+        /* ── Rating breakdown ── */
+        .breakdown-header {
+            padding: 18px 20px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .breakdown-season {
+            font-size: 11px;
+            color: #aaa;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .breakdown-body { padding: 16px 20px; }
+
+        .rating-final {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #10b981;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f8f8f8;
+            font-size: 12.5px;
+        }
+        .breakdown-row:last-child { border-bottom: none; }
+        .breakdown-row-label { color: #666; }
+        .breakdown-row-val {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .breakdown-row-val.positive { color: #10b981; }
+        .breakdown-row-val.negative { color: #ef4444; }
+        .breakdown-row-val.base { color: #333; }
+
+        .percentile-section { margin-top: 16px; }
+        .percentile-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .pct-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 11.5px;
+        }
+        .pct-label { width: 50px; color: #666; font-weight: 600; flex-shrink: 0; }
+        .pct-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 3px; height: 6px; }
+        .pct-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .pct-val { width: 32px; text-align: right; color: #667eea; font-weight: 700; font-size: 11px; }
+
+        /* ── Similar players ── */
+        .sim-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 0 20px;
+            margin-top: 4px;
+        }
+        .sim-tab {
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.12s;
+            white-space: nowrap;
+        }
+        .sim-tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+        .sim-list { padding: 12px 20px; }
+
+        .sim-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f8f8;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-radius: 6px;
+        }
+        .sim-row:last-child { border-bottom: none; }
+        .sim-row:hover { background: #f7f8ff; padding-left: 6px; }
+
+        .sim-rank {
+            width: 20px;
+            font-size: 11px;
+            color: #ccc;
+            font-weight: 700;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .sim-info { flex: 1; min-width: 0; }
+        .sim-name {
+            font-weight: 700;
+            color: #333;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sim-meta { font-size: 11px; color: #aaa; margin-top: 1px; }
+        .sim-rating {
+            font-weight: 700;
+            color: #10b981;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .sim-score {
+            font-size: 10px;
+            color: #ccc;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: right;
+        }
+
+        .sim-unavailable {
+            padding: 24px 20px;
+            text-align: center;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        .loading { padding: 60px; text-align: center; color: #aaa; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<div class="nav-tabs">
+    <div class="nav-brand">NIL <span>PRO</span></div>
+    <a href="/index.html" class="nav-tab">Rankings</a>
+    <a href="/similarity.html" class="nav-tab">Similar Players</a>
+</div>
+
+<div class="profile-page" id="profilePage">
+    <div class="loading">Loading player profile…</div>
+</div>
+
+<script>
+const API_BASE = (location.port === '3000' || location.port === '5500' || location.port === '5173')
+    ? 'http://localhost:8000/api'
+    : '/api';
+
+const params = new URLSearchParams(location.search);
+const PLAYER_ID = params.get('id');
+
+let profileData = null;
+let selectedSeason = null;
+let careerMode = 'pergame';  // 'pergame' | 'advanced'
+let simSegment = 'production';
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+async function init() {
+    if (!PLAYER_ID) {
+        document.getElementById('profilePage').innerHTML = '<div class="loading">No player ID specified.</div>';
+        return;
+    }
+
+    const res = await fetch(`${API_BASE}/profile/${PLAYER_ID}`);
+    if (!res.ok) {
+        document.getElementById('profilePage').innerHTML = '<div class="loading">Player not found.</div>';
+        return;
+    }
+
+    profileData = await res.json();
+
+    // Default selected season = most recent with a rating
+    const rated = profileData.seasons.filter(s => s.rating);
+    selectedSeason = rated.length ? rated[rated.length - 1].season : profileData.seasons[profileData.seasons.length - 1]?.season;
+
+    // Set page title
+    document.title = `${profileData.bio.full_name} | NIL PRO`;
+
+    render();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function render() {
+    const { bio, seasons, similarity } = profileData;
+    const currentRating = seasons.find(s => s.season === selectedSeason)?.rating;
+
+    document.getElementById('profilePage').innerHTML = `
+        ${renderHeader(bio, seasons, currentRating)}
+        ${renderCareerSection(seasons)}
+        <div class="bottom-panels">
+            ${renderBreakdown(currentRating, selectedSeason)}
+            ${renderSimilarity(similarity)}
+        </div>
+    `;
+
+    attachCareerListeners(seasons);
+    attachSimListeners();
+}
+
+function renderHeader(bio, seasons, currentRating) {
+    const ratedSeasons = seasons.filter(s => s.rating);
+    const pills = [
+        bio.position       ? `<span class="meta-pill">${bio.position}</span>` : '',
+        currentRating?.team ? `<span class="meta-pill team">${currentRating.team}</span>` : '',
+        seasons.find(s=>s.pergame)?.pergame?.class_year ? `<span class="meta-pill">${seasons.find(s=>s.season===selectedSeason)?.pergame?.class_year || ''}</span>` : '',
+        bio.height_ft      ? `<span class="meta-pill">${bio.height_ft}</span>` : '',
+        bio.weight_lbs     ? `<span class="meta-pill">${bio.weight_lbs} lbs</span>` : '',
+        bio.hometown       ? `<span class="meta-pill">${bio.hometown}</span>` : '',
+        bio.birthdate      ? `<span class="meta-pill">b. ${bio.birthdate}</span>` : '',
+        currentRating?.two_way === 'Y' ? `<span class="meta-pill two-way">Two-Way</span>` : '',
+    ].filter(Boolean).join('');
+
+    const sparkBars = renderSparkline(ratedSeasons);
+
+    return `
+        <div class="card">
+            <div class="profile-header">
+                <div>
+                    <div class="profile-name">${bio.full_name}</div>
+                    <div class="profile-meta">${pills}</div>
+                </div>
+                ${currentRating ? `
+                <div class="rating-badge">
+                    <div class="rating-num">${Number(currentRating.final_rating).toFixed(1)}</div>
+                    <div class="rating-label">${selectedSeason} Rating</div>
+                </div>` : ''}
+            </div>
+            ${ratedSeasons.length > 1 ? `
+            <div class="sparkline-section">
+                <div class="sparkline-label">Rating trajectory</div>
+                <div class="sparkline" id="sparkline">${sparkBars}</div>
+            </div>` : ''}
+        </div>
+    `;
+}
+
+function renderSparkline(ratedSeasons) {
+    const ratings = ratedSeasons.map(s => Number(s.rating.final_rating));
+    const max = Math.max(...ratings, 100);
+    return ratedSeasons.map((s, i) => {
+        const h = Math.max(4, Math.round((Number(s.rating.final_rating) / max) * 48));
+        const active = s.season === selectedSeason ? 'active' : '';
+        return `
+            <div class="spark-bar-wrap ${active}" data-season="${s.season}" onclick="selectSeason('${s.season}')">
+                <div class="spark-bar" style="height:${h}px" title="${s.rating.final_rating}"></div>
+                <div class="spark-season">${s.season.slice(2)}</div>
+            </div>`;
+    }).join('');
+}
+
+function renderCareerSection(seasons) {
+    const toggles = `
+        <div class="stat-toggle">
+            <button class="stat-toggle-btn ${careerMode==='pergame'?'active':''}" onclick="setCareerMode('pergame')">Per Game</button>
+            <button class="stat-toggle-btn ${careerMode==='advanced'?'active':''}" onclick="setCareerMode('advanced')">Advanced</button>
+        </div>`;
+
+    return `
+        <div class="card">
+            <div class="section-header">
+                <span class="section-title">Career Stats</span>
+                ${toggles}
+            </div>
+            <div class="career-table-wrap">
+                <table>
+                    <thead><tr>${careerHeaders()}</tr></thead>
+                    <tbody>${seasons.map(s => careerRow(s)).join('')}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function careerHeaders() {
+    if (careerMode === 'pergame') {
+        return `
+            <th>Season</th><th>Team</th><th>Cl</th><th>GP</th>
+            <th>MIN</th><th>PTS</th><th>REB</th><th>AST</th>
+            <th>STL</th><th>BLK</th><th>TOV</th>
+            <th>FG%</th><th>3PM</th><th>3PA</th><th>3P%</th><th>FT%</th>
+            <th>Rating</th>`;
+    } else {
+        return `
+            <th>Season</th><th>Team</th><th>Cl</th><th>GP</th>
+            <th>TS%</th><th>eFG%</th><th>USG%</th><th>PER</th>
+            <th>ORTG</th><th>DRTG</th>
+            <th>AST%</th><th>TOV%</th><th>STL%</th><th>BLK%</th>
+            <th>ORB%</th><th>DRB%</th><th>WS</th>
+            <th>Rating</th>`;
+    }
+}
+
+function careerRow(s) {
+    const pg = s.pergame;
+    const adv = s.advanced;
+    const misc = s.misc;
+    const r = s.rating;
+    const selected = s.season === selectedSeason ? 'selected' : '';
+    const team = pg?.team || r?.team || '-';
+    const level = pg?.level && pg.level !== 'NCAA_DI' ? `<span class="level-badge">${pg.level.replace('NCAA_', '')}</span>` : '';
+    const cls = pg?.class_year || '-';
+    const gp = pg?.gp ?? r?.gp ?? '-';
+    const rating = r ? `<td class="rating-cell">${Number(r.final_rating).toFixed(1)}</td>` : '<td class="null-cell">—</td>';
+
+    const n = (v, d=1) => v != null ? Number(v).toFixed(d) : '<span class="null-cell">—</span>';
+    const pct = v => v != null ? (Number(v)*100).toFixed(1)+'%' : '<span class="null-cell">—</span>';
+
+    let cells;
+    if (careerMode === 'pergame') {
+        cells = `
+            <td class="season-cell">${s.season}</td>
+            <td class="team-cell">${team}${level}</td>
+            <td>${cls}</td><td>${gp}</td>
+            <td>${n(pg?.min)}</td><td>${n(pg?.pts)}</td><td>${n(pg?.trb)}</td><td>${n(pg?.ast)}</td>
+            <td>${n(pg?.stl)}</td><td>${n(pg?.blk)}</td><td>${n(pg?.tov)}</td>
+            <td>${pct(pg?.fg_pct)}</td><td>${n(pg?.fg3m)}</td><td>${n(pg?.fg3a)}</td>
+            <td>${pct(pg?.fg3_pct)}</td><td>${pct(pg?.ft_pct)}</td>
+            ${rating}`;
+    } else {
+        cells = `
+            <td class="season-cell">${s.season}</td>
+            <td class="team-cell">${team}${level}</td>
+            <td>${cls}</td><td>${gp}</td>
+            <td>${pct(adv?.ts_pct)}</td><td>${pct(adv?.efg_pct)}</td>
+            <td>${n(adv?.usg_pct)}</td><td>${n(adv?.per)}</td>
+            <td>${n(adv?.ortg, 1)}</td><td>${n(adv?.drtg, 1)}</td>
+            <td>${n(adv?.ast_pct)}</td><td>${n(adv?.tov_pct)}</td>
+            <td>${n(adv?.stl_pct)}</td><td>${n(adv?.blk_pct)}</td>
+            <td>${n(adv?.orb_pct)}</td><td>${n(adv?.drb_pct)}</td>
+            <td>${n(misc?.ws, 2)}</td>
+            ${rating}`;
+    }
+
+    return `<tr class="${selected}" data-season="${s.season}">${cells}</tr>`;
+}
+
+function renderBreakdown(rating, season) {
+    if (!rating) {
+        return `<div class="card breakdown-header"><div class="section-title">Rating Breakdown</div>
+            <div class="breakdown-body"><p style="color:#bbb;font-size:13px">No rating for this season.</p></div></div>`;
+    }
+
+    const r = rating;
+    const components = [
+        { label: 'Base Rating',       val: r.base_rating,          isBase: true },
+        { label: '+ MIN Boost',        val: r.min_boost },
+        { label: '+ 3PT Boost',        val: r.three_boost },
+        { label: '+ FG Boost',         val: r.fg_boost },
+        { label: '+ AST Boost',        val: r.ast_boost },
+        { label: '+ BLK Boost',        val: r.blk_boost },
+        { label: '+ DD Boost',         val: r.double_double_boost },
+        { label: '+ TD Boost',         val: r.triple_double_boost },
+        { label: '+ FT Boost',         val: r.free_throw_boost },
+    ];
+
+    const rows = components.map(c => {
+        const v = Number(c.val ?? 0);
+        const cls = c.isBase ? 'base' : v >= 0 ? 'positive' : 'negative';
+        const sign = c.isBase ? '' : (v >= 0 ? '+' : '');
+        return `<div class="breakdown-row">
+            <span class="breakdown-row-label">${c.label}</span>
+            <span class="breakdown-row-val ${cls}">${sign}${v.toFixed(2)}</span>
+        </div>`;
+    }).join('');
+
+    const pctDefs = [
+        { label: 'MIN',   key: 'min_per' },
+        { label: 'PTS',   key: 'pts_per' },
+        { label: 'REB',   key: 'reb_per' },
+        { label: 'AST',   key: 'ast_per' },
+        { label: 'BLK',   key: 'blk_per' },
+        { label: 'STL',   key: 'stl_per' },
+        { label: 'FG%',   key: 'fgpct_per' },
+        { label: '3P%',   key: 'p3pct_per' },
+        { label: 'FT%',   key: 'ftpct_per' },
+    ];
+
+    const pctBars = pctDefs.map(p => {
+        const v = r[p.key];
+        if (v == null) return '';
+        return `<div class="pct-row">
+            <span class="pct-label">${p.label}</span>
+            <div class="pct-bar-wrap"><div class="pct-bar" style="width:${v}%"></div></div>
+            <span class="pct-val">${v}</span>
+        </div>`;
+    }).join('');
+
+    return `
+        <div class="card">
+            <div class="breakdown-header">
+                <span class="section-title">Rating Breakdown</span>
+                <div class="breakdown-season">${season}</div>
+            </div>
+            <div class="breakdown-body">
+                <div class="rating-final">${Number(r.final_rating).toFixed(1)}</div>
+                ${rows}
+                <div class="percentile-section">
+                    <div class="percentile-title">Percentile ranks</div>
+                    ${pctBars}
+                </div>
+            </div>
+        </div>`;
+}
+
+function renderSimilarity(similarity) {
+    const hasSim = similarity && Object.keys(similarity).length > 0;
+    const segments = ['production', 'position', 'age'];
+    const labels = { production: 'Production', position: 'Same Position', age: 'Same Age' };
+
+    const tabs = segments.map(seg => `
+        <div class="sim-tab ${simSegment===seg?'active':''}" data-seg="${seg}">${labels[seg]}</div>
+    `).join('');
+
+    let body;
+    if (!hasSim) {
+        body = `<div class="sim-unavailable">Similarity only available for 2025-26 season players.</div>`;
+    } else {
+        const rows = (similarity[simSegment] || []).map(p => `
+            <div class="sim-row" onclick="window.location='/player.html?id=${p.sim_player_id}'">
+                <div class="sim-rank">${p.rank}</div>
+                <div class="sim-info">
+                    <div class="sim-name">${p.sim_name}</div>
+                    <div class="sim-meta">${p.sim_team} · ${p.sim_season} · ${p.sim_pos || ''}</div>
+                </div>
+                <div class="sim-rating">${Number(p.sim_rating).toFixed(1)}</div>
+            </div>
+        `).join('');
+        body = `<div class="sim-list">${rows || '<div class="sim-unavailable">No similar players found.</div>'}</div>`;
+    }
+
+    return `
+        <div class="card">
+            <div class="section-header" style="padding-bottom:0">
+                <span class="section-title">Similar Players</span>
+            </div>
+            <div class="sim-tabs" id="simTabs">${tabs}</div>
+            <div id="simBody">${body}</div>
+        </div>`;
+}
+
+// ── Interactions ──────────────────────────────────────────────────────────
+function attachCareerListeners(seasons) {
+    document.querySelectorAll('tbody tr[data-season]').forEach(tr => {
+        tr.addEventListener('click', () => selectSeason(tr.dataset.season));
+    });
+}
+
+function attachSimListeners() {
+    document.querySelectorAll('.sim-tab[data-seg]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            simSegment = tab.dataset.seg;
+            document.getElementById('simTabs').querySelectorAll('.sim-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('simBody').innerHTML =
+                renderSimilarity(profileData.similarity).match(/id="simBody">([\s\S]*?)<\/div>\s*<\/div>\s*$/) ?
+                '' : '';
+            // Re-render just the sim body
+            const hasSim = profileData.similarity && Object.keys(profileData.similarity).length > 0;
+            if (!hasSim) {
+                document.getElementById('simBody').innerHTML = `<div class="sim-unavailable">Similarity only available for 2025-26 season players.</div>`;
+            } else {
+                const rows = (profileData.similarity[simSegment] || []).map(p => `
+                    <div class="sim-row" onclick="window.location='/player.html?id=${p.sim_player_id}'">
+                        <div class="sim-rank">${p.rank}</div>
+                        <div class="sim-info">
+                            <div class="sim-name">${p.sim_name}</div>
+                            <div class="sim-meta">${p.sim_team} · ${p.sim_season} · ${p.sim_pos || ''}</div>
+                        </div>
+                        <div class="sim-rating">${Number(p.sim_rating).toFixed(1)}</div>
+                    </div>
+                `).join('');
+                document.getElementById('simBody').innerHTML = `<div class="sim-list">${rows || '<div class="sim-unavailable">No similar players found.</div>'}</div>`;
+            }
+        });
+    });
+}
+
+function selectSeason(season) {
+    selectedSeason = season;
+    // Update sparkline
+    document.querySelectorAll('.spark-bar-wrap').forEach(el => {
+        el.classList.toggle('active', el.dataset.season === season);
+    });
+    // Update selected row
+    document.querySelectorAll('tbody tr[data-season]').forEach(tr => {
+        tr.classList.toggle('selected', tr.dataset.season === season);
+    });
+    // Update rating badge
+    const r = profileData.seasons.find(s => s.season === season)?.rating;
+    if (r) {
+        const badge = document.querySelector('.rating-badge');
+        if (badge) {
+            badge.querySelector('.rating-num').textContent = Number(r.final_rating).toFixed(1);
+            badge.querySelector('.rating-label').textContent = `${season} Rating`;
+        }
+    }
+    // Re-render breakdown panel
+    const breakdownEl = document.querySelector('.bottom-panels > .card:first-child');
+    if (breakdownEl) breakdownEl.outerHTML = renderBreakdown(r, season);
+}
+
+function setCareerMode(mode) {
+    careerMode = mode;
+    // Re-render just the career section
+    const careerCard = document.querySelector('.career-table-wrap').closest('.card');
+    careerCard.outerHTML = renderCareerSection(profileData.seasons);
+    attachCareerListeners(profileData.seasons);
+}
+
+init();
+</script>
+</body>
+</html>

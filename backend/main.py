@@ -414,6 +414,69 @@ def get_similarity(player_id: str, season: str):
         return {'player_id': player_id, 'season': season, 'segments': segments}
 
 
+@app.get("/api/profile/{player_id}")
+def get_profile(player_id: str):
+    """Full player profile: bio + all seasons of stats + similarity"""
+    with engine.connect() as conn:
+        # Bio
+        result = conn.execute(
+            text("SELECT * FROM players WHERE player_id = :pid"),
+            {'pid': player_id}
+        )
+        row = result.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Player not found")
+        bio = dict(zip(result.keys(), row))
+
+        # All seasons from each table
+        def fetch_all(table):
+            r = conn.execute(
+                text(f"SELECT * FROM {table} WHERE player_id = :pid ORDER BY season"),
+                {'pid': player_id}
+            )
+            return {row['season']: dict(row) for row in [dict(zip(r.keys(), row)) for row in r.fetchall()]}
+
+        pergame  = fetch_all('player_stats_pergame')
+        advanced = fetch_all('player_stats_advanced')
+        misc     = fetch_all('player_stats_misc')
+
+        r = conn.execute(
+            text("SELECT * FROM player_ratings WHERE player_id = :pid ORDER BY season"),
+            {'pid': player_id}
+        )
+        ratings = {row['season']: dict(zip(r.keys(), row)) for row in r.fetchall()}
+
+        # Merge into season list
+        all_seasons = sorted(set(list(pergame) + list(ratings)))
+        seasons = []
+        for s in all_seasons:
+            seasons.append({
+                'season':   s,
+                'pergame':  pergame.get(s),
+                'advanced': advanced.get(s),
+                'misc':     misc.get(s),
+                'rating':   ratings.get(s),
+            })
+
+        # Similarity (2025-26 only)
+        r = conn.execute(text("""
+            SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos, sim_rating, score
+            FROM player_similarity
+            WHERE player_id = :pid AND season = '2025-26'
+            ORDER BY segment, rank
+        """), {'pid': player_id})
+        sim_rows = [dict(zip(r.keys(), row)) for row in r.fetchall()]
+        similarity = {}
+        for row in sim_rows:
+            similarity.setdefault(row['segment'], []).append(row)
+
+        return json.loads(json.dumps({
+            'bio': bio,
+            'seasons': seasons,
+            'similarity': similarity,
+        }, cls=DecimalEncoder))
+
+
 @app.get("/api/hometown-coords")
 def get_hometown_coords():
     with engine.connect() as conn:
