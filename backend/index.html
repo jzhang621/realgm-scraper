@@ -379,6 +379,12 @@
         .more-row td { text-align: center; color: #bbb; padding: 10px; font-size: 11px; }
 
         /* ── Pagination ── */
+        .pagination-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .pagination {
             background: white;
             border-radius: 10px;
@@ -388,6 +394,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            flex: 1;
         }
 
         .pg-btn {
@@ -527,10 +534,6 @@
             <a href="/index.html" class="nav-tab active">Rankings</a>
             <a href="/similarity.html" class="nav-tab">Similar Players</a>
             <div class="view-toggle" style="margin-left:auto">
-                <button class="toggle-btn active" id="btnPergame" onclick="setDisplayMode('pergame')">Per Game</button>
-                <button class="toggle-btn" id="btnTotals" onclick="setDisplayMode('totals')">Totals</button>
-            </div>
-            <div class="view-toggle">
                 <button class="toggle-btn active" id="btnTable" onclick="setView('table')">Table</button>
                 <button class="toggle-btn" id="btnMap" onclick="setView('map')">Map</button>
             </div>
@@ -543,7 +546,13 @@
             <div id="map"></div>
         </div>
 
-        <div id="pagination" class="pagination" style="display:none"></div>
+        <div class="pagination-header" id="paginationHeader" style="display:none">
+            <div class="view-toggle">
+                <button class="toggle-btn active" id="btnPergame" onclick="setDisplayMode('pergame')">Per Game</button>
+                <button class="toggle-btn" id="btnTotals" onclick="setDisplayMode('totals')">Totals</button>
+            </div>
+            <div id="pagination" class="pagination"></div>
+        </div>
 
         <div class="table-container" id="tableContainer" style="display:none">
             <table>
@@ -994,9 +1003,10 @@ function setDisplayMode(mode) {
 }
 
 function renderPagination(totalPages) {
+    const header = document.getElementById('paginationHeader');
     const el = document.getElementById('pagination');
-    if (totalPages <= 1) { el.style.display = 'none'; return; }
-    el.style.display = 'flex';
+    header.style.display = totalPages <= 1 ? 'none' : 'flex';
+    if (totalPages <= 1) return;
 
     const start = (currentPage - 1) * PAGE_SIZE + 1;
     const end = Math.min(currentPage * PAGE_SIZE, filteredPlayers.length);
@@ -1289,17 +1299,17 @@ function setView(view) {
     document.getElementById('btnTable').classList.toggle('active', view === 'table');
     document.getElementById('btnMap').classList.toggle('active', view === 'map');
 
-    const tableEl = document.getElementById('tableContainer');
-    const mapEl   = document.getElementById('mapContainer');
-    const pagEl   = document.getElementById('pagination');
+    const tableEl  = document.getElementById('tableContainer');
+    const mapEl    = document.getElementById('mapContainer');
+    const headerEl = document.getElementById('paginationHeader');
 
     if (view === 'table') {
         tableEl.style.display = 'block';
-        pagEl.style.display = filteredPlayers.length > PAGE_SIZE ? 'flex' : 'none';
+        headerEl.style.display = filteredPlayers.length > PAGE_SIZE ? 'flex' : 'none';
         mapEl.style.display = 'none';
     } else {
         tableEl.style.display = 'none';
-        pagEl.style.display = 'none';
+        headerEl.style.display = 'none';
         mapEl.style.display = 'block';
         initMap().then(updateMapMarkers);
     }
