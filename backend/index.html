@@ -324,6 +324,35 @@
         .loading { text-align: center; padding: 50px; font-size: 1.1em; color: #666; }
         .more-row td { text-align: center; color: #bbb; padding: 10px; font-size: 11px; }
 
+        /* ── Pagination ── */
+        .pagination {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pg-btn {
+            padding: 5px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            background: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .pg-btn:hover:not(:disabled) { border-color: #667eea; color: #667eea; }
+        .pg-btn:disabled { opacity: 0.35; cursor: default; }
+        .pg-btn.active { background: #667eea; border-color: #667eea; color: white; }
+        .pg-info { font-size: 12px; color: #aaa; margin: 0 6px; }
+
         /* ── Modal ── */
         .modal {
             display: none;
@@ -435,6 +464,8 @@
 
         <div id="loading" class="loading">Loading data...</div>
 
+        <div id="pagination" class="pagination" style="display:none"></div>
+
         <div class="table-container" id="tableContainer" style="display:none">
             <table>
                 <thead>
@@ -508,11 +539,15 @@ let currentSeason = '2025-26';
 let sortCol = 'final_rating';
 let sortDir = -1;
 let activePositions = new Set();
+let currentPage = 1;
+const PAGE_SIZE = 100;
+let filteredPlayers = [];
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('seasonSelect').addEventListener('change', e => {
         currentSeason = e.target.value;
+        currentPage = 1;
         loadPlayers();
     });
     document.getElementById('searchBox').addEventListener('input', applyFilters);
@@ -680,24 +715,33 @@ function applyFilters() {
         return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
     });
 
+    filteredPlayers = filtered;
+    currentPage = 1;
     document.getElementById('resultsCount').textContent =
         `${filtered.length.toLocaleString()} player${filtered.length !== 1 ? 's' : ''}`;
-    renderTable(filtered);
+    renderPage();
 }
 
 function fmt(v, d = 1)  { return v != null ? Number(v).toFixed(d) : '-'; }
 function fmtP(v, d = 1) { return v != null ? (Number(v) * 100).toFixed(d) + '%' : '-'; }
 
-function renderTable(players) {
+function renderPage() {
+    const totalPages = Math.ceil(filteredPlayers.length / PAGE_SIZE);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageRows = filteredPlayers.slice(start, start + PAGE_SIZE);
+    renderTable(pageRows, start);
+    renderPagination(totalPages);
+}
+
+function renderTable(players, offset = 0) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    const MAX = 500;
 
-    players.slice(0, MAX).forEach((p, i) => {
+    players.forEach((p, i) => {
         const tr = document.createElement('tr');
         tr.addEventListener('click', () => showModal(p.player_id));
         tr.innerHTML = `
-            <td style="color:#ccc;font-size:.88em">${i + 1}</td>
+            <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
             <td><span class="player-name">${p.full_name}</span></td>
             <td>${p.team || '-'}</td>
             <td>${p.position || '-'}</td>
@@ -723,13 +767,41 @@ function renderTable(players) {
         `;
         tbody.appendChild(tr);
     });
+}
 
-    if (players.length > MAX) {
-        const tr = document.createElement('tr');
-        tr.className = 'more-row';
-        tr.innerHTML = `<td colspan="23">Showing ${MAX} of ${players.length.toLocaleString()} — use filters to narrow results</td>`;
-        tbody.appendChild(tr);
+function renderPagination(totalPages) {
+    const el = document.getElementById('pagination');
+    if (totalPages <= 1) { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+
+    const start = (currentPage - 1) * PAGE_SIZE + 1;
+    const end = Math.min(currentPage * PAGE_SIZE, filteredPlayers.length);
+
+    // Show up to 7 page buttons around current page
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            pages.push(i);
+        }
     }
+
+    let html = `<button class="pg-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← Prev</button>`;
+    let prev = null;
+    pages.forEach(p => {
+        if (prev && p - prev > 1) html += `<span class="pg-info">…</span>`;
+        html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+        prev = p;
+    });
+    html += `<button class="pg-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>`;
+    html += `<span class="pg-info">${start}–${end} of ${filteredPlayers.length.toLocaleString()}</span>`;
+
+    el.innerHTML = html;
+}
+
+function goPage(page) {
+    currentPage = page;
+    renderPage();
+    document.getElementById('tableContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Reset ─────────────────────────────────────────────────────────────────
