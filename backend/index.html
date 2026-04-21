@@ -329,6 +329,16 @@
         tr:hover { background: #f8f9ff; cursor: pointer; }
 
         .player-name { font-weight: 600; color: #667eea; }
+
+        .sim-cell {
+            text-align: center;
+            font-size: 14px;
+            color: #ccc;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.12s;
+        }
+        .sim-cell:hover { color: #667eea; }
         .rating-cell { font-weight: bold; color: #10b981; }
 
         .two-way-badge {
@@ -935,6 +945,7 @@ function renderTableHeader() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <th style="cursor:default">#</th>
+        <th style="cursor:default;width:28px" title="Find similar players"></th>
         <th data-col="full_name" style="min-width:145px">Player</th>
         <th data-col="team" style="min-width:115px">Team</th>
         <th data-col="position">Pos</th>
@@ -977,6 +988,7 @@ function renderTable(players, offset = 0) {
         const varCells = cols.map(c => `<td>${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
+            <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})" title="Find players like this">≈</td>
             <td><span class="player-name">${p.full_name}</span></td>
             <td>${p.team || '-'}</td>
             <td>${p.position || '-'}</td>
