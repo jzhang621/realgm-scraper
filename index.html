@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCAA Basketball Stats</title>
+    <title>NIL PRO</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -322,6 +324,38 @@
         }
 
         .loading { text-align: center; padding: 50px; font-size: 1.1em; color: #666; }
+
+        /* ── View toggle ── */
+        .view-toggle {
+            display: flex;
+            gap: 6px;
+        }
+
+        .toggle-btn {
+            padding: 5px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            background: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .toggle-btn.active { background: #667eea; border-color: #667eea; color: white; }
+        .toggle-btn:hover:not(.active) { border-color: #667eea; color: #667eea; }
+
+        /* ── Map ── */
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            overflow: hidden;
+            display: none;
+        }
+
+        #map { height: 620px; width: 100%; }
         .more-row td { text-align: center; color: #bbb; padding: 10px; font-size: 11px; }
 
         /* ── Pagination ── */
@@ -459,10 +493,18 @@
             <div class="nav-brand">NIL <span>PRO</span></div>
             <a href="/index.html" class="nav-tab active">Rankings</a>
             <a href="/similarity.html" class="nav-tab">Similar Players</a>
+            <div class="view-toggle" style="margin-left:auto">
+                <button class="toggle-btn active" id="btnTable" onclick="setView('table')">Table</button>
+                <button class="toggle-btn" id="btnMap" onclick="setView('map')">Map</button>
+            </div>
             <span class="results-count" id="resultsCount"></span>
         </div>
 
         <div id="loading" class="loading">Loading data...</div>
+
+        <div class="map-container" id="mapContainer">
+            <div id="map"></div>
+        </div>
 
         <div id="pagination" class="pagination" style="display:none"></div>
 
@@ -732,6 +774,7 @@ function renderPage() {
     const pageRows = filteredPlayers.slice(start, start + PAGE_SIZE);
     renderTable(pageRows, start);
     renderPagination(totalPages);
+    if (currentView === 'map') updateMapMarkers();
 }
 
 function renderTable(players, offset = 0) {
@@ -978,6 +1021,101 @@ function pctBox(label, val) {
 
 function closeModal() { document.getElementById('playerModal').classList.remove('show'); }
 window.onclick = e => { if (e.target === document.getElementById('playerModal')) closeModal(); };
+
+// ── Map view ──────────────────────────────────────────────────────────────
+let map = null;
+let mapCoords = {};   // hometown -> {lat, lng}
+let mapMarkers = L.layerGroup();
+let currentView = 'table';
+
+async function initMap() {
+    if (map) return;
+    map = L.map('map').setView([38, -96], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    mapMarkers.addTo(map);
+
+    // Load coords
+    const res = await fetch(`${API_BASE}/hometown-coords`);
+    const data = await res.json();
+    data.coords.forEach(c => {
+        mapCoords[c.hometown] = { lat: Number(c.lat), lng: Number(c.lng) };
+    });
+}
+
+function setView(view) {
+    currentView = view;
+    document.getElementById('btnTable').classList.toggle('active', view === 'table');
+    document.getElementById('btnMap').classList.toggle('active', view === 'map');
+
+    const tableEl = document.getElementById('tableContainer');
+    const mapEl   = document.getElementById('mapContainer');
+    const pagEl   = document.getElementById('pagination');
+
+    if (view === 'table') {
+        tableEl.style.display = 'block';
+        pagEl.style.display = filteredPlayers.length > PAGE_SIZE ? 'flex' : 'none';
+        mapEl.style.display = 'none';
+    } else {
+        tableEl.style.display = 'none';
+        pagEl.style.display = 'none';
+        mapEl.style.display = 'block';
+        initMap().then(updateMapMarkers);
+    }
+}
+
+function updateMapMarkers() {
+    if (!map) return;
+    mapMarkers.clearLayers();
+
+    // Use current page players for map
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pagePlayers = filteredPlayers.slice(start, start + PAGE_SIZE);
+
+    // Group players by hometown coords
+    const groups = {};
+    pagePlayers.forEach(p => {
+        if (!p.hometown) return;
+        const c = mapCoords[p.hometown];
+        if (!c) return;
+        const key = `${c.lat},${c.lng}`;
+        if (!groups[key]) groups[key] = { lat: c.lat, lng: c.lng, players: [] };
+        groups[key].players.push(p);
+    });
+
+    Object.values(groups).forEach(({ lat, lng, players }) => {
+        const marker = L.circleMarker([lat, lng], {
+            radius: Math.min(4 + players.length * 2, 14),
+            fillColor: '#667eea',
+            color: '#fff',
+            weight: 1.5,
+            fillOpacity: 0.85,
+        });
+
+        const popupHtml = players.map(p =>
+            `<div style="margin-bottom:4px">
+                <strong style="color:#667eea;cursor:pointer" onclick="showModal('${p.player_id}')">${p.full_name}</strong>
+                <span style="color:#aaa;font-size:11px"> · ${p.team} · ${fmt(p.final_rating)}</span>
+            </div>`
+        ).join('');
+
+        marker.bindPopup(`
+            <div style="font-size:12px;min-width:180px">
+                <div style="font-weight:700;color:#333;margin-bottom:6px">${players[0].hometown}</div>
+                ${popupHtml}
+            </div>
+        `, { maxWidth: 280 });
+
+        mapMarkers.addLayer(marker);
+    });
+
+    // Fit bounds if markers exist
+    if (mapMarkers.getLayers().length > 0) {
+        const bounds = mapMarkers.getBounds();
+        if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    }
+}
 </script>
 </body>
 </html>

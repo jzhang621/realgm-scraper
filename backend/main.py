@@ -414,6 +414,17 @@ def get_similarity(player_id: str, season: str):
         return {'player_id': player_id, 'season': season, 'segments': segments}
 
 
+@app.get("/api/hometown-coords")
+def get_hometown_coords():
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT hometown, lat, lng FROM hometown_coords
+            WHERE lat IS NOT NULL AND lng IS NOT NULL
+        """))
+        rows = rows_to_dict(result.fetchall(), result)
+        return json.loads(json.dumps({'coords': rows}, cls=DecimalEncoder))
+
+
 @app.get("/api/search")
 def search_players(q: str = '', limit: int = 10):
     with engine.connect() as conn:
