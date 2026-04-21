@@ -337,8 +337,28 @@
             cursor: pointer;
             user-select: none;
             transition: color 0.12s;
+            position: relative;
         }
         .sim-cell:hover { color: #667eea; }
+        .sim-cell::after {
+            content: 'Find players like this';
+            position: absolute;
+            left: 50%;
+            top: calc(100% + 6px);
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 4px 8px;
+            border-radius: 5px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 100;
+        }
+        .sim-cell:hover::after { opacity: 1; }
         .rating-cell { font-weight: bold; color: #10b981; }
 
         .two-way-badge {
@@ -988,7 +1008,7 @@ function renderTable(players, offset = 0) {
         const varCells = cols.map(c => `<td>${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
-            <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})" title="Find players like this">≈</td>
+            <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
             <td><span class="player-name">${p.full_name}</span></td>
             <td>${p.team || '-'}</td>
             <td>${p.position || '-'}</td>
