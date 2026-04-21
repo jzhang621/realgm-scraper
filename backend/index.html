@@ -527,6 +527,10 @@
             <a href="/index.html" class="nav-tab active">Rankings</a>
             <a href="/similarity.html" class="nav-tab">Similar Players</a>
             <div class="view-toggle" style="margin-left:auto">
+                <button class="toggle-btn active" id="btnPergame" onclick="setDisplayMode('pergame')">Per Game</button>
+                <button class="toggle-btn" id="btnTotals" onclick="setDisplayMode('totals')">Totals</button>
+            </div>
+            <div class="view-toggle">
                 <button class="toggle-btn active" id="btnTable" onclick="setView('table')">Table</button>
                 <button class="toggle-btn" id="btnMap" onclick="setView('map')">Map</button>
             </div>
@@ -543,35 +547,7 @@
 
         <div class="table-container" id="tableContainer" style="display:none">
             <table>
-                <thead>
-                    <tr>
-                        <th style="cursor:default">#</th>
-                        <th data-col="full_name" style="min-width:145px">Player</th>
-                        <th data-col="team" style="min-width:115px">Team</th>
-                        <th data-col="position">Pos</th>
-                        <th data-col="class_year">Yr</th>
-                        <th data-col="height_in">Ht</th>
-                        <th data-col="weight">Wt</th>
-                        <th data-col="gp">GP</th>
-                        <th data-col="min">MIN</th>
-                        <th data-col="pts">PPG</th>
-                        <th data-col="reb">RPG</th>
-                        <th data-col="ast">APG</th>
-                        <th data-col="stl">SPG</th>
-                        <th data-col="blk">BPG</th>
-                        <th data-col="tov">TOV</th>
-                        <th data-col="fg_pct">FG%</th>
-                        <th data-col="fg3m">3PM</th>
-                        <th data-col="fg3a">3PA</th>
-                        <th data-col="fg3_pct">3P%</th>
-                        <th data-col="ft_pct">FT%</th>
-                        <th data-col="ts_pct">TS%</th>
-                        <th data-col="per">PER</th>
-                        <th data-col="usg_pct">USG%</th>
-                        <th data-col="ws">WS</th>
-                        <th data-col="final_rating" class="sort-desc">Rating</th>
-                    </tr>
-                </thead>
+                <thead id="tableHead"></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
@@ -602,31 +578,94 @@ function inchesToHeight(inches) {
     return `${ft}-${i}`;
 }
 
-const STAT_DEFS = [
+// ── Stat definitions (sliders) ─────────────────────────────────────────────
+const STAT_DEFS_SHARED = [
     { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
     { key: 'gp',           label: 'GP',           group: 'RATING',      pct: false, decimals: 0 },
     { key: 'age',          label: 'Age',          group: 'PHYSICAL',    pct: false, decimals: 0 },
     { key: 'height_in',    label: 'Height',       group: 'PHYSICAL',    pct: false, decimals: 0, formatVal: inchesToHeight },
     { key: 'weight',       label: 'Weight (lbs)', group: 'PHYSICAL',    pct: false, decimals: 0 },
-    { key: 'pts',          label: 'PPG',          group: 'SCORING',     pct: false, decimals: 1 },
-    { key: 'min',          label: 'MIN',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'fg_pct',       label: 'FG%',          group: 'SCORING',     pct: true,  decimals: 1 },
     { key: 'fg3_pct',      label: '3P%',          group: 'SCORING',     pct: true,  decimals: 1 },
     { key: 'ft_pct',       label: 'FT%',          group: 'SCORING',     pct: true,  decimals: 1 },
-    { key: 'ast',          label: 'APG',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
-    { key: 'tov',          label: 'TOV',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
-    { key: 'reb',          label: 'RPG',          group: 'REBOUNDING',  pct: false, decimals: 1 },
-    { key: 'stl',          label: 'SPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
-    { key: 'blk',          label: 'BPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
     { key: 'ts_pct',       label: 'TS%',          group: 'EFFICIENCY',  pct: true,  decimals: 1 },
     { key: 'per',          label: 'PER',          group: 'EFFICIENCY',  pct: false, decimals: 1 },
     { key: 'usg_pct',      label: 'USG%',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
     { key: 'ws',           label: 'Win Shares',   group: 'EFFICIENCY',  pct: false, decimals: 2 },
 ];
+const STAT_DEFS_PERGAME = [
+    ...STAT_DEFS_SHARED.slice(0, 5),
+    { key: 'pts',  label: 'PPG',  group: 'SCORING',    pct: false, decimals: 1 },
+    { key: 'min',  label: 'MIN',  group: 'SCORING',    pct: false, decimals: 1 },
+    ...STAT_DEFS_SHARED.slice(5, 8),
+    { key: 'ast',  label: 'APG',  group: 'PLAYMAKING', pct: false, decimals: 1 },
+    { key: 'tov',  label: 'TOV',  group: 'PLAYMAKING', pct: false, decimals: 1 },
+    { key: 'reb',  label: 'RPG',  group: 'REBOUNDING', pct: false, decimals: 1 },
+    { key: 'stl',  label: 'SPG',  group: 'DEFENSE',    pct: false, decimals: 1 },
+    { key: 'blk',  label: 'BPG',  group: 'DEFENSE',    pct: false, decimals: 1 },
+    ...STAT_DEFS_SHARED.slice(8),
+];
+const STAT_DEFS_TOTALS = [
+    ...STAT_DEFS_SHARED.slice(0, 5),
+    { key: 't_pts', label: 'PTS',  group: 'SCORING',    pct: false, decimals: 0 },
+    { key: 't_min', label: 'MIN',  group: 'SCORING',    pct: false, decimals: 0 },
+    ...STAT_DEFS_SHARED.slice(5, 8),
+    { key: 't_ast', label: 'AST',  group: 'PLAYMAKING', pct: false, decimals: 0 },
+    { key: 't_tov', label: 'TO',   group: 'PLAYMAKING', pct: false, decimals: 0 },
+    { key: 't_reb', label: 'REB',  group: 'REBOUNDING', pct: false, decimals: 0 },
+    { key: 't_stl', label: 'STL',  group: 'DEFENSE',    pct: false, decimals: 0 },
+    { key: 't_blk', label: 'BLK',  group: 'DEFENSE',    pct: false, decimals: 0 },
+    ...STAT_DEFS_SHARED.slice(8),
+];
+
+// ── Variable stat columns shown in table ───────────────────────────────────
+// type: 'num' | 'pct' | 'raw'   d: decimal places
+const COL_SETS = {
+    pergame: [
+        { col: 'min',     label: 'MIN',  type: 'num', d: 1 },
+        { col: 'pts',     label: 'PPG',  type: 'num', d: 1 },
+        { col: 'reb',     label: 'RPG',  type: 'num', d: 1 },
+        { col: 'ast',     label: 'APG',  type: 'num', d: 1 },
+        { col: 'stl',     label: 'SPG',  type: 'num', d: 1 },
+        { col: 'blk',     label: 'BPG',  type: 'num', d: 1 },
+        { col: 'tov',     label: 'TOV',  type: 'num', d: 1 },
+        { col: 'fg_pct',  label: 'FG%',  type: 'pct' },
+        { col: 'fg3m',    label: '3PM',  type: 'num', d: 1 },
+        { col: 'fg3a',    label: '3PA',  type: 'num', d: 1 },
+        { col: 'fg3_pct', label: '3P%',  type: 'pct' },
+        { col: 'ft_pct',  label: 'FT%',  type: 'pct' },
+        { col: 'ts_pct',  label: 'TS%',  type: 'pct' },
+        { col: 'per',     label: 'PER',  type: 'num', d: 1 },
+        { col: 'usg_pct', label: 'USG%', type: 'num', d: 1 },
+        { col: 'ws',      label: 'WS',   type: 'num', d: 2 },
+    ],
+    totals: [
+        { col: 't_min',   label: 'MIN',  type: 'num', d: 0 },
+        { col: 't_pts',   label: 'PTS',  type: 'num', d: 0 },
+        { col: 't_reb',   label: 'REB',  type: 'num', d: 0 },
+        { col: 't_ast',   label: 'AST',  type: 'num', d: 0 },
+        { col: 't_stl',   label: 'STL',  type: 'num', d: 0 },
+        { col: 't_blk',   label: 'BLK',  type: 'num', d: 0 },
+        { col: 't_tov',   label: 'TO',   type: 'num', d: 0 },
+        { col: 'fg_pct',  label: 'FG%',  type: 'pct' },
+        { col: 't_fg3m',  label: '3PM',  type: 'num', d: 0 },
+        { col: 't_fg3a',  label: '3PA',  type: 'num', d: 0 },
+        { col: 'fg3_pct', label: '3P%',  type: 'pct' },
+        { col: 'ft_pct',  label: 'FT%',  type: 'pct' },
+        { col: 'ts_pct',  label: 'TS%',  type: 'pct' },
+        { col: 'per',     label: 'PER',  type: 'num', d: 1 },
+        { col: 'usg_pct', label: 'USG%', type: 'num', d: 1 },
+        { col: 'ws',      label: 'WS',   type: 'num', d: 2 },
+    ],
+};
+
+function getStatDefs() { return displayMode === 'pergame' ? STAT_DEFS_PERGAME : STAT_DEFS_TOTALS; }
+function getCols()     { return COL_SETS[displayMode]; }
 
 const sliderState = {};
 let allPlayers = [];
 let currentSeason = '2025-26';
+let displayMode = 'pergame';
 let sortCol = 'final_rating';
 let sortDir = -1;
 let activePositions = new Set();
@@ -643,18 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPlayers();
     });
     document.getElementById('searchBox').addEventListener('input', applyFilters);
-
-    document.querySelectorAll('th[data-col]').forEach(th => {
-        th.addEventListener('click', () => {
-            const col = th.dataset.col;
-            sortDir = sortCol === col ? sortDir * -1 : -1;
-            sortCol = col;
-            document.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
-            th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
-            applyFilters();
-        });
-    });
-
     loadPlayers();
 });
 
@@ -672,6 +699,7 @@ async function loadPlayers() {
         }));
 
         buildSliders();
+        renderTableHeader();
         buildPositionChips();
         buildClassChips();
         applyFilters();
@@ -690,7 +718,7 @@ function buildSliders() {
     container.innerHTML = '';
     let lastGroup = null;
 
-    STAT_DEFS.forEach(def => {
+    getStatDefs().forEach(def => {
         const vals = allPlayers
             .map(p => p[def.key] != null ? (def.pct ? Number(p[def.key]) * 100 : Number(p[def.key])) : null)
             .filter(v => v != null);
@@ -849,7 +877,7 @@ function applyFilters() {
         if (activePositions.size > 0 && !activePositions.has(p.pos_group)) return false;
         if (activeClassYears.size > 0 && !activeClassYears.has(p.class_year)) return false;
 
-        for (const def of STAT_DEFS) {
+        for (const def of getStatDefs()) {
             const s = sliderState[def.key];
             if (!s || (s.curMin === s.dataMin && s.curMax === s.dataMax)) continue;
             const raw = p[def.key];
@@ -888,13 +916,56 @@ function renderPage() {
     if (currentView === 'map') updateMapMarkers();
 }
 
+function fmtCol(c, val) {
+    if (c.type === 'pct') return fmtP(val);
+    return fmt(val, c.d ?? 1);
+}
+
+function renderTableHeader() {
+    const cols = getCols();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <th style="cursor:default">#</th>
+        <th data-col="full_name" style="min-width:145px">Player</th>
+        <th data-col="team" style="min-width:115px">Team</th>
+        <th data-col="position">Pos</th>
+        <th data-col="class_year">Yr</th>
+        <th data-col="height_in">Ht</th>
+        <th data-col="weight">Wt</th>
+        <th data-col="gp">GP</th>
+        ${cols.map(c => `<th data-col="${c.col}">${c.label}</th>`).join('')}
+        <th data-col="final_rating" class="${sortCol === 'final_rating' ? (sortDir === -1 ? 'sort-desc' : 'sort-asc') : ''}">Rating</th>
+    `;
+    const thead = document.getElementById('tableHead');
+    thead.innerHTML = '';
+    thead.appendChild(tr);
+
+    // Re-attach sort listeners
+    thead.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            sortDir = sortCol === col ? sortDir * -1 : -1;
+            sortCol = col;
+            thead.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+            th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
+            applyFilters();
+        });
+        // Mark active sort col
+        if (th.dataset.col === sortCol) {
+            th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
+        }
+    });
+}
+
 function renderTable(players, offset = 0) {
+    const cols = getCols();
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
 
     players.forEach((p, i) => {
         const tr = document.createElement('tr');
         tr.addEventListener('click', () => showModal(p.player_id));
+        const varCells = cols.map(c => `<td>${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
             <td><span class="player-name">${p.full_name}</span></td>
@@ -904,26 +975,22 @@ function renderTable(players, offset = 0) {
             <td style="color:#aaa">${p.height || '-'}</td>
             <td style="color:#aaa">${p.weight ?? '-'}</td>
             <td>${p.gp ?? '-'}</td>
-            <td>${fmt(p.min)}</td>
-            <td>${fmt(p.pts)}</td>
-            <td>${fmt(p.reb)}</td>
-            <td>${fmt(p.ast)}</td>
-            <td>${fmt(p.stl)}</td>
-            <td>${fmt(p.blk)}</td>
-            <td>${fmt(p.tov)}</td>
-            <td>${fmtP(p.fg_pct)}</td>
-            <td>${fmt(p.fg3m)}</td>
-            <td>${fmt(p.fg3a)}</td>
-            <td>${fmtP(p.fg3_pct)}</td>
-            <td>${fmtP(p.ft_pct)}</td>
-            <td>${fmtP(p.ts_pct)}</td>
-            <td>${fmt(p.per)}</td>
-            <td>${p.usg_pct != null ? Number(p.usg_pct).toFixed(1) : '-'}</td>
-            <td>${fmt(p.ws, 2)}</td>
+            ${varCells}
             <td class="rating-cell">${fmt(p.final_rating)}</td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+function setDisplayMode(mode) {
+    displayMode = mode;
+    document.getElementById('btnPergame').classList.toggle('active', mode === 'pergame');
+    document.getElementById('btnTotals').classList.toggle('active', mode === 'totals');
+    sortCol = 'final_rating';
+    sortDir = -1;
+    buildSliders();
+    renderTableHeader();
+    applyFilters();
 }
 
 function renderPagination(totalPages) {
@@ -963,7 +1030,7 @@ function goPage(page) {
 
 // ── Reset ─────────────────────────────────────────────────────────────────
 function resetFilters() {
-    STAT_DEFS.forEach(def => {
+    getStatDefs().forEach(def => {
         const s = sliderState[def.key];
         if (!s) return;
         s.curMin = s.dataMin;
@@ -1140,7 +1207,7 @@ function applyPlayerFilters(playerId) {
     if (!p) return;
 
     // Reset first so we start clean
-    STAT_DEFS.forEach(def => {
+    getStatDefs().forEach(def => {
         const s = sliderState[def.key];
         if (!s) return;
         s.curMin = s.dataMin;
@@ -1157,7 +1224,7 @@ function applyPlayerFilters(playerId) {
     document.getElementById('searchBox').value = '';
 
     // Set slider mins to player's stat values
-    STAT_DEFS.forEach(def => {
+    getStatDefs().forEach(def => {
         const s = sliderState[def.key];
         if (!s || p[def.key] == null) return;
         const playerVal = def.pct ? Number(p[def.key]) * 100 : Number(p[def.key]);
