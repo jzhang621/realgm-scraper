@@ -444,7 +444,8 @@ def get_profile(player_id: str):
             text("SELECT * FROM player_ratings WHERE player_id = :pid ORDER BY season"),
             {'pid': player_id}
         )
-        ratings = {row['season']: dict(zip(r.keys(), row)) for row in r.fetchall()}
+        ratings = rows_to_dict(r.fetchall(), r)
+        ratings = {row['season']: row for row in ratings}
 
         # Merge into season list
         all_seasons = sorted(set(list(pergame) + list(ratings)))
