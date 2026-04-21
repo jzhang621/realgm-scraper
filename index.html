@@ -102,7 +102,23 @@
             margin-bottom: 4px;
         }
 
+        .slider-label-wrap { display: flex; align-items: center; gap: 5px; }
         .slider-label { font-size: 12px; font-weight: 600; color: #444; }
+
+        .slider-clear {
+            display: none;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            color: #e05050;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 3px;
+            padding: 1px 4px;
+            cursor: pointer;
+            letter-spacing: 0;
+        }
+        .slider-clear:hover { background: #e05050; color: white; border-color: #e05050; }
 
         .slider-current {
             font-size: 11px;
@@ -143,6 +159,8 @@
             pointer-events: none;
             outline: none;
         }
+        .range-wrap input[type=range]:first-of-type { z-index: 2; }
+        .range-wrap input[type=range]:last-of-type  { z-index: 3; }
 
         .range-wrap input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -272,6 +290,8 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.18);
             overflow-x: auto;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
         }
 
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -452,6 +472,15 @@
         }
         .realgm-link:hover { background: #5a6fd4; }
 
+        .btn-apply-filters {
+            display: inline-block; margin-top: 9px; margin-left: 8px; padding: 5px 11px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; border-radius: 6px;
+            font-size: 0.82em; font-weight: 600;
+            cursor: pointer; border: none;
+        }
+        .btn-apply-filters:hover { background: linear-gradient(135deg, #059669, #047857); }
+
     </style>
 </head>
 <body>
@@ -483,6 +512,10 @@
         <!-- Position group chips -->
         <div class="slider-group-label">Position Group</div>
         <div class="pos-group" id="posChips"></div>
+
+        <!-- Class year chips -->
+        <div class="slider-group-label">Class Year</div>
+        <div class="pos-group" id="classChips"></div>
 
         <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
     </aside>
@@ -517,6 +550,8 @@
                         <th data-col="team" style="min-width:115px">Team</th>
                         <th data-col="position">Pos</th>
                         <th data-col="class_year">Yr</th>
+                        <th data-col="height_in">Ht</th>
+                        <th data-col="weight">Wt</th>
                         <th data-col="gp">GP</th>
                         <th data-col="min">MIN</th>
                         <th data-col="pts">PPG</th>
@@ -557,9 +592,22 @@ const API_BASE = (location.port === '3000' || location.port === '5500' || locati
     : '/api';
 
 
+function parseHeightToInches(h) {
+    if (!h) return null;
+    const m = String(h).match(/^(\d+)-(\d+)$/);
+    return m ? parseInt(m[1]) * 12 + parseInt(m[2]) : null;
+}
+function inchesToHeight(inches) {
+    const ft = Math.floor(inches / 12), i = Math.round(inches % 12);
+    return `${ft}-${i}`;
+}
+
 const STAT_DEFS = [
     { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
     { key: 'gp',           label: 'GP',           group: 'RATING',      pct: false, decimals: 0 },
+    { key: 'age',          label: 'Age',          group: 'PHYSICAL',    pct: false, decimals: 0 },
+    { key: 'height_in',    label: 'Height',       group: 'PHYSICAL',    pct: false, decimals: 0, formatVal: inchesToHeight },
+    { key: 'weight',       label: 'Weight (lbs)', group: 'PHYSICAL',    pct: false, decimals: 0 },
     { key: 'pts',          label: 'PPG',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'min',          label: 'MIN',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'fg_pct',       label: 'FG%',          group: 'SCORING',     pct: true,  decimals: 1 },
@@ -582,6 +630,7 @@ let currentSeason = '2025-26';
 let sortCol = 'final_rating';
 let sortDir = -1;
 let activePositions = new Set();
+let activeClassYears = new Set();
 let currentPage = 1;
 const PAGE_SIZE = 100;
 let filteredPlayers = [];
@@ -617,10 +666,14 @@ async function loadPlayers() {
     try {
         const res = await fetch(`${API_BASE}/players/${currentSeason}?limit=15000`);
         const data = await res.json();
-        allPlayers = data.data;
+        allPlayers = data.data.map(p => ({
+            ...p,
+            height_in: parseHeightToInches(p.height),
+        }));
 
         buildSliders();
         buildPositionChips();
+        buildClassChips();
         applyFilters();
 
         document.getElementById('loading').style.display = 'none';
@@ -648,13 +701,16 @@ function buildSliders() {
         const dataMax = Math.ceil(Math.max(...vals) * 10) / 10;
         sliderState[def.key] = { dataMin, dataMax, curMin: dataMin, curMax: dataMax };
 
-        const fmtBound = v => def.pct ? v.toFixed(0) + '%' : v.toFixed(def.decimals);
+        const fmtBound = v => def.formatVal ? def.formatVal(v) : def.pct ? v.toFixed(0) + '%' : v.toFixed(def.decimals);
 
         const row = document.createElement('div');
         row.className = 'slider-row';
         row.innerHTML = `
             <div class="slider-top">
-                <span class="slider-label">${def.label}</span>
+                <span class="slider-label-wrap">
+                    <span class="slider-label">${def.label}</span>
+                    <span class="slider-clear" id="${def.key}-clear" title="Clear filter">&times;</span>
+                </span>
                 <span class="slider-current" id="${def.key}-current">any</span>
             </div>
             <div class="range-wrap">
@@ -673,6 +729,7 @@ function buildSliders() {
 
         document.getElementById(`${def.key}-min`).addEventListener('input', () => onSlider(def, 'min'));
         document.getElementById(`${def.key}-max`).addEventListener('input', () => onSlider(def, 'max'));
+        document.getElementById(`${def.key}-clear`).addEventListener('click', () => clearSlider(def));
     });
 }
 
@@ -704,9 +761,33 @@ function updateSliderUI(def) {
     document.getElementById(`${def.key}-fill`).style.cssText =
         `left:${leftPct}%; width:${rightPct - leftPct}%`;
 
-    const fmtV = v => def.pct ? v.toFixed(def.decimals) + '%' : v.toFixed(def.decimals);
+    const fmtV = v => def.formatVal ? def.formatVal(v) : def.pct ? v.toFixed(def.decimals) + '%' : v.toFixed(def.decimals);
+    const isDefault = curMin === dataMin && curMax === dataMax;
     document.getElementById(`${def.key}-current`).textContent =
-        (curMin === dataMin && curMax === dataMax) ? 'any' : `${fmtV(curMin)} – ${fmtV(curMax)}`;
+        isDefault ? 'any' : `${fmtV(curMin)} – ${fmtV(curMax)}`;
+
+    const clearEl = document.getElementById(`${def.key}-clear`);
+    if (clearEl) clearEl.style.display = isDefault ? 'none' : 'inline-block';
+
+    // Fix z-index: when min thumb is near/at max, bring min slider on top so it's draggable
+    const minEl = document.getElementById(`${def.key}-min`);
+    const maxEl = document.getElementById(`${def.key}-max`);
+    if (minEl && maxEl) {
+        const proximity = (curMax - curMin) / span;
+        minEl.style.zIndex = proximity < 0.05 ? '5' : '';
+        maxEl.style.zIndex = proximity < 0.05 ? '4' : '';
+    }
+}
+
+function clearSlider(def) {
+    const s = sliderState[def.key];
+    if (!s) return;
+    s.curMin = s.dataMin;
+    s.curMax = s.dataMax;
+    document.getElementById(`${def.key}-min`).value = s.dataMin;
+    document.getElementById(`${def.key}-max`).value = s.dataMax;
+    updateSliderUI(def);
+    applyFilters();
 }
 
 // ── Position chips (pos_group) ────────────────────────────────────────────
@@ -730,6 +811,35 @@ function buildPositionChips() {
 }
 
 
+// ── Class year chips ──────────────────────────────────────────────────────
+function buildClassChips() {
+    const yearOrder = ['Fr', 'So', 'Jr', 'Sr', 'Grad', '5th Year', 'RS Fr', 'RS So', 'RS Jr', 'RS Sr'];
+    const found = [...new Set(allPlayers.map(p => p.class_year).filter(Boolean))];
+    found.sort((a, b) => {
+        const ai = yearOrder.indexOf(a), bi = yearOrder.indexOf(b);
+        if (ai !== -1 && bi !== -1) return ai - bi;
+        if (ai !== -1) return -1;
+        if (bi !== -1) return 1;
+        return a.localeCompare(b);
+    });
+
+    const container = document.getElementById('classChips');
+    container.innerHTML = '';
+    activeClassYears.clear();
+
+    found.forEach(yr => {
+        const chip = document.createElement('div');
+        chip.className = 'pos-chip';
+        chip.textContent = yr;
+        chip.addEventListener('click', () => {
+            if (activeClassYears.has(yr)) { activeClassYears.delete(yr); chip.classList.remove('active'); }
+            else                          { activeClassYears.add(yr);    chip.classList.add('active'); }
+            applyFilters();
+        });
+        container.appendChild(chip);
+    });
+}
+
 // ── Filter + render ───────────────────────────────────────────────────────
 function applyFilters() {
     const search = document.getElementById('searchBox').value.toLowerCase().trim();
@@ -737,6 +847,7 @@ function applyFilters() {
     let filtered = allPlayers.filter(p => {
         if (search && !p.full_name.toLowerCase().includes(search)) return false;
         if (activePositions.size > 0 && !activePositions.has(p.pos_group)) return false;
+        if (activeClassYears.size > 0 && !activeClassYears.has(p.class_year)) return false;
 
         for (const def of STAT_DEFS) {
             const s = sliderState[def.key];
@@ -790,6 +901,8 @@ function renderTable(players, offset = 0) {
             <td>${p.team || '-'}</td>
             <td>${p.position || '-'}</td>
             <td style="color:#aaa">${p.class_year || '-'}</td>
+            <td style="color:#aaa">${p.height || '-'}</td>
+            <td style="color:#aaa">${p.weight ?? '-'}</td>
             <td>${p.gp ?? '-'}</td>
             <td>${fmt(p.min)}</td>
             <td>${fmt(p.pts)}</td>
@@ -862,6 +975,7 @@ function resetFilters() {
         updateSliderUI(def);
     });
     activePositions.clear();
+    activeClassYears.clear();
     document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('searchBox').value = '';
     applyFilters();
@@ -884,6 +998,7 @@ function showModal(playerId) {
                 ${p.hometown ? ' &nbsp;|&nbsp; ' + p.hometown : ''}
             </div>
             <a class="realgm-link" href="https://basketball.realgm.com/player/x/Summary/${p.player_id}" target="_blank">View on RealGM</a>
+            <button class="btn-apply-filters" onclick="applyPlayerFilters(${p.player_id})">Find Players Like This &rarr;</button>
         </div>
 
         <div class="player-overview">
@@ -1017,6 +1132,64 @@ function pctBox(label, val) {
         <div class="pct-bar-wrap"><div class="pct-bar" style="width:${v}%"></div></div>
         <div class="pct-value">${val != null ? val + 'th' : '-'}</div>
     </div>`;
+}
+
+// ── Apply player stats as minimum filters ─────────────────────────────────
+function applyPlayerFilters(playerId) {
+    const p = allPlayers.find(x => x.player_id == playerId);
+    if (!p) return;
+
+    // Reset first so we start clean
+    STAT_DEFS.forEach(def => {
+        const s = sliderState[def.key];
+        if (!s) return;
+        s.curMin = s.dataMin;
+        s.curMax = s.dataMax;
+        const minEl = document.getElementById(`${def.key}-min`);
+        const maxEl = document.getElementById(`${def.key}-max`);
+        if (minEl) minEl.value = s.dataMin;
+        if (maxEl) maxEl.value = s.dataMax;
+        updateSliderUI(def);
+    });
+    activePositions.clear();
+    activeClassYears.clear();
+    document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('searchBox').value = '';
+
+    // Set slider mins to player's stat values
+    STAT_DEFS.forEach(def => {
+        const s = sliderState[def.key];
+        if (!s || p[def.key] == null) return;
+        const playerVal = def.pct ? Number(p[def.key]) * 100 : Number(p[def.key]);
+        // Clamp to data range
+        const clamped = Math.max(s.dataMin, Math.min(s.dataMax, playerVal));
+        s.curMin = clamped;
+        const minEl = document.getElementById(`${def.key}-min`);
+        if (minEl) minEl.value = clamped;
+        updateSliderUI(def);
+    });
+
+    // Set position chip
+    if (p.pos_group) {
+        activePositions.add(p.pos_group);
+        document.querySelectorAll('#posChips .pos-chip').forEach(chip => {
+            if (chip.textContent === p.pos_group) chip.classList.add('active');
+        });
+    }
+
+    // Set class year chip
+    if (p.class_year) {
+        activeClassYears.add(p.class_year);
+        document.querySelectorAll('#classChips .pos-chip').forEach(chip => {
+            if (chip.textContent === p.class_year) chip.classList.add('active');
+        });
+    }
+
+    closeModal();
+    applyFilters();
+
+    // Scroll sidebar into view so user sees the active filters
+    document.querySelector('.sidebar').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function closeModal() { document.getElementById('playerModal').classList.remove('show'); }
