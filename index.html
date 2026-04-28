@@ -768,7 +768,8 @@ function buildSliders() {
 
         const dataMin = Math.floor(Math.min(...vals) * 10) / 10;
         const dataMax = Math.ceil(Math.max(...vals) * 10) / 10;
-        sliderState[def.key] = { dataMin, dataMax, curMin: dataMin, curMax: dataMax };
+        const prev = sliderState[def.key];
+        sliderState[def.key] = { dataMin, dataMax, curMin: prev ? prev.curMin : dataMin, curMax: prev ? prev.curMax : dataMax };
 
         const fmtBound = v => def.formatVal ? def.formatVal(v) : def.pct ? v.toFixed(0) + '%' : v.toFixed(def.decimals);
 
@@ -786,8 +787,8 @@ function buildSliders() {
                 <div class="range-track">
                     <div class="range-fill" id="${def.key}-fill"></div>
                 </div>
-                <input type="range" id="${def.key}-min" min="${dataMin}" max="${dataMax}" value="${dataMin}" step="any">
-                <input type="range" id="${def.key}-max" min="${dataMin}" max="${dataMax}" value="${dataMax}" step="any">
+                <input type="range" id="${def.key}-min" min="${dataMin}" max="${dataMax}" value="${sliderState[def.key].curMin}" step="any">
+                <input type="range" id="${def.key}-max" min="${dataMin}" max="${dataMax}" value="${sliderState[def.key].curMax}" step="any">
             </div>
             <div class="range-bounds">
                 <span>${fmtBound(dataMin)}</span>
@@ -799,6 +800,7 @@ function buildSliders() {
         document.getElementById(`${def.key}-min`).addEventListener('input', () => onSlider(def, 'min'));
         document.getElementById(`${def.key}-max`).addEventListener('input', () => onSlider(def, 'max'));
         document.getElementById(`${def.key}-clear`).addEventListener('click', () => clearSlider(def));
+        updateSliderUI(def);
     });
 }
 
