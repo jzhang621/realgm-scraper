@@ -861,7 +861,7 @@ function updateExportButton() {
 }
 
 function exportToCSV() {
-    const players = allPlayers.filter(p => selectedPlayerIds.has(p.player_id));
+    const players = allPlayers.filter(p => selectedPlayerIds.has(String(p.player_id)));
     if (!players.length) return;
 
     const header = EXPORT_COLS.map(c => `"${c.label}"`).join(',');
@@ -870,17 +870,19 @@ function exportToCSV() {
             let v = p[c.key];
             if (v == null) return '';
             if (c.pct) v = (Number(v) * 100).toFixed(1);
-            return `"${v}"`;
+            return `"${String(v).replace(/"/g, '""')}"`;
         }).join(',')
     );
 
     const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `nil-pro-${currentSeason}-${players.length}players.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
 
@@ -1239,11 +1241,11 @@ function renderTableHeader() {
     thead.innerHTML = '';
     thead.appendChild(tr);
 
-    // Select-all checkbox
+    // Select-all checkbox — use string IDs consistently
     document.getElementById('selectAllCb').addEventListener('click', e => {
         e.stopPropagation();
         const start = (currentPage - 1) * PAGE_SIZE;
-        const pageIds = filteredPlayers.slice(start, start + PAGE_SIZE).map(p => p.player_id);
+        const pageIds = filteredPlayers.slice(start, start + PAGE_SIZE).map(p => String(p.player_id));
         const allChecked = pageIds.every(id => selectedPlayerIds.has(id));
         pageIds.forEach(id => allChecked ? selectedPlayerIds.delete(id) : selectedPlayerIds.add(id));
         updateExportButton();
@@ -1271,7 +1273,7 @@ function renderTable(players, offset = 0) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
 
-    const pageIds = players.map(p => p.player_id);
+    const pageIds = players.map(p => String(p.player_id));
     const allChecked = pageIds.length > 0 && pageIds.every(id => selectedPlayerIds.has(id));
     const selectAllCb = document.getElementById('selectAllCb');
     if (selectAllCb) selectAllCb.checked = allChecked;
@@ -1298,9 +1300,9 @@ function renderTable(players, offset = 0) {
             <td data-col="gp">${p.gp ?? '-'}</td>
             ${varCells}
         `;
-        // Checkbox change handler
+        // Checkbox change handler — store as string to match allPlayers player_id type
         tr.querySelector('input[type=checkbox]').addEventListener('change', e => {
-            const id = Number(e.target.dataset.id);
+            const id = e.target.dataset.id;
             e.target.checked ? selectedPlayerIds.add(id) : selectedPlayerIds.delete(id);
             const allNowChecked = pageIds.every(id => selectedPlayerIds.has(id));
             if (selectAllCb) selectAllCb.checked = allNowChecked;
