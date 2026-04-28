@@ -607,15 +607,16 @@ function careerRow(s) {
             <td>${pct(pg?.fg3_pct)}</td><td>${pct(pg?.ft_pct)}</td>
             ${rating}`;
     } else if (careerMode === 'totals') {
+        const tot = s.totals;
         cells = `
             <td class="season-cell">${s.season}</td>
             <td class="team-cell">${team}${level}</td>
             <td>${cls}</td><td>${gp}</td>
-            <td>${n(pg?.t_min, 0)}</td><td>${n(pg?.t_pts, 0)}</td><td>${n(pg?.t_reb, 0)}</td><td>${n(pg?.t_ast, 0)}</td>
-            <td>${n(pg?.t_stl, 0)}</td><td>${n(pg?.t_blk, 0)}</td><td>${n(pg?.t_tov, 0)}</td>
-            <td>${n(pg?.t_fgm, 0)}</td><td>${n(pg?.t_fga, 0)}</td>
-            <td>${n(pg?.t_fg3m, 0)}</td><td>${n(pg?.t_fg3a, 0)}</td>
-            <td>${n(pg?.t_ftm, 0)}</td><td>${n(pg?.t_fta, 0)}</td>
+            <td>${n(tot?.t_min, 0)}</td><td>${n(tot?.t_pts, 0)}</td><td>${n(tot?.t_reb, 0)}</td><td>${n(tot?.t_ast, 0)}</td>
+            <td>${n(tot?.t_stl, 0)}</td><td>${n(tot?.t_blk, 0)}</td><td>${n(tot?.t_tov, 0)}</td>
+            <td>${n(tot?.t_fgm, 0)}</td><td>${n(tot?.t_fga, 0)}</td>
+            <td>${n(tot?.t_fg3m, 0)}</td><td>${n(tot?.t_fg3a, 0)}</td>
+            <td>${n(tot?.t_ftm, 0)}</td><td>${n(tot?.t_fta, 0)}</td>
             ${rating}`;
     } else {
         cells = `

@@ -467,6 +467,15 @@ def get_profile(player_id: str):
         ratings = rows_to_dict(r.fetchall(), r)
         ratings = {row['season']: row for row in ratings}
 
+        # Totals from materialized view
+        r = conn.execute(
+            text("""SELECT season, t_min, t_pts, t_reb, t_ast, t_stl, t_blk, t_tov,
+                           t_fgm, t_fga, t_fg3m, t_fg3a, t_ftm, t_fta
+                    FROM player_season_stats WHERE player_id = :pid ORDER BY season"""),
+            {'pid': player_id}
+        )
+        totals = {row['season']: dict(row) for row in [dict(zip(r.keys(), row)) for row in r.fetchall()]}
+
         # Merge into season list
         all_seasons = sorted(set(list(pergame) + list(ratings)))
         seasons = []
@@ -476,6 +485,7 @@ def get_profile(player_id: str):
                 'pergame':  pergame.get(s),
                 'advanced': advanced.get(s),
                 'misc':     misc.get(s),
+                'totals':   totals.get(s),
                 'rating':   ratings.get(s),
             })
 
