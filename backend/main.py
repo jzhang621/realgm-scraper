@@ -14,16 +14,6 @@ import os
 import time
 from decimal import Decimal
 from datetime import datetime, date
-import json
-
-# Custom JSON encoder for Decimal and datetime
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        if isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        return super(DecimalEncoder, self).default(obj)
 
 # Database connection
 DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost:5432/ncaa_basketball')
@@ -52,11 +42,22 @@ app.add_middleware(
 # Gzip compression — compresses large JSON responses ~70%
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Helper function to convert rows to dict
+# Helper function to convert rows to dict, normalizing Decimal/date types inline
 def rows_to_dict(rows, result):
-    """Convert database rows to list of dicts"""
-    columns = result.keys()
-    return [dict(zip(columns, row)) for row in rows]
+    """Convert database rows to list of dicts with JSON-safe types"""
+    columns = list(result.keys())
+    out = []
+    for row in rows:
+        d = {}
+        for k, v in zip(columns, row):
+            if isinstance(v, Decimal):
+                d[k] = float(v)
+            elif isinstance(v, (datetime, date)):
+                d[k] = v.isoformat()
+            else:
+                d[k] = v
+        out.append(d)
+    return out
 
 
 @app.get("/api/ratings/{season}")
@@ -112,9 +113,6 @@ def get_ratings(
 
         data = rows_to_dict(rows, result)
 
-        # Convert Decimals to floats
-        data = json.loads(json.dumps(data, cls=DecimalEncoder))
-
         return {
             "season": season,
             "count": len(data),
@@ -148,10 +146,7 @@ def get_player(player_id: str):
         )
         ratings = rows_to_dict(result.fetchall(), result)
 
-        return json.loads(json.dumps({
-            "player": player_dict,
-            "ratings": ratings
-        }, cls=DecimalEncoder))
+        return {"player": player_dict, "ratings": ratings}
 
 @app.get("/api/stats/{player_id}/{season}")
 def get_player_stats(player_id: str, season: str):
@@ -200,14 +195,14 @@ def get_player_stats(player_id: str, season: str):
         if not pergame and not rating:
             raise HTTPException(status_code=404, detail="Stats not found for this player/season")
 
-        return json.loads(json.dumps({
+        return {
             "player_id": player_id,
             "season": season,
             "pergame": pergame[0] if pergame else None,
             "advanced": advanced[0] if advanced else None,
             "misc": misc[0] if misc else None,
             "rating": rating[0] if rating else None
-        }, cls=DecimalEncoder))
+        }
 
 @app.get("/api/search")
 def search_players(
@@ -253,11 +248,7 @@ def search_players(
 
         data = rows_to_dict(rows, result)
 
-        return json.loads(json.dumps({
-            "query": q,
-            "count": len(data),
-            "results": data
-        }, cls=DecimalEncoder))
+        return {"query": q, "count": len(data), "results": data}
 
 @app.get("/api/compare")
 def compare_players(
@@ -282,10 +273,7 @@ def compare_players(
                 detail="Could not find both players for this season"
             )
 
-        return json.loads(json.dumps({
-            "season": season,
-            "players": ratings
-        }, cls=DecimalEncoder))
+        return {"season": season, "players": ratings}
 
 @app.get("/api/teams/{season}")
 def get_teams(season: str):
@@ -362,15 +350,8 @@ def get_players(
         params['limit'] = limit
         params['offset'] = offset
 
-        t0 = time.time()
         result = conn.execute(text(query), params)
-        t1 = time.time()
-        rows = result.fetchall()
-        t2 = time.time()
-        data = rows_to_dict(rows, result)
-        data = json.loads(json.dumps(data, cls=DecimalEncoder))
-        t3 = time.time()
-        print(f"[players] execute={t1-t0:.2f}s  fetchall={t2-t1:.2f}s  serialize={t3-t2:.2f}s  total={t3-t0:.2f}s", flush=True)
+        data = rows_to_dict(result.fetchall(), result)
 
         return {"season": season, "count": len(data), "data": data}
 
@@ -415,11 +396,7 @@ def get_leaderboard(
         result = conn.execute(text(query), {'season': season, 'limit': limit})
         leaders = rows_to_dict(result.fetchall(), result)
 
-        return json.loads(json.dumps({
-            "season": season,
-            "stat": stat,
-            "leaders": leaders
-        }, cls=DecimalEncoder))
+        return {"season": season, "stat": stat, "leaders": leaders}
 
 @app.get("/api/similarity/{player_id}/{season}")
 def get_similarity(player_id: str, season: str):
@@ -431,7 +408,6 @@ def get_similarity(player_id: str, season: str):
             ORDER BY segment, rank
         """), {'player_id': player_id, 'season': season})
         rows = rows_to_dict(result.fetchall(), result)
-        rows = json.loads(json.dumps(rows, cls=DecimalEncoder))
 
         segments = {}
         for r in rows:
@@ -507,11 +483,7 @@ def get_profile(player_id: str):
         for row in sim_rows:
             similarity.setdefault(row['segment'], []).append(row)
 
-        return json.loads(json.dumps({
-            'bio': bio,
-            'seasons': seasons,
-            'similarity': similarity,
-        }, cls=DecimalEncoder))
+        return {'bio': bio, 'seasons': seasons, 'similarity': similarity}
 
 
 @app.get("/api/hometown-coords")
@@ -522,7 +494,7 @@ def get_hometown_coords():
             WHERE lat IS NOT NULL AND lng IS NOT NULL
         """))
         rows = rows_to_dict(result.fetchall(), result)
-        return json.loads(json.dumps({'coords': rows}, cls=DecimalEncoder))
+        return {'coords': rows}
 
 
 @app.get("/api/search")
