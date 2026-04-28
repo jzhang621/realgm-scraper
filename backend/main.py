@@ -3,6 +3,7 @@ FastAPI Backend for NCAA Basketball Stats
 """
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
@@ -46,6 +47,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Gzip compression — compresses large JSON responses ~70%
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Helper function to convert rows to dict
 def rows_to_dict(rows, result):
@@ -316,7 +320,23 @@ def get_players(
     """Get wide player stats row from materialized view for a season"""
     with engine.connect() as conn:
         query = """
-            SELECT *
+            SELECT
+                player_id, season, full_name, team, position, height, weight,
+                hometown, age, pos_group, class_year, two_way,
+                gp, min, pts, reb, ast, stl, blk, tov,
+                fg_pct, fg3m, fg3a, fg3_pct, ft_pct, fgm, fga, ftm, fta,
+                off_reb, def_reb,
+                ts_pct, efg_pct, orb_pct, drb_pct, ast_pct, tov_pct,
+                stl_pct, blk_pct, usg_pct, per, ortg, drtg, ppr, pps,
+                dbl_dbl, tpl_dbl, ast_to_ratio, stl_to_ratio, win_pct,
+                ws, ows, dws,
+                t_min, t_pts, t_reb, t_ast, t_stl, t_blk, t_tov,
+                t_fgm, t_fga, t_fg3m, t_fg3a, t_ftm, t_fta,
+                min_per, pts_per, ast_per, reb_per, blk_per, stl_per,
+                fgm_per, fgpct_per, p3pct_per, pm3_per, ftpct_per,
+                base_rating, game_adj, final_rating,
+                min_boost, three_boost, fg_boost, ast_boost, blk_boost,
+                double_double_boost, triple_double_boost, free_throw_boost
             FROM player_season_stats
             WHERE season = :season
         """
