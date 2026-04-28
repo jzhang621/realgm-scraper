@@ -529,6 +529,108 @@ def search_players(q: str = '', limit: int = 10):
         return {'results': merged[:limit]}
 
 
+@app.get("/api/player-count/{season}")
+def get_player_count(season: str):
+    """Total number of players for a season — used to fix pagination totals."""
+    with engine.connect() as conn:
+        count = conn.execute(
+            text("SELECT COUNT(*) FROM player_season_stats WHERE season = :season"),
+            {'season': season}
+        ).scalar()
+        return {'season': season, 'count': int(count)}
+
+
+@app.get("/api/stat-ranges/{season}")
+def get_stat_ranges(season: str):
+    """Return min/max for every slider stat across the full season — one query."""
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT
+                MIN(final_rating) AS final_rating_min, MAX(final_rating) AS final_rating_max,
+                MIN(gp)           AS gp_min,           MAX(gp)           AS gp_max,
+                MIN(age)          AS age_min,           MAX(age)          AS age_max,
+                MIN(weight)       AS weight_min,        MAX(weight)       AS weight_max,
+                MIN(CASE WHEN height ~ '^[0-9]+-[0-9]+$'
+                    THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int
+                    END)          AS height_in_min,
+                MAX(CASE WHEN height ~ '^[0-9]+-[0-9]+$'
+                    THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int
+                    END)          AS height_in_max,
+                MIN(pts)          AS pts_min,           MAX(pts)          AS pts_max,
+                MIN("min")        AS min_min,           MAX("min")        AS min_max,
+                MIN(fgm)          AS fgm_min,           MAX(fgm)          AS fgm_max,
+                MIN(fga)          AS fga_min,           MAX(fga)          AS fga_max,
+                MIN(fg_pct)       AS fg_pct_min,        MAX(fg_pct)       AS fg_pct_max,
+                MIN(fg3m)         AS fg3m_min,          MAX(fg3m)         AS fg3m_max,
+                MIN(fg3a)         AS fg3a_min,          MAX(fg3a)         AS fg3a_max,
+                MIN(fg3_pct)      AS fg3_pct_min,       MAX(fg3_pct)      AS fg3_pct_max,
+                MIN(ftm)          AS ftm_min,           MAX(ftm)          AS ftm_max,
+                MIN(fta)          AS fta_min,           MAX(fta)          AS fta_max,
+                MIN(ft_pct)       AS ft_pct_min,        MAX(ft_pct)       AS ft_pct_max,
+                MIN(efg_pct)      AS efg_pct_min,       MAX(efg_pct)      AS efg_pct_max,
+                MIN(ts_pct)       AS ts_pct_min,        MAX(ts_pct)       AS ts_pct_max,
+                MIN(ast)          AS ast_min,           MAX(ast)          AS ast_max,
+                MIN(tov)          AS tov_min,           MAX(tov)          AS tov_max,
+                MIN(ast_pct)      AS ast_pct_min,       MAX(ast_pct)      AS ast_pct_max,
+                MIN(tov_pct)      AS tov_pct_min,       MAX(tov_pct)      AS tov_pct_max,
+                MIN(ast_to_ratio) AS ast_to_ratio_min,  MAX(ast_to_ratio) AS ast_to_ratio_max,
+                MIN(ppr)          AS ppr_min,           MAX(ppr)          AS ppr_max,
+                MIN(reb)          AS reb_min,           MAX(reb)          AS reb_max,
+                MIN(off_reb)      AS off_reb_min,       MAX(off_reb)      AS off_reb_max,
+                MIN(def_reb)      AS def_reb_min,       MAX(def_reb)      AS def_reb_max,
+                MIN(orb_pct)      AS orb_pct_min,       MAX(orb_pct)      AS orb_pct_max,
+                MIN(drb_pct)      AS drb_pct_min,       MAX(drb_pct)      AS drb_pct_max,
+                MIN(stl)          AS stl_min,           MAX(stl)          AS stl_max,
+                MIN(blk)          AS blk_min,           MAX(blk)          AS blk_max,
+                MIN(stl_pct)      AS stl_pct_min,       MAX(stl_pct)      AS stl_pct_max,
+                MIN(blk_pct)      AS blk_pct_min,       MAX(blk_pct)      AS blk_pct_max,
+                MIN(drtg)         AS drtg_min,          MAX(drtg)         AS drtg_max,
+                MIN(per)          AS per_min,           MAX(per)          AS per_max,
+                MIN(usg_pct)      AS usg_pct_min,       MAX(usg_pct)      AS usg_pct_max,
+                MIN(ortg)         AS ortg_min,          MAX(ortg)         AS ortg_max,
+                MIN(pps)          AS pps_min,           MAX(pps)          AS pps_max,
+                MIN(ws)           AS ws_min,            MAX(ws)           AS ws_max,
+                MIN(ows)          AS ows_min,           MAX(ows)          AS ows_max,
+                MIN(dws)          AS dws_min,           MAX(dws)          AS dws_max,
+                MIN(win_pct)      AS win_pct_min,       MAX(win_pct)      AS win_pct_max,
+                MIN(dbl_dbl)      AS dbl_dbl_min,       MAX(dbl_dbl)      AS dbl_dbl_max,
+                MIN(tpl_dbl)      AS tpl_dbl_min,       MAX(tpl_dbl)      AS tpl_dbl_max,
+                MIN(stl_to_ratio) AS stl_to_ratio_min,  MAX(stl_to_ratio) AS stl_to_ratio_max,
+                MIN(t_pts)        AS t_pts_min,         MAX(t_pts)        AS t_pts_max,
+                MIN(t_min)        AS t_min_min,         MAX(t_min)        AS t_min_max,
+                MIN(t_fgm)        AS t_fgm_min,         MAX(t_fgm)        AS t_fgm_max,
+                MIN(t_fga)        AS t_fga_min,         MAX(t_fga)        AS t_fga_max,
+                MIN(t_fg3m)       AS t_fg3m_min,        MAX(t_fg3m)       AS t_fg3m_max,
+                MIN(t_fg3a)       AS t_fg3a_min,        MAX(t_fg3a)       AS t_fg3a_max,
+                MIN(t_ftm)        AS t_ftm_min,         MAX(t_ftm)        AS t_ftm_max,
+                MIN(t_fta)        AS t_fta_min,         MAX(t_fta)        AS t_fta_max,
+                MIN(t_ast)        AS t_ast_min,         MAX(t_ast)        AS t_ast_max,
+                MIN(t_tov)        AS t_tov_min,         MAX(t_tov)        AS t_tov_max,
+                MIN(t_reb)        AS t_reb_min,         MAX(t_reb)        AS t_reb_max,
+                MIN(t_stl)        AS t_stl_min,         MAX(t_stl)        AS t_stl_max,
+                MIN(t_blk)        AS t_blk_min,         MAX(t_blk)        AS t_blk_max
+            FROM player_season_stats
+            WHERE season = :season
+        """), {'season': season})
+
+        row = result.fetchone()
+        if not row:
+            return {'season': season, 'ranges': {}}
+
+        cols = list(result.keys())
+        flat = {}
+        for k, v in zip(cols, row):
+            flat[k] = float(v) if isinstance(v, Decimal) else v
+
+        ranges = {}
+        for col in cols:
+            if col.endswith('_min'):
+                key = col[:-4]
+                ranges[key] = {'min': flat.get(f'{key}_min'), 'max': flat.get(f'{key}_max')}
+
+        return {'season': season, 'ranges': ranges}
+
+
 # Serve frontend — must be mounted last so /api routes take priority
 import os as _os
 _static_dir = _os.path.dirname(__file__)

@@ -603,43 +603,113 @@ function inchesToHeight(inches) {
 }
 
 // ── Stat definitions (sliders) ─────────────────────────────────────────────
-const STAT_DEFS_SHARED = [
+const STAT_DEFS_PERGAME = [
+    // RATING
     { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
     { key: 'gp',           label: 'GP',           group: 'RATING',      pct: false, decimals: 0 },
+    // PHYSICAL
     { key: 'age',          label: 'Age',          group: 'PHYSICAL',    pct: false, decimals: 0 },
     { key: 'height_in',    label: 'Height',       group: 'PHYSICAL',    pct: false, decimals: 0, formatVal: inchesToHeight },
     { key: 'weight',       label: 'Weight (lbs)', group: 'PHYSICAL',    pct: false, decimals: 0 },
+    // SCORING
+    { key: 'pts',          label: 'PPG',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'min',          label: 'MIN',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'fgm',          label: 'FGM',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'fga',          label: 'FGA',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'fg_pct',       label: 'FG%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'fg3m',         label: '3PM',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'fg3a',         label: '3PA',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'fg3_pct',      label: '3P%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'ftm',          label: 'FTM',          group: 'SCORING',     pct: false, decimals: 1 },
+    { key: 'fta',          label: 'FTA',          group: 'SCORING',     pct: false, decimals: 1 },
     { key: 'ft_pct',       label: 'FT%',          group: 'SCORING',     pct: true,  decimals: 1 },
-    { key: 'ts_pct',       label: 'TS%',          group: 'EFFICIENCY',  pct: true,  decimals: 1 },
+    { key: 'efg_pct',      label: 'eFG%',         group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'ts_pct',       label: 'TS%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    // PLAYMAKING
+    { key: 'ast',          label: 'APG',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'tov',          label: 'TOV',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'ast_pct',      label: 'AST%',         group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'tov_pct',      label: 'TOV%',         group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'ast_to_ratio', label: 'AST/TO',       group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'ppr',          label: 'PPR',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    // REBOUNDING
+    { key: 'reb',          label: 'RPG',          group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'off_reb',      label: 'ORB',          group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'def_reb',      label: 'DRB',          group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'orb_pct',      label: 'ORB%',         group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'drb_pct',      label: 'DRB%',         group: 'REBOUNDING',  pct: false, decimals: 1 },
+    // DEFENSE
+    { key: 'stl',          label: 'SPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'blk',          label: 'BPG',          group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'stl_pct',      label: 'STL%',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'blk_pct',      label: 'BLK%',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'drtg',         label: 'DRTG',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    // EFFICIENCY
     { key: 'per',          label: 'PER',          group: 'EFFICIENCY',  pct: false, decimals: 1 },
     { key: 'usg_pct',      label: 'USG%',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'ortg',         label: 'ORTG',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'pps',          label: 'PPS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
     { key: 'ws',           label: 'Win Shares',   group: 'EFFICIENCY',  pct: false, decimals: 2 },
-];
-const STAT_DEFS_PERGAME = [
-    ...STAT_DEFS_SHARED.slice(0, 5),
-    { key: 'pts',  label: 'PPG',  group: 'SCORING',    pct: false, decimals: 1 },
-    { key: 'min',  label: 'MIN',  group: 'SCORING',    pct: false, decimals: 1 },
-    ...STAT_DEFS_SHARED.slice(5, 8),
-    { key: 'ast',  label: 'APG',  group: 'PLAYMAKING', pct: false, decimals: 1 },
-    { key: 'tov',  label: 'TOV',  group: 'PLAYMAKING', pct: false, decimals: 1 },
-    { key: 'reb',  label: 'RPG',  group: 'REBOUNDING', pct: false, decimals: 1 },
-    { key: 'stl',  label: 'SPG',  group: 'DEFENSE',    pct: false, decimals: 1 },
-    { key: 'blk',  label: 'BPG',  group: 'DEFENSE',    pct: false, decimals: 1 },
-    ...STAT_DEFS_SHARED.slice(8),
+    { key: 'ows',          label: 'OWS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'dws',          label: 'DWS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'win_pct',      label: 'Win%',         group: 'EFFICIENCY',  pct: true,  decimals: 1 },
+    // MISC
+    { key: 'dbl_dbl',      label: 'Dbl-Dbl',      group: 'MISC',        pct: false, decimals: 0 },
+    { key: 'tpl_dbl',      label: 'Tpl-Dbl',      group: 'MISC',        pct: false, decimals: 0 },
+    { key: 'stl_to_ratio', label: 'STL/TO',       group: 'MISC',        pct: false, decimals: 2 },
 ];
 const STAT_DEFS_TOTALS = [
-    ...STAT_DEFS_SHARED.slice(0, 5),
-    { key: 't_pts', label: 'PTS',  group: 'SCORING',    pct: false, decimals: 0 },
-    { key: 't_min', label: 'MIN',  group: 'SCORING',    pct: false, decimals: 0 },
-    ...STAT_DEFS_SHARED.slice(5, 8),
-    { key: 't_ast', label: 'AST',  group: 'PLAYMAKING', pct: false, decimals: 0 },
-    { key: 't_tov', label: 'TO',   group: 'PLAYMAKING', pct: false, decimals: 0 },
-    { key: 't_reb', label: 'REB',  group: 'REBOUNDING', pct: false, decimals: 0 },
-    { key: 't_stl', label: 'STL',  group: 'DEFENSE',    pct: false, decimals: 0 },
-    { key: 't_blk', label: 'BLK',  group: 'DEFENSE',    pct: false, decimals: 0 },
-    ...STAT_DEFS_SHARED.slice(8),
+    // RATING
+    { key: 'final_rating', label: 'Rating',      group: 'RATING',      pct: false, decimals: 1 },
+    { key: 'gp',           label: 'GP',           group: 'RATING',      pct: false, decimals: 0 },
+    // PHYSICAL
+    { key: 'age',          label: 'Age',          group: 'PHYSICAL',    pct: false, decimals: 0 },
+    { key: 'height_in',    label: 'Height',       group: 'PHYSICAL',    pct: false, decimals: 0, formatVal: inchesToHeight },
+    { key: 'weight',       label: 'Weight (lbs)', group: 'PHYSICAL',    pct: false, decimals: 0 },
+    // SCORING
+    { key: 't_pts',        label: 'PTS',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 't_min',        label: 'MIN',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 't_fgm',        label: 'FGM',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 't_fga',        label: 'FGA',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 'fg_pct',       label: 'FG%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 't_fg3m',       label: '3PM',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 't_fg3a',       label: '3PA',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 'fg3_pct',      label: '3P%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 't_ftm',        label: 'FTM',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 't_fta',        label: 'FTA',          group: 'SCORING',     pct: false, decimals: 0 },
+    { key: 'ft_pct',       label: 'FT%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'efg_pct',      label: 'eFG%',         group: 'SCORING',     pct: true,  decimals: 1 },
+    { key: 'ts_pct',       label: 'TS%',          group: 'SCORING',     pct: true,  decimals: 1 },
+    // PLAYMAKING
+    { key: 't_ast',        label: 'AST',          group: 'PLAYMAKING',  pct: false, decimals: 0 },
+    { key: 't_tov',        label: 'TOV',          group: 'PLAYMAKING',  pct: false, decimals: 0 },
+    { key: 'ast_pct',      label: 'AST%',         group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'tov_pct',      label: 'TOV%',         group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'ast_to_ratio', label: 'AST/TO',       group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    { key: 'ppr',          label: 'PPR',          group: 'PLAYMAKING',  pct: false, decimals: 1 },
+    // REBOUNDING
+    { key: 't_reb',        label: 'REB',          group: 'REBOUNDING',  pct: false, decimals: 0 },
+    { key: 'orb_pct',      label: 'ORB%',         group: 'REBOUNDING',  pct: false, decimals: 1 },
+    { key: 'drb_pct',      label: 'DRB%',         group: 'REBOUNDING',  pct: false, decimals: 1 },
+    // DEFENSE
+    { key: 't_stl',        label: 'STL',          group: 'DEFENSE',     pct: false, decimals: 0 },
+    { key: 't_blk',        label: 'BLK',          group: 'DEFENSE',     pct: false, decimals: 0 },
+    { key: 'stl_pct',      label: 'STL%',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'blk_pct',      label: 'BLK%',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    { key: 'drtg',         label: 'DRTG',         group: 'DEFENSE',     pct: false, decimals: 1 },
+    // EFFICIENCY
+    { key: 'per',          label: 'PER',          group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'usg_pct',      label: 'USG%',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'ortg',         label: 'ORTG',         group: 'EFFICIENCY',  pct: false, decimals: 1 },
+    { key: 'pps',          label: 'PPS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'ws',           label: 'Win Shares',   group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'ows',          label: 'OWS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'dws',          label: 'DWS',          group: 'EFFICIENCY',  pct: false, decimals: 2 },
+    { key: 'win_pct',      label: 'Win%',         group: 'EFFICIENCY',  pct: true,  decimals: 1 },
+    // MISC
+    { key: 'dbl_dbl',      label: 'Dbl-Dbl',      group: 'MISC',        pct: false, decimals: 0 },
+    { key: 'tpl_dbl',      label: 'Tpl-Dbl',      group: 'MISC',        pct: false, decimals: 0 },
+    { key: 'stl_to_ratio', label: 'STL/TO',       group: 'MISC',        pct: false, decimals: 2 },
 ];
 
 // ── Variable stat columns shown in table ───────────────────────────────────
@@ -686,8 +756,16 @@ const COL_SETS = {
 function getStatDefs() { return displayMode === 'pergame' ? STAT_DEFS_PERGAME : STAT_DEFS_TOTALS; }
 function getCols()     { return COL_SETS[displayMode]; }
 
+const FETCH_SIZE = 200;
+const PAGE_SIZE = 100;
+
 const sliderState = {};
+let statRanges = {};
+let totalSeasonCount = 0;
 let allPlayers = [];
+let serverOffset = 0;
+let hasMoreData = true;
+let isFetchingMore = false;
 let currentSeason = '2025-26';
 let displayMode = 'pergame';
 let sortCol = 'final_rating';
@@ -695,7 +773,6 @@ let sortDir = -1;
 let activePositions = new Set();
 let activeClassYears = new Set();
 let currentPage = 1;
-const PAGE_SIZE = 100;
 let filteredPlayers = [];
 
 // ── Boot ──────────────────────────────────────────────────────────────────
@@ -720,13 +797,20 @@ async function loadPlayers() {
     document.getElementById('loading').style.display = 'block';
     document.getElementById('tableContainer').style.display = 'none';
 
+    allPlayers = [];
+    serverOffset = 0;
+    hasMoreData = true;
+    statRanges = {};
+    totalSeasonCount = 0;
+
     try {
-        const res = await fetch(`${API_BASE}/players/${currentSeason}?limit=15000`);
-        const data = await res.json();
-        allPlayers = data.data.map(p => ({
-            ...p,
-            height_in: parseHeightToInches(p.height),
-        }));
+        const [, rangesRes, countRes] = await Promise.all([
+            fetchBatch(),
+            fetch(`${API_BASE}/stat-ranges/${currentSeason}`).then(r => r.json()),
+            fetch(`${API_BASE}/player-count/${currentSeason}`).then(r => r.json()),
+        ]);
+        statRanges = rangesRes.ranges || {};
+        totalSeasonCount = countRes.count || 0;
 
         buildSliders();
         renderTableHeader();
@@ -742,6 +826,18 @@ async function loadPlayers() {
     }
 }
 
+async function fetchBatch() {
+    if (isFetchingMore || !hasMoreData) return;
+    isFetchingMore = true;
+    const res = await fetch(`${API_BASE}/players/${currentSeason}?limit=${FETCH_SIZE}&offset=${serverOffset}`);
+    const data = await res.json();
+    const batch = data.data.map(p => ({ ...p, height_in: parseHeightToInches(p.height) }));
+    allPlayers = [...allPlayers, ...batch];
+    serverOffset += batch.length;
+    hasMoreData = batch.length === FETCH_SIZE;
+    isFetchingMore = false;
+}
+
 // ── Sliders ───────────────────────────────────────────────────────────────
 function buildSliders() {
     const container = document.getElementById('sliderContainer');
@@ -749,14 +845,21 @@ function buildSliders() {
     let lastGroup = null;
 
     getStatDefs().forEach(def => {
-        const vals = allPlayers
-            .map(p => p[def.key] != null ? (def.pct ? Number(p[def.key]) * 100 : Number(p[def.key])) : null)
-            .filter(v => v != null);
+        let dataMin, dataMax;
+        const r = statRanges[def.key];
+        if (r && r.min != null && r.max != null) {
+            const scale = def.pct ? 100 : 1;
+            dataMin = Math.floor(Number(r.min) * scale * 10) / 10;
+            dataMax = Math.ceil(Number(r.max) * scale * 10) / 10;
+        } else {
+            const vals = allPlayers
+                .map(p => p[def.key] != null ? (def.pct ? Number(p[def.key]) * 100 : Number(p[def.key])) : null)
+                .filter(v => v != null);
+            if (!vals.length) return;
+            dataMin = Math.floor(Math.min(...vals) * 10) / 10;
+            dataMax = Math.ceil(Math.max(...vals) * 10) / 10;
+        }
 
-        if (!vals.length) return;
-
-        const dataMin = Math.floor(Math.min(...vals) * 10) / 10;
-        const dataMax = Math.ceil(Math.max(...vals) * 10) / 10;
         const prev = sliderState[def.key];
         sliderState[def.key] = { dataMin, dataMax, curMin: prev ? prev.curMin : dataMin, curMax: prev ? prev.curMax : dataMax };
 
@@ -925,7 +1028,7 @@ function buildClassChips() {
 }
 
 // ── Filter + render ───────────────────────────────────────────────────────
-function applyFilters() {
+function computeFiltered() {
     const search = document.getElementById('searchBox').value.toLowerCase().trim();
 
     let filtered = allPlayers.filter(p => {
@@ -953,10 +1056,27 @@ function applyFilters() {
         return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
     });
 
-    filteredPlayers = filtered;
+    return filtered;
+}
+
+function isFiltered() {
+    if (document.getElementById('searchBox').value.trim()) return true;
+    if (activePositions.size > 0 || activeClassYears.size > 0) return true;
+    for (const def of getStatDefs()) {
+        const s = sliderState[def.key];
+        if (s && (s.curMin !== s.dataMin || s.curMax !== s.dataMax)) return true;
+    }
+    return false;
+}
+
+function applyFilters() {
+    filteredPlayers = computeFiltered();
     currentPage = 1;
+    const filtered = isFiltered();
+    const displayCount = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
+    const suffix = filtered && hasMoreData ? '+' : '';
     document.getElementById('resultsCount').textContent =
-        `${filtered.length.toLocaleString()} player${filtered.length !== 1 ? 's' : ''}`;
+        `${displayCount.toLocaleString()}${suffix} player${displayCount !== 1 ? 's' : ''}`;
     renderPage();
 }
 
@@ -964,11 +1084,10 @@ function fmt(v, d = 1)  { return v != null ? Number(v).toFixed(d) : '-'; }
 function fmtP(v, d = 1) { return v != null ? (Number(v) * 100).toFixed(d) + '%' : '-'; }
 
 function renderPage() {
-    const totalPages = Math.ceil(filteredPlayers.length / PAGE_SIZE);
     const start = (currentPage - 1) * PAGE_SIZE;
     const pageRows = filteredPlayers.slice(start, start + PAGE_SIZE);
     renderTable(pageRows, start);
-    renderPagination(totalPages);
+    renderPagination();
     updateSortHighlight();
     if (currentView === 'map') updateMapMarkers();
 }
@@ -994,6 +1113,7 @@ function renderTableHeader() {
         <th data-col="final_rating" class="${sortCol === 'final_rating' ? (sortDir === -1 ? 'sort-desc' : 'sort-asc') : ''}">Rating</th>
         <th data-col="position">Pos</th>
         <th data-col="class_year">Yr</th>
+        <th data-col="age">Age</th>
         <th data-col="height_in">Ht</th>
         <th data-col="weight">Wt</th>
         <th data-col="gp">GP</th>
@@ -1037,6 +1157,7 @@ function renderTable(players, offset = 0) {
             <td data-col="final_rating" class="rating-cell">${fmt(p.final_rating)}</td>
             <td data-col="position">${p.position || '-'}</td>
             <td data-col="class_year" style="color:#aaa">${p.class_year || '-'}</td>
+            <td data-col="age" style="color:#aaa">${p.age ?? '-'}</td>
             <td data-col="height_in" style="color:#aaa">${p.height || '-'}</td>
             <td data-col="weight" style="color:#aaa">${p.weight ?? '-'}</td>
             <td data-col="gp">${p.gp ?? '-'}</td>
@@ -1057,15 +1178,21 @@ function setDisplayMode(mode) {
     applyFilters();
 }
 
-function renderPagination(totalPages) {
+function renderPagination() {
     const header = document.getElementById('paginationHeader');
     const el = document.getElementById('pagination');
     header.style.display = 'flex';
+
+    const filtered = isFiltered();
+    const displayTotal = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
+    const totalPages = Math.ceil(displayTotal / PAGE_SIZE);
+
     el.style.display = totalPages <= 1 ? 'none' : '';
     if (totalPages <= 1) return;
 
     const start = (currentPage - 1) * PAGE_SIZE + 1;
     const end = Math.min(currentPage * PAGE_SIZE, filteredPlayers.length);
+    const ofSuffix = filtered && hasMoreData ? '+' : '';
 
     // Show up to 7 page buttons around current page
     const pages = [];
@@ -1082,13 +1209,23 @@ function renderPagination(totalPages) {
         html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
         prev = p;
     });
-    html += `<button class="pg-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>`;
-    html += `<span class="pg-info">${start}–${end} of ${filteredPlayers.length.toLocaleString()}</span>`;
+    if (filtered && hasMoreData) html += `<span class="pg-info">…</span>`;
+    const nextDisabled = currentPage === totalPages && (!hasMoreData || !filtered);
+    html += `<button class="pg-btn" ${nextDisabled ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>`;
+    html += `<span class="pg-info">${start}–${end} of ${displayTotal.toLocaleString()}${ofSuffix}</span>`;
 
     el.innerHTML = html;
 }
 
-function goPage(page) {
+async function goPage(page) {
+    const neededCount = page * PAGE_SIZE;
+    if (neededCount > filteredPlayers.length && hasMoreData && !isFetchingMore) {
+        await fetchBatch();
+        filteredPlayers = computeFiltered();
+        const suffix = hasMoreData ? '+' : '';
+        document.getElementById('resultsCount').textContent =
+            `${filteredPlayers.length.toLocaleString()}${suffix} player${filteredPlayers.length !== 1 ? 's' : ''}`;
+    }
     currentPage = page;
     renderPage();
     document.getElementById('tableContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
