@@ -149,45 +149,26 @@
             border-radius: 2px;
         }
 
-        .range-wrap input[type=range] {
+        .range-thumb {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            background: none;
-            pointer-events: none;
-            outline: none;
-        }
-        .range-wrap input[type=range]:first-of-type { z-index: 2; }
-        .range-wrap input[type=range]:last-of-type  { z-index: 3; }
-
-        .range-wrap input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
             width: 14px;
             height: 14px;
             border-radius: 50%;
             background: white;
             border: 2px solid #667eea;
-            cursor: pointer;
-            pointer-events: all;
+            cursor: grab;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transform: translateX(-50%);
+            top: 50%;
+            margin-top: -7px;
+            touch-action: none;
             transition: border-color 0.12s, box-shadow 0.12s;
         }
-
-        .range-wrap input[type=range]::-webkit-slider-thumb:hover {
+        .range-thumb:hover {
             border-color: #764ba2;
             box-shadow: 0 0 0 3px rgba(102,126,234,0.18);
         }
-
-        .range-wrap input[type=range]::-moz-range-thumb {
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #667eea;
-            cursor: pointer;
-            pointer-events: all;
-        }
+        .range-thumb:active { cursor: grabbing; }
 
         .range-bounds {
             display: flex;
@@ -789,12 +770,12 @@ function buildSliders() {
                 </span>
                 <span class="slider-current" id="${def.key}-current">any</span>
             </div>
-            <div class="range-wrap">
+            <div class="range-wrap" id="${def.key}-wrap">
                 <div class="range-track">
                     <div class="range-fill" id="${def.key}-fill"></div>
                 </div>
-                <input type="range" id="${def.key}-min" min="${dataMin}" max="${dataMax}" value="${sliderState[def.key].curMin}" step="any">
-                <input type="range" id="${def.key}-max" min="${dataMin}" max="${dataMax}" value="${sliderState[def.key].curMax}" step="any">
+                <div class="range-thumb" id="${def.key}-min-thumb"></div>
+                <div class="range-thumb" id="${def.key}-max-thumb"></div>
             </div>
             <div class="range-bounds">
                 <span>${fmtBound(dataMin)}</span>
@@ -803,27 +784,46 @@ function buildSliders() {
         `;
         container.appendChild(row);
 
-        document.getElementById(`${def.key}-min`).addEventListener('input', () => onSlider(def, 'min'));
-        document.getElementById(`${def.key}-max`).addEventListener('input', () => onSlider(def, 'max'));
+        initThumb(def, 'min');
+        initThumb(def, 'max');
         document.getElementById(`${def.key}-clear`).addEventListener('click', () => clearSlider(def));
         updateSliderUI(def);
     });
 }
 
-function onSlider(def, handle) {
-    const minEl = document.getElementById(`${def.key}-min`);
-    const maxEl = document.getElementById(`${def.key}-max`);
-    let minVal = parseFloat(minEl.value);
-    let maxVal = parseFloat(maxEl.value);
+function initThumb(def, handle) {
+    const thumbEl = document.getElementById(`${def.key}-${handle}-thumb`);
+    const wrapEl  = document.getElementById(`${def.key}-wrap`);
+    const step = def.decimals === 0 ? 1 : def.pct ? 1 : Math.pow(10, -def.decimals);
 
-    if (handle === 'min' && minVal > maxVal) { minEl.value = maxVal; minVal = maxVal; }
-    if (handle === 'max' && maxVal < minVal) { maxEl.value = minVal; maxVal = minVal; }
+    thumbEl.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        thumbEl.setPointerCapture(e.pointerId);
 
-    sliderState[def.key].curMin = minVal;
-    sliderState[def.key].curMax = maxVal;
+        const onMove = e => {
+            const rect = wrapEl.getBoundingClientRect();
+            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            const s = sliderState[def.key];
+            const raw = s.dataMin + pct * (s.dataMax - s.dataMin);
+            let val = Math.round(raw / step) * step;
+            // Fix floating-point rounding (e.g. 0.30000000000000004)
+            val = parseFloat(val.toFixed(def.decimals));
+            val = Math.max(s.dataMin, Math.min(s.dataMax, val));
 
-    updateSliderUI(def);
-    applyFilters();
+            if (handle === 'min') {
+                s.curMin = Math.min(val, s.curMax);
+            } else {
+                s.curMax = Math.max(val, s.curMin);
+            }
+            updateSliderUI(def);
+            applyFilters();
+        };
+
+        thumbEl.addEventListener('pointermove', onMove);
+        thumbEl.addEventListener('pointerup', () => {
+            thumbEl.removeEventListener('pointermove', onMove);
+        }, { once: true });
+    });
 }
 
 function updateSliderUI(def) {
@@ -837,6 +837,8 @@ function updateSliderUI(def) {
 
     document.getElementById(`${def.key}-fill`).style.cssText =
         `left:${leftPct}%; width:${rightPct - leftPct}%`;
+    document.getElementById(`${def.key}-min-thumb`).style.left = `${leftPct}%`;
+    document.getElementById(`${def.key}-max-thumb`).style.left = `${rightPct}%`;
 
     const fmtV = v => def.formatVal ? def.formatVal(v) : def.pct ? v.toFixed(def.decimals) + '%' : v.toFixed(def.decimals);
     const isDefault = curMin === dataMin && curMax === dataMax;
@@ -845,15 +847,6 @@ function updateSliderUI(def) {
 
     const clearEl = document.getElementById(`${def.key}-clear`);
     if (clearEl) clearEl.style.display = isDefault ? 'none' : 'inline-block';
-
-    // Fix z-index: when min thumb is near/at max, bring min slider on top so it's draggable
-    const minEl = document.getElementById(`${def.key}-min`);
-    const maxEl = document.getElementById(`${def.key}-max`);
-    if (minEl && maxEl) {
-        const proximity = (curMax - curMin) / span;
-        minEl.style.zIndex = proximity < 0.05 ? '5' : '';
-        maxEl.style.zIndex = proximity < 0.05 ? '4' : '';
-    }
 }
 
 function clearSlider(def) {
@@ -861,8 +854,6 @@ function clearSlider(def) {
     if (!s) return;
     s.curMin = s.dataMin;
     s.curMax = s.dataMax;
-    document.getElementById(`${def.key}-min`).value = s.dataMin;
-    document.getElementById(`${def.key}-max`).value = s.dataMax;
     updateSliderUI(def);
     applyFilters();
 }
@@ -1094,10 +1085,6 @@ function resetFilters() {
         if (!s) return;
         s.curMin = s.dataMin;
         s.curMax = s.dataMax;
-        const minEl = document.getElementById(`${def.key}-min`);
-        const maxEl = document.getElementById(`${def.key}-max`);
-        if (minEl) minEl.value = s.dataMin;
-        if (maxEl) maxEl.value = s.dataMax;
         updateSliderUI(def);
     });
     activePositions.clear();
@@ -1271,10 +1258,6 @@ function applyPlayerFilters(playerId) {
         if (!s) return;
         s.curMin = s.dataMin;
         s.curMax = s.dataMax;
-        const minEl = document.getElementById(`${def.key}-min`);
-        const maxEl = document.getElementById(`${def.key}-max`);
-        if (minEl) minEl.value = s.dataMin;
-        if (maxEl) maxEl.value = s.dataMax;
         updateSliderUI(def);
     });
     activePositions.clear();
@@ -1287,11 +1270,8 @@ function applyPlayerFilters(playerId) {
         const s = sliderState[def.key];
         if (!s || p[def.key] == null) return;
         const playerVal = def.pct ? Number(p[def.key]) * 100 : Number(p[def.key]);
-        // Clamp to data range
         const clamped = Math.max(s.dataMin, Math.min(s.dataMax, playerVal));
         s.curMin = clamped;
-        const minEl = document.getElementById(`${def.key}-min`);
-        if (minEl) minEl.value = clamped;
         updateSliderUI(def);
     });
 
