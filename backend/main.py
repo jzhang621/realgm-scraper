@@ -361,10 +361,15 @@ def get_players(
         params['limit'] = limit
         params['offset'] = offset
 
+        t0 = time.time()
         result = conn.execute(text(query), params)
+        t1 = time.time()
         rows = result.fetchall()
+        t2 = time.time()
         data = rows_to_dict(rows, result)
         data = json.loads(json.dumps(data, cls=DecimalEncoder))
+        t3 = time.time()
+        print(f"[players] execute={t1-t0:.2f}s  fetchall={t2-t1:.2f}s  serialize={t3-t2:.2f}s  total={t3-t0:.2f}s", flush=True)
 
         return {"season": season, "count": len(data), "data": data}
 
