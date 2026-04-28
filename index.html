@@ -968,13 +968,13 @@ function renderTableHeader() {
         <th style="cursor:default;width:28px" title="Find similar players"></th>
         <th data-col="full_name" style="min-width:145px">Player</th>
         <th data-col="team" style="min-width:115px">Team</th>
+        <th data-col="final_rating" class="${sortCol === 'final_rating' ? (sortDir === -1 ? 'sort-desc' : 'sort-asc') : ''}">Rating</th>
         <th data-col="position">Pos</th>
         <th data-col="class_year">Yr</th>
         <th data-col="height_in">Ht</th>
         <th data-col="weight">Wt</th>
         <th data-col="gp">GP</th>
         ${cols.map(c => `<th data-col="${c.col}">${c.label}</th>`).join('')}
-        <th data-col="final_rating" class="${sortCol === 'final_rating' ? (sortDir === -1 ? 'sort-desc' : 'sort-asc') : ''}">Rating</th>
     `;
     const thead = document.getElementById('tableHead');
     thead.innerHTML = '';
@@ -1011,13 +1011,13 @@ function renderTable(players, offset = 0) {
             <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
             <td><span class="player-name">${p.full_name}</span></td>
             <td>${p.team || '-'}</td>
+            <td class="rating-cell">${fmt(p.final_rating)}</td>
             <td>${p.position || '-'}</td>
             <td style="color:#aaa">${p.class_year || '-'}</td>
             <td style="color:#aaa">${p.height || '-'}</td>
             <td style="color:#aaa">${p.weight ?? '-'}</td>
             <td>${p.gp ?? '-'}</td>
             ${varCells}
-            <td class="rating-cell">${fmt(p.final_rating)}</td>
         `;
         tbody.appendChild(tr);
     });
