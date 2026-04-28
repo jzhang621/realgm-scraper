@@ -1045,7 +1045,8 @@ function setDisplayMode(mode) {
 function renderPagination(totalPages) {
     const header = document.getElementById('paginationHeader');
     const el = document.getElementById('pagination');
-    header.style.display = totalPages <= 1 ? 'none' : 'flex';
+    header.style.display = 'flex';
+    el.style.display = totalPages <= 1 ? 'none' : '';
     if (totalPages <= 1) return;
 
     const start = (currentPage - 1) * PAGE_SIZE + 1;
@@ -1345,7 +1346,7 @@ function setView(view) {
 
     if (view === 'table') {
         tableEl.style.display = 'block';
-        headerEl.style.display = filteredPlayers.length > PAGE_SIZE ? 'flex' : 'none';
+        headerEl.style.display = 'flex';
         mapEl.style.display = 'none';
     } else {
         tableEl.style.display = 'none';
