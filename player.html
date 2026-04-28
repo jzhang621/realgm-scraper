@@ -388,7 +388,7 @@ const PLAYER_ID = params.get('id');
 
 let profileData = null;
 let selectedSeason = null;
-let careerMode = 'pergame';  // 'pergame' | 'advanced'
+let careerMode = 'pergame';  // 'pergame' | 'totals' | 'advanced'
 let simSegment = 'production';
 
 // ── Boot ──────────────────────────────────────────────────────────────────
@@ -534,6 +534,7 @@ function renderCareerSection(seasons) {
     const toggles = `
         <div class="stat-toggle">
             <button class="stat-toggle-btn ${careerMode==='pergame'?'active':''}" onclick="setCareerMode('pergame')">Per Game</button>
+            <button class="stat-toggle-btn ${careerMode==='totals'?'active':''}" onclick="setCareerMode('totals')">Totals</button>
             <button class="stat-toggle-btn ${careerMode==='advanced'?'active':''}" onclick="setCareerMode('advanced')">Advanced</button>
         </div>`;
 
@@ -560,6 +561,13 @@ function careerHeaders() {
             <th>MIN</th><th>PTS</th><th>REB</th><th>AST</th>
             <th>STL</th><th>BLK</th><th>TOV</th>
             <th>FG%</th><th>3PM</th><th>3PA</th><th>3P%</th><th>FT%</th>
+            <th>Rating</th>`;
+    } else if (careerMode === 'totals') {
+        return `
+            <th>Season</th><th>Team</th><th>Cl</th><th>GP</th>
+            <th>MIN</th><th>PTS</th><th>REB</th><th>AST</th>
+            <th>STL</th><th>BLK</th><th>TOV</th>
+            <th>FGM</th><th>FGA</th><th>3PM</th><th>3PA</th><th>FTM</th><th>FTA</th>
             <th>Rating</th>`;
     } else {
         return `
@@ -597,6 +605,17 @@ function careerRow(s) {
             <td>${n(pg?.stl)}</td><td>${n(pg?.blk)}</td><td>${n(pg?.tov)}</td>
             <td>${pct(pg?.fg_pct)}</td><td>${n(pg?.fg3m)}</td><td>${n(pg?.fg3a)}</td>
             <td>${pct(pg?.fg3_pct)}</td><td>${pct(pg?.ft_pct)}</td>
+            ${rating}`;
+    } else if (careerMode === 'totals') {
+        cells = `
+            <td class="season-cell">${s.season}</td>
+            <td class="team-cell">${team}${level}</td>
+            <td>${cls}</td><td>${gp}</td>
+            <td>${n(pg?.t_min, 0)}</td><td>${n(pg?.t_pts, 0)}</td><td>${n(pg?.t_reb, 0)}</td><td>${n(pg?.t_ast, 0)}</td>
+            <td>${n(pg?.t_stl, 0)}</td><td>${n(pg?.t_blk, 0)}</td><td>${n(pg?.t_tov, 0)}</td>
+            <td>${n(pg?.t_fgm, 0)}</td><td>${n(pg?.t_fga, 0)}</td>
+            <td>${n(pg?.t_fg3m, 0)}</td><td>${n(pg?.t_fg3a, 0)}</td>
+            <td>${n(pg?.t_ftm, 0)}</td><td>${n(pg?.t_fta, 0)}</td>
             ${rating}`;
     } else {
         cells = `
