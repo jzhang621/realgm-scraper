@@ -210,7 +210,7 @@
         /* ── Reset button ── */
         .btn-reset {
             width: 100%;
-            margin-top: 16px;
+            margin-top: 8px;
             padding: 7px;
             border: 2px solid #e8e8e8;
             border-radius: 8px;
@@ -526,6 +526,8 @@
             <input type="text" id="searchBox" placeholder="Player name...">
         </div>
 
+        <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
+
         <!-- Sliders injected here -->
         <div id="sliderContainer"></div>
 
@@ -537,7 +539,6 @@
         <div class="slider-group-label">Class Year</div>
         <div class="pos-group" id="classChips"></div>
 
-        <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
     </aside>
 
     <!-- ── Main ── -->
