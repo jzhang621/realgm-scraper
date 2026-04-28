@@ -784,32 +784,43 @@ function buildSliders() {
         `;
         container.appendChild(row);
 
-        initThumb(def, 'min');
-        initThumb(def, 'max');
+        initThumb(def);
         document.getElementById(`${def.key}-clear`).addEventListener('click', () => clearSlider(def));
         updateSliderUI(def);
     });
 }
 
-function initThumb(def, handle) {
-    const thumbEl = document.getElementById(`${def.key}-${handle}-thumb`);
-    const wrapEl  = document.getElementById(`${def.key}-wrap`);
+function initThumb(def) {
+    const wrapEl = document.getElementById(`${def.key}-wrap`);
     const step = def.decimals === 0 ? 1 : def.pct ? 1 : Math.pow(10, -def.decimals);
 
-    thumbEl.addEventListener('pointerdown', e => {
+    const pctToVal = (pct) => {
+        const s = sliderState[def.key];
+        let val = s.dataMin + pct * (s.dataMax - s.dataMin);
+        val = Math.round(val / step) * step;
+        val = parseFloat(val.toFixed(def.decimals));
+        return Math.max(s.dataMin, Math.min(s.dataMax, val));
+    };
+
+    wrapEl.addEventListener('pointerdown', e => {
         e.preventDefault();
-        thumbEl.setPointerCapture(e.pointerId);
+        wrapEl.setPointerCapture(e.pointerId);
+
+        const rect = wrapEl.getBoundingClientRect();
+        const clickPct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const s = sliderState[def.key];
+        const span = s.dataMax - s.dataMin || 1;
+        const minPct = (s.curMin - s.dataMin) / span;
+        const maxPct = (s.curMax - s.dataMin) / span;
+
+        // Pick the closest thumb; if tied, prefer min when clicking left, max when clicking right
+        const distMin = Math.abs(clickPct - minPct);
+        const distMax = Math.abs(clickPct - maxPct);
+        let handle = distMin <= distMax ? 'min' : 'max';
 
         const onMove = e => {
-            const rect = wrapEl.getBoundingClientRect();
             const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            const s = sliderState[def.key];
-            const raw = s.dataMin + pct * (s.dataMax - s.dataMin);
-            let val = Math.round(raw / step) * step;
-            // Fix floating-point rounding (e.g. 0.30000000000000004)
-            val = parseFloat(val.toFixed(def.decimals));
-            val = Math.max(s.dataMin, Math.min(s.dataMax, val));
-
+            const val = pctToVal(pct);
             if (handle === 'min') {
                 s.curMin = Math.min(val, s.curMax);
             } else {
@@ -819,10 +830,13 @@ function initThumb(def, handle) {
             applyFilters();
         };
 
-        thumbEl.addEventListener('pointermove', onMove);
-        thumbEl.addEventListener('pointerup', () => {
-            thumbEl.removeEventListener('pointermove', onMove);
+        wrapEl.addEventListener('pointermove', onMove);
+        wrapEl.addEventListener('pointerup', () => {
+            wrapEl.removeEventListener('pointermove', onMove);
         }, { once: true });
+
+        // Fire immediately so a click (no move) still updates
+        onMove(e);
     });
 }
 
