@@ -317,6 +317,8 @@
         th:hover { background: rgba(255,255,255,0.12); }
         th.sort-asc::after  { content: ' ↑'; }
         th.sort-desc::after { content: ' ↓'; }
+        td.sort-col { background: rgba(102, 126, 234, 0.06); }
+        th.sort-asc, th.sort-desc { background: rgba(255,255,255,0.18); }
 
         td {
             padding: 7px 9px;
@@ -952,7 +954,13 @@ function renderPage() {
     const pageRows = filteredPlayers.slice(start, start + PAGE_SIZE);
     renderTable(pageRows, start);
     renderPagination(totalPages);
+    updateSortHighlight();
     if (currentView === 'map') updateMapMarkers();
+}
+
+function updateSortHighlight() {
+    document.querySelectorAll('td.sort-col').forEach(el => el.classList.remove('sort-col'));
+    document.querySelectorAll(`td[data-col="${sortCol}"]`).forEach(el => el.classList.add('sort-col'));
 }
 
 function fmtCol(c, val) {
@@ -1005,18 +1013,18 @@ function renderTable(players, offset = 0) {
     players.forEach((p, i) => {
         const tr = document.createElement('tr');
         tr.addEventListener('click', () => window.location.href = `/player.html?id=${p.player_id}`);
-        const varCells = cols.map(c => `<td>${fmtCol(c, p[c.col])}</td>`).join('');
+        const varCells = cols.map(c => `<td data-col="${c.col}">${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
             <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
-            <td><span class="player-name">${p.full_name}</span></td>
-            <td>${p.team || '-'}</td>
-            <td class="rating-cell">${fmt(p.final_rating)}</td>
-            <td>${p.position || '-'}</td>
-            <td style="color:#aaa">${p.class_year || '-'}</td>
-            <td style="color:#aaa">${p.height || '-'}</td>
-            <td style="color:#aaa">${p.weight ?? '-'}</td>
-            <td>${p.gp ?? '-'}</td>
+            <td data-col="full_name"><span class="player-name">${p.full_name}</span></td>
+            <td data-col="team">${p.team || '-'}</td>
+            <td data-col="final_rating" class="rating-cell">${fmt(p.final_rating)}</td>
+            <td data-col="position">${p.position || '-'}</td>
+            <td data-col="class_year" style="color:#aaa">${p.class_year || '-'}</td>
+            <td data-col="height_in" style="color:#aaa">${p.height || '-'}</td>
+            <td data-col="weight" style="color:#aaa">${p.weight ?? '-'}</td>
+            <td data-col="gp">${p.gp ?? '-'}</td>
             ${varCells}
         `;
         tbody.appendChild(tr);
