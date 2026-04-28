@@ -359,6 +359,25 @@
 
         .loading { text-align: center; padding: 50px; font-size: 1.1em; color: #666; }
 
+        /* ── Checkbox column ── */
+        .cb-col { width: 28px; text-align: center !important; padding: 7px 4px !important; }
+        .cb-col input[type=checkbox] { cursor: pointer; accent-color: #667eea; width: 14px; height: 14px; }
+
+        /* ── Export button ── */
+        .export-btn {
+            padding: 5px 12px;
+            border: 1.5px solid #10b981;
+            border-radius: 6px;
+            background: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #10b981;
+            cursor: pointer;
+            transition: all 0.12s;
+            white-space: nowrap;
+        }
+        .export-btn:hover { background: #10b981; color: white; }
+
         /* ── View toggle ── */
         .view-toggle {
             display: flex;
@@ -552,6 +571,7 @@
                 <button class="toggle-btn active" id="btnTable" onclick="setView('table')">Table</button>
                 <button class="toggle-btn" id="btnMap" onclick="setView('map')">Map</button>
             </div>
+            <button class="export-btn" id="exportBtn" onclick="exportToCSV()" style="display:none">Export CSV (<span id="exportCount">0</span>)</button>
             <span class="results-count" id="resultsCount"></span>
         </div>
 
@@ -775,6 +795,95 @@ let activeClassYears = new Set();
 let currentPage = 1;
 let filteredPlayers = [];
 
+let selectedPlayerIds = new Set();
+
+const EXPORT_COLS = [
+    { key: 'full_name',     label: 'Player' },
+    { key: 'team',          label: 'Team' },
+    { key: 'position',      label: 'Position' },
+    { key: 'pos_group',     label: 'Pos Group' },
+    { key: 'class_year',    label: 'Year' },
+    { key: 'age',           label: 'Age' },
+    { key: 'height',        label: 'Height' },
+    { key: 'weight',        label: 'Weight (lbs)' },
+    { key: 'hometown',      label: 'Hometown' },
+    { key: 'gp',            label: 'GP' },
+    { key: 'final_rating',  label: 'Rating' },
+    { key: 'min',           label: 'MIN' },
+    { key: 'pts',           label: 'PPG' },
+    { key: 'reb',           label: 'RPG' },
+    { key: 'ast',           label: 'APG' },
+    { key: 'stl',           label: 'SPG' },
+    { key: 'blk',           label: 'BPG' },
+    { key: 'tov',           label: 'TOV' },
+    { key: 'fg_pct',        label: 'FG%',   pct: true },
+    { key: 'fg3m',          label: '3PM' },
+    { key: 'fg3a',          label: '3PA' },
+    { key: 'fg3_pct',       label: '3P%',   pct: true },
+    { key: 'ftm',           label: 'FTM' },
+    { key: 'fta',           label: 'FTA' },
+    { key: 'ft_pct',        label: 'FT%',   pct: true },
+    { key: 'efg_pct',       label: 'eFG%',  pct: true },
+    { key: 'ts_pct',        label: 'TS%',   pct: true },
+    { key: 'per',           label: 'PER' },
+    { key: 'usg_pct',       label: 'USG%' },
+    { key: 'ortg',          label: 'ORTG' },
+    { key: 'drtg',          label: 'DRTG' },
+    { key: 'orb_pct',       label: 'ORB%' },
+    { key: 'drb_pct',       label: 'DRB%' },
+    { key: 'ast_pct',       label: 'AST%' },
+    { key: 'tov_pct',       label: 'TOV%' },
+    { key: 'stl_pct',       label: 'STL%' },
+    { key: 'blk_pct',       label: 'BLK%' },
+    { key: 'ast_to_ratio',  label: 'AST/TO' },
+    { key: 'stl_to_ratio',  label: 'STL/TO' },
+    { key: 'ws',            label: 'Win Shares' },
+    { key: 'ows',           label: 'OWS' },
+    { key: 'dws',           label: 'DWS' },
+    { key: 'win_pct',       label: 'Win%',  pct: true },
+    { key: 'pps',           label: 'PPS' },
+    { key: 'ppr',           label: 'PPR' },
+    { key: 'dbl_dbl',       label: 'Dbl-Dbl' },
+    { key: 'tpl_dbl',       label: 'Tpl-Dbl' },
+    { key: 't_min',         label: 'Total MIN' },
+    { key: 't_pts',         label: 'Total PTS' },
+    { key: 't_reb',         label: 'Total REB' },
+    { key: 't_ast',         label: 'Total AST' },
+    { key: 't_stl',         label: 'Total STL' },
+    { key: 't_blk',         label: 'Total BLK' },
+    { key: 't_tov',         label: 'Total TOV' },
+];
+
+function updateExportButton() {
+    const n = selectedPlayerIds.size;
+    document.getElementById('exportBtn').style.display = n > 0 ? '' : 'none';
+    document.getElementById('exportCount').textContent = n;
+}
+
+function exportToCSV() {
+    const players = allPlayers.filter(p => selectedPlayerIds.has(p.player_id));
+    if (!players.length) return;
+
+    const header = EXPORT_COLS.map(c => `"${c.label}"`).join(',');
+    const rows = players.map(p =>
+        EXPORT_COLS.map(c => {
+            let v = p[c.key];
+            if (v == null) return '';
+            if (c.pct) v = (Number(v) * 100).toFixed(1);
+            return `"${v}"`;
+        }).join(',')
+    );
+
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nil-pro-${currentSeason}-${players.length}players.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('seasonSelect').addEventListener('change', e => {
@@ -806,6 +915,8 @@ async function loadPlayers() {
     hasMoreData = true;
     statRanges = {};
     totalSeasonCount = 0;
+    selectedPlayerIds.clear();
+    updateExportButton();
 
     try {
         const [, rangesRes, countRes] = await Promise.all([
@@ -1110,6 +1221,7 @@ function renderTableHeader() {
     const cols = getCols();
     const tr = document.createElement('tr');
     tr.innerHTML = `
+        <th class="cb-col" style="cursor:default"><input type="checkbox" id="selectAllCb" title="Select all on page"></th>
         <th style="cursor:default">#</th>
         <th style="cursor:default;width:28px" title="Find similar players"></th>
         <th data-col="full_name" style="min-width:145px">Player</th>
@@ -1127,6 +1239,17 @@ function renderTableHeader() {
     thead.innerHTML = '';
     thead.appendChild(tr);
 
+    // Select-all checkbox
+    document.getElementById('selectAllCb').addEventListener('click', e => {
+        e.stopPropagation();
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const pageIds = filteredPlayers.slice(start, start + PAGE_SIZE).map(p => p.player_id);
+        const allChecked = pageIds.every(id => selectedPlayerIds.has(id));
+        pageIds.forEach(id => allChecked ? selectedPlayerIds.delete(id) : selectedPlayerIds.add(id));
+        updateExportButton();
+        renderPage();
+    });
+
     // Re-attach sort listeners
     thead.querySelectorAll('th[data-col]').forEach(th => {
         th.addEventListener('click', async () => {
@@ -1137,7 +1260,6 @@ function renderTableHeader() {
             th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
             await applyFilters();
         });
-        // Mark active sort col
         if (th.dataset.col === sortCol) {
             th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
         }
@@ -1149,11 +1271,20 @@ function renderTable(players, offset = 0) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
 
+    const pageIds = players.map(p => p.player_id);
+    const allChecked = pageIds.length > 0 && pageIds.every(id => selectedPlayerIds.has(id));
+    const selectAllCb = document.getElementById('selectAllCb');
+    if (selectAllCb) selectAllCb.checked = allChecked;
+
     players.forEach((p, i) => {
+        const checked = selectedPlayerIds.has(p.player_id);
         const tr = document.createElement('tr');
         tr.addEventListener('click', () => window.location.href = `/player.html?id=${p.player_id}`);
         const varCells = cols.map(c => `<td data-col="${c.col}">${fmtCol(c, p[c.col])}</td>`).join('');
         tr.innerHTML = `
+            <td class="cb-col" onclick="event.stopPropagation()">
+                <input type="checkbox" data-id="${p.player_id}" ${checked ? 'checked' : ''}>
+            </td>
             <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
             <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
             <td data-col="full_name"><span class="player-name">${p.full_name}</span></td>
@@ -1167,6 +1298,14 @@ function renderTable(players, offset = 0) {
             <td data-col="gp">${p.gp ?? '-'}</td>
             ${varCells}
         `;
+        // Checkbox change handler
+        tr.querySelector('input[type=checkbox]').addEventListener('change', e => {
+            const id = Number(e.target.dataset.id);
+            e.target.checked ? selectedPlayerIds.add(id) : selectedPlayerIds.delete(id);
+            const allNowChecked = pageIds.every(id => selectedPlayerIds.has(id));
+            if (selectAllCb) selectAllCb.checked = allNowChecked;
+            updateExportButton();
+        });
         tbody.appendChild(tr);
     });
 }
