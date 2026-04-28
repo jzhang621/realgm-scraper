@@ -788,7 +788,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('searchBox').value = '';
         loadPlayers();
     });
-    document.getElementById('searchBox').addEventListener('input', applyFilters);
+    let searchDebounce = null;
+    document.getElementById('searchBox').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(applyFilters, 300);
+    });
     loadPlayers();
 });
 
@@ -826,12 +830,36 @@ async function loadPlayers() {
     }
 }
 
+function buildFilterParams() {
+    const params = new URLSearchParams();
+    const search = document.getElementById('searchBox').value.trim();
+    if (search) params.set('search', search);
+    if (activePositions.size > 0) params.set('pos_group', [...activePositions].join(','));
+    if (activeClassYears.size > 0) params.set('class_year', [...activeClassYears].join(','));
+
+    const seen = new Set();
+    for (const def of getStatDefs()) {
+        if (seen.has(def.key)) continue;
+        seen.add(def.key);
+        const s = sliderState[def.key];
+        if (!s) continue;
+        const scale = def.pct ? 100 : 1;
+        if (s.curMin !== s.dataMin) params.set(`${def.key}_min`, s.curMin / scale);
+        if (s.curMax !== s.dataMax) params.set(`${def.key}_max`, s.curMax / scale);
+    }
+    return params;
+}
+
 async function fetchBatch() {
     if (isFetchingMore || !hasMoreData) return;
     isFetchingMore = true;
     const dir = sortDir === -1 ? 'desc' : 'asc';
-    const url = `${API_BASE}/players/${currentSeason}?limit=${FETCH_SIZE}&offset=${serverOffset}&sort_col=${sortCol}&sort_dir=${dir}`;
-    const res = await fetch(url);
+    const params = buildFilterParams();
+    params.set('limit', FETCH_SIZE);
+    params.set('offset', serverOffset);
+    params.set('sort_col', sortCol);
+    params.set('sort_dir', dir);
+    const res = await fetch(`${API_BASE}/players/${currentSeason}?${params}`);
     const data = await res.json();
     const batch = data.data.map(p => ({ ...p, height_in: parseHeightToInches(p.height) }));
     allPlayers = [...allPlayers, ...batch];
@@ -934,15 +962,16 @@ function initThumb(def) {
                 s.curMax = Math.max(val, s.curMin);
             }
             updateSliderUI(def);
-            applyFilters();
         };
 
         wrapEl.addEventListener('pointermove', onMove);
         wrapEl.addEventListener('pointerup', () => {
             wrapEl.removeEventListener('pointermove', onMove);
+            applyFilters();
         }, { once: true });
 
-        // Fire immediately so a click (no move) still updates
+        // Fire immediately so a click (no move) still updates the UI;
+        // applyFilters fires on pointerup which follows immediately after
         onMove(e);
     });
 }
@@ -1030,29 +1059,6 @@ function buildClassChips() {
 }
 
 // ── Filter + render ───────────────────────────────────────────────────────
-function computeFiltered() {
-    const search = document.getElementById('searchBox').value.toLowerCase().trim();
-
-    let filtered = allPlayers.filter(p => {
-        if (search && !p.full_name.toLowerCase().includes(search)) return false;
-        if (activePositions.size > 0 && !activePositions.has(p.pos_group)) return false;
-        if (activeClassYears.size > 0 && !activeClassYears.has(p.class_year)) return false;
-
-        for (const def of getStatDefs()) {
-            const s = sliderState[def.key];
-            if (!s || (s.curMin === s.dataMin && s.curMax === s.dataMax)) continue;
-            const raw = p[def.key];
-            if (raw == null) return false;
-            const v = def.pct ? Number(raw) * 100 : Number(raw);
-            if (v < s.curMin || v > s.curMax) return false;
-        }
-
-        return true;
-    });
-
-    return filtered;
-}
-
 function isFiltered() {
     if (document.getElementById('searchBox').value.trim()) return true;
     if (activePositions.size > 0 || activeClassYears.size > 0) return true;
@@ -1063,8 +1069,12 @@ function isFiltered() {
     return false;
 }
 
-function applyFilters() {
-    filteredPlayers = computeFiltered();
+async function applyFilters() {
+    allPlayers = [];
+    serverOffset = 0;
+    hasMoreData = true;
+    await fetchBatch();
+    filteredPlayers = [...allPlayers];
     currentPage = 1;
     const filtered = isFiltered();
     const displayCount = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
@@ -1125,13 +1135,7 @@ function renderTableHeader() {
             sortCol = col;
             thead.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
             th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
-
-            // Reset loaded data and re-fetch with new sort from the server
-            allPlayers = [];
-            serverOffset = 0;
-            hasMoreData = true;
-            await fetchBatch();
-            applyFilters();
+            await applyFilters();
         });
         // Mark active sort col
         if (th.dataset.col === sortCol) {
@@ -1221,10 +1225,12 @@ async function goPage(page) {
     const neededCount = page * PAGE_SIZE;
     if (neededCount > filteredPlayers.length && hasMoreData && !isFetchingMore) {
         await fetchBatch();
-        filteredPlayers = computeFiltered();
-        const suffix = hasMoreData ? '+' : '';
+        filteredPlayers = [...allPlayers];
+        const filtered = isFiltered();
+        const displayCount = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
+        const suffix = filtered && hasMoreData ? '+' : '';
         document.getElementById('resultsCount').textContent =
-            `${filteredPlayers.length.toLocaleString()}${suffix} player${filteredPlayers.length !== 1 ? 's' : ''}`;
+            `${displayCount.toLocaleString()}${suffix} player${displayCount !== 1 ? 's' : ''}`;
     }
     currentPage = page;
     renderPage();

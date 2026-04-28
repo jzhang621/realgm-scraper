@@ -1,7 +1,7 @@
 """
 FastAPI Backend for NCAA Basketball Stats
 """
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -313,10 +313,7 @@ ALLOWED_SORT_COLS = {
 @app.get("/api/players/{season}")
 def get_players(
     season: str,
-    position: Optional[str] = None,
-    team: Optional[str] = None,
-    min_rating: Optional[float] = None,
-    two_way: Optional[str] = None,
+    request: Request,
     sort_col: str = 'final_rating',
     sort_dir: str = 'desc',
     limit: int = Query(200, le=200),
@@ -326,18 +323,61 @@ def get_players(
     if sort_col not in ALLOWED_SORT_COLS:
         sort_col = 'final_rating'
     order_dir = 'DESC' if sort_dir == 'desc' else 'ASC'
-    # height_in is a client-side alias; map it to a SQL expression
-    if sort_col == 'height_in':
-        order_expr = (
-            f"(CASE WHEN height ~ '^[0-9]+-[0-9]+$' "
-            f"THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int "
-            f"END) {order_dir} NULLS LAST"
-        )
-    else:
-        order_expr = f"{sort_col} {order_dir} NULLS LAST"
+    HEIGHT_EXPR = (
+        "(CASE WHEN height ~ '^[0-9]+-[0-9]+$' "
+        "THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int END)"
+    )
+    order_expr = f"{HEIGHT_EXPR} {order_dir} NULLS LAST" if sort_col == 'height_in' \
+        else f"{sort_col} {order_dir} NULLS LAST"
+
+    qp = dict(request.query_params)
+    where_clauses = ["season = :season"]
+    params: dict = {'season': season, 'limit': limit, 'offset': offset}
+
+    # Full-name search
+    if qp.get('search'):
+        where_clauses.append("full_name ILIKE :search")
+        params['search'] = f"%{qp['search']}%"
+
+    # Position group chips (comma-separated values: Guard, Wing, Big)
+    if qp.get('pos_group'):
+        groups = [g.strip() for g in qp['pos_group'].split(',') if g.strip()]
+        if groups:
+            ph = ', '.join(f':pg_{i}' for i in range(len(groups)))
+            where_clauses.append(f"pos_group IN ({ph})")
+            for i, g in enumerate(groups):
+                params[f'pg_{i}'] = g
+
+    # Class year chips (comma-separated)
+    if qp.get('class_year'):
+        years = [y.strip() for y in qp['class_year'].split(',') if y.strip()]
+        if years:
+            ph = ', '.join(f':cy_{i}' for i in range(len(years)))
+            where_clauses.append(f"class_year IN ({ph})")
+            for i, y in enumerate(years):
+                params[f'cy_{i}'] = y
+
+    # Stat range filters — {col}_min / {col}_max sent as DB-scale values
+    for key, val in qp.items():
+        for suffix, op in [('_min', '>='), ('_max', '<=')]:
+            if not key.endswith(suffix):
+                continue
+            col = key[:-len(suffix)]
+            if col not in ALLOWED_SORT_COLS:
+                continue
+            try:
+                fval = float(val)
+            except ValueError:
+                continue
+            pname = f'f_{key}'
+            if col == 'height_in':
+                where_clauses.append(f"{HEIGHT_EXPR} {op} :{pname}")
+            else:
+                where_clauses.append(f"{col} {op} :{pname}")
+            params[pname] = fval
 
     with engine.connect() as conn:
-        query = """
+        query = f"""
             SELECT
                 player_id, season, full_name, team, position, height, weight,
                 hometown, age, pos_group, class_year, two_way,
@@ -356,28 +396,10 @@ def get_players(
                 min_boost, three_boost, fg_boost, ast_boost, blk_boost,
                 double_double_boost, triple_double_boost, free_throw_boost
             FROM player_season_stats
-            WHERE season = :season
+            WHERE {' AND '.join(where_clauses)}
+            ORDER BY {order_expr}
+            LIMIT :limit OFFSET :offset
         """
-        params = {'season': season}
-
-        if position:
-            query += " AND position = :position"
-            params['position'] = position
-
-        if team:
-            query += " AND team = :team"
-            params['team'] = team
-
-        if min_rating:
-            query += " AND final_rating >= :min_rating"
-            params['min_rating'] = min_rating
-
-        if two_way == 'Y':
-            query += " AND two_way = 'Y'"
-
-        query += f" ORDER BY {order_expr} LIMIT :limit OFFSET :offset"
-        params['limit'] = limit
-        params['offset'] = offset
 
         result = conn.execute(text(query), params)
         data = rows_to_dict(result.fetchall(), result)
