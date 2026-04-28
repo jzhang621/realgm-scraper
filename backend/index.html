@@ -829,7 +829,9 @@ async function loadPlayers() {
 async function fetchBatch() {
     if (isFetchingMore || !hasMoreData) return;
     isFetchingMore = true;
-    const res = await fetch(`${API_BASE}/players/${currentSeason}?limit=${FETCH_SIZE}&offset=${serverOffset}`);
+    const dir = sortDir === -1 ? 'desc' : 'asc';
+    const url = `${API_BASE}/players/${currentSeason}?limit=${FETCH_SIZE}&offset=${serverOffset}&sort_col=${sortCol}&sort_dir=${dir}`;
+    const res = await fetch(url);
     const data = await res.json();
     const batch = data.data.map(p => ({ ...p, height_in: parseHeightToInches(p.height) }));
     allPlayers = [...allPlayers, ...batch];
@@ -1048,14 +1050,6 @@ function computeFiltered() {
         return true;
     });
 
-    filtered.sort((a, b) => {
-        const av = a[sortCol], bv = b[sortCol];
-        if (av == null && bv == null) return 0;
-        if (av == null) return 1;
-        if (bv == null) return -1;
-        return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
-    });
-
     return filtered;
 }
 
@@ -1125,12 +1119,18 @@ function renderTableHeader() {
 
     // Re-attach sort listeners
     thead.querySelectorAll('th[data-col]').forEach(th => {
-        th.addEventListener('click', () => {
+        th.addEventListener('click', async () => {
             const col = th.dataset.col;
             sortDir = sortCol === col ? sortDir * -1 : -1;
             sortCol = col;
             thead.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
             th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
+
+            // Reset loaded data and re-fetch with new sort from the server
+            allPlayers = [];
+            serverOffset = 0;
+            hasMoreData = true;
+            await fetchBatch();
             applyFilters();
         });
         // Mark active sort col

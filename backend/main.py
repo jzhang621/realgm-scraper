@@ -296,6 +296,20 @@ def get_teams(season: str):
             "teams": teams
         }
 
+ALLOWED_SORT_COLS = {
+    'final_rating', 'full_name', 'team', 'position', 'age', 'height_in', 'weight', 'gp',
+    'min', 'pts', 'reb', 'ast', 'stl', 'blk', 'tov',
+    'fg_pct', 'fg3m', 'fg3a', 'fg3_pct', 'ft_pct', 'fgm', 'fga', 'ftm', 'fta',
+    'off_reb', 'def_reb', 'ts_pct', 'efg_pct', 'orb_pct', 'drb_pct',
+    'ast_pct', 'tov_pct', 'stl_pct', 'blk_pct', 'usg_pct', 'per', 'ortg', 'drtg',
+    'ppr', 'pps', 'dbl_dbl', 'tpl_dbl', 'ast_to_ratio', 'stl_to_ratio', 'win_pct',
+    'ws', 'ows', 'dws',
+    't_min', 't_pts', 't_reb', 't_ast', 't_stl', 't_blk', 't_tov',
+    't_fgm', 't_fga', 't_fg3m', 't_fg3a', 't_ftm', 't_fta',
+    'class_year',
+}
+
+
 @app.get("/api/players/{season}")
 def get_players(
     season: str,
@@ -303,10 +317,25 @@ def get_players(
     team: Optional[str] = None,
     min_rating: Optional[float] = None,
     two_way: Optional[str] = None,
-    limit: int = Query(15000, le=15000),
+    sort_col: str = 'final_rating',
+    sort_dir: str = 'desc',
+    limit: int = Query(200, le=200),
     offset: int = 0
 ):
     """Get wide player stats row from materialized view for a season"""
+    if sort_col not in ALLOWED_SORT_COLS:
+        sort_col = 'final_rating'
+    order_dir = 'DESC' if sort_dir == 'desc' else 'ASC'
+    # height_in is a client-side alias; map it to a SQL expression
+    if sort_col == 'height_in':
+        order_expr = (
+            f"(CASE WHEN height ~ '^[0-9]+-[0-9]+$' "
+            f"THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int "
+            f"END) {order_dir} NULLS LAST"
+        )
+    else:
+        order_expr = f"{sort_col} {order_dir} NULLS LAST"
+
     with engine.connect() as conn:
         query = """
             SELECT
@@ -346,7 +375,7 @@ def get_players(
         if two_way == 'Y':
             query += " AND two_way = 'Y'"
 
-        query += " ORDER BY final_rating DESC LIMIT :limit OFFSET :offset"
+        query += f" ORDER BY {order_expr} LIMIT :limit OFFSET :offset"
         params['limit'] = limit
         params['offset'] = offset
 
