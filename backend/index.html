@@ -720,6 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('seasonSelect').addEventListener('change', e => {
         currentSeason = e.target.value;
         currentPage = 1;
+        // Clear all filters before loading new season so stale ranges don't apply
+        Object.keys(sliderState).forEach(k => delete sliderState[k]);
+        activePositions.clear();
+        activeClassYears.clear();
+        document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
+        document.getElementById('searchBox').value = '';
         loadPlayers();
     });
     document.getElementById('searchBox').addEventListener('input', applyFilters);
