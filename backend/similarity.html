@@ -146,11 +146,15 @@
         /* ── Segments ── */
         .segments {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 14px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
+            .segments { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
             .segments { grid-template-columns: 1fr; }
         }
 
@@ -170,9 +174,10 @@
             color: white;
         }
 
-        .seg-production .segment-header { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .seg-position   .segment-header { background: linear-gradient(135deg, #10b981, #059669); }
-        .seg-age        .segment-header { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .seg-production    .segment-header { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .seg-position      .segment-header { background: linear-gradient(135deg, #10b981, #059669); }
+        .seg-age           .segment-header { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .seg-playing-time  .segment-header { background: linear-gradient(135deg, #06b6d4, #0284c7); }
 
         .segment-header .sub {
             font-size: 10px;
@@ -303,6 +308,13 @@
             </div>
             <div id="list-age"><div class="empty-state">Search for a player above</div></div>
         </div>
+        <div class="segment-panel seg-playing-time">
+            <div class="segment-header">
+                Playing Time
+                <div class="sub">±15% total minutes · all seasons</div>
+            </div>
+            <div id="list-playing_time"><div class="empty-state">Search for a player above</div></div>
+        </div>
     </div>
 
 </div>
@@ -366,23 +378,47 @@ seasonSelect.addEventListener('change', () => {
 
 // ── Similarity ────────────────────────────────────────────────────────────
 async function loadSimilarity(playerId, season) {
-    ['production', 'position', 'age'].forEach(seg => {
+    ['production', 'position', 'age', 'playing_time'].forEach(seg => {
         document.getElementById(`list-${seg}`).innerHTML =
             '<div class="loading-state">Loading...</div>';
     });
 
-    const [simRes, playerRes] = await Promise.all([
+    const [simRes, profileRes] = await Promise.all([
         fetch(`${API_BASE}/similarity/${playerId}/${season}`),
-        fetch(`${API_BASE}/players/${season}?limit=15000`)
+        fetch(`${API_BASE}/profile/${playerId}`)
     ]);
 
-    const simData   = await simRes.json();
-    const playerData = await playerRes.json();
-    const player = playerData.data.find(p => p.player_id == playerId);
+    const simData = await simRes.json();
+    const profileData = profileRes.ok ? await profileRes.json() : null;
+
+    // Build a flat player object from the profile for the card
+    let player = null;
+    if (profileData) {
+        const bio = profileData.bio || {};
+        const seasonData = profileData.seasons?.find(s => s.season === season);
+        const pg = seasonData?.pergame || {};
+        const r  = seasonData?.rating  || {};
+        player = {
+            full_name:   bio.full_name,
+            team:        r.team || pg.team,
+            position:    bio.position,
+            class_year:  pg.class_year,
+            height:      bio.height_ft,
+            weight:      bio.weight_lbs,
+            age:         null,
+            final_rating: r.final_rating,
+            pts:  pg.pts,  reb: pg.trb,  ast: pg.ast,
+            stl:  pg.stl,  blk: pg.blk,  min: pg.min,
+            fg3a: pg.fg3a, fg3_pct: pg.fg3_pct,
+            fg_pct: pg.fg_pct,
+            usg_pct: seasonData?.advanced?.usg_pct,
+            ts_pct:  seasonData?.advanced?.ts_pct,
+        };
+    }
 
     renderPlayerCard(player);
 
-    ['production', 'position', 'age'].forEach(seg => {
+    ['production', 'position', 'age', 'playing_time'].forEach(seg => {
         const rows = simData.segments?.[seg] || [];
         renderSegment(seg, rows);
     });

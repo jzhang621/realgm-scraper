@@ -706,8 +706,8 @@ function renderBreakdown(rating, season) {
 
 function renderSimilarity(similarity) {
     const hasSim = similarity && Object.keys(similarity).length > 0;
-    const segments = ['production', 'position', 'age'];
-    const labels = { production: 'Production', position: 'Same Position', age: 'Same Age' };
+    const segments = ['production', 'position', 'age', 'playing_time'];
+    const labels = { production: 'Production', position: 'Same Position', age: 'Same Age', playing_time: 'Playing Time' };
 
     const tabs = segments.map(seg => `
         <div class="sim-tab ${simSegment===seg?'active':''}" data-seg="${seg}">${labels[seg]}</div>
@@ -727,7 +727,10 @@ function renderSimilarity(similarity) {
                 <div class="sim-rating">${Number(p.sim_rating).toFixed(1)}</div>
             </div>
         `).join('');
-        body = `<div class="sim-list">${rows || '<div class="sim-unavailable">No similar players found.</div>'}</div>`;
+        const emptyMsg = simSegment === 'playing_time'
+            ? 'No playing time data available for this player.'
+            : 'No similar players found.';
+        body = `<div class="sim-list">${rows || `<div class="sim-unavailable">${emptyMsg}</div>`}</div>`;
     }
 
     return `
@@ -771,7 +774,10 @@ function attachSimListeners() {
                         <div class="sim-rating">${Number(p.sim_rating).toFixed(1)}</div>
                     </div>
                 `).join('');
-                document.getElementById('simBody').innerHTML = `<div class="sim-list">${rows || '<div class="sim-unavailable">No similar players found.</div>'}</div>`;
+                const emptyMsg = simSegment === 'playing_time'
+                    ? 'No playing time data available for this player.'
+                    : 'No similar players found.';
+                document.getElementById('simBody').innerHTML = `<div class="sim-list">${rows || `<div class="sim-unavailable">${emptyMsg}</div>`}</div>`;
             }
         });
     });

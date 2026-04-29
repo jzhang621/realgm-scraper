@@ -8,8 +8,12 @@ top 100 rated players in 2025-26, across 3 segments:
 
 import psycopg2
 import numpy as np
+import time
 
-PG_DSN = 'postgresql://localhost:5432/ncaa_basketball'
+import os
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), 'backend', '.env'))
+PG_DSN = os.getenv('DATABASE_URL', 'postgresql://localhost:5432/ncaa_basketball')
 
 PROD_FEATURES = [
     'pts', 'reb', 'ast', 'stl', 'blk',
@@ -37,7 +41,7 @@ def effective_age(row):
 def load_all(conn):
     cur = conn.cursor()
     cols = ['player_id', 'season', 'full_name', 'team', 'position', 'pos_group',
-            'class_year', 'age', 'final_rating', 'height', 'weight'] + PROD_FEATURES
+            'class_year', 'age', 'final_rating', 'height', 'weight', 't_min'] + PROD_FEATURES
     cur.execute(f"SELECT {', '.join(cols)} FROM player_season_stats")
     rows = [dict(zip(cols, r)) for r in cur.fetchall()]
     cur.close()
@@ -85,11 +89,12 @@ def top8_similar(target_idx, matrix, rows, exclude_pid, segment_mask):
     top = np.argsort(dists)[:8]
     return [(candidates[i], float(dists[i])) for i in top]
 
-def setup_table(conn):
+def setup_table(conn, reset=False):
     cur = conn.cursor()
-    cur.execute("DROP TABLE IF EXISTS player_similarity")
+    if reset:
+        cur.execute("DROP TABLE IF EXISTS player_similarity")
     cur.execute("""
-        CREATE TABLE player_similarity (
+        CREATE TABLE IF NOT EXISTS player_similarity (
             player_id      TEXT,
             season         TEXT,
             segment        TEXT,
@@ -107,29 +112,43 @@ def setup_table(conn):
     conn.commit()
     cur.close()
 
+def load_done(conn, season):
+    """Return set of player_ids already fully computed (all 4 segments present)."""
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT player_id FROM player_similarity
+        WHERE season = %s
+        GROUP BY player_id
+        HAVING COUNT(DISTINCT segment) = 4
+    """, (season,))
+    done = {r[0] for r in cur.fetchall()}
+    cur.close()
+    return done
+
 def main():
     conn = psycopg2.connect(PG_DSN)
     print("Loading all player-seasons...")
     rows = load_all(conn)
     print(f"  {len(rows)} rows loaded")
 
-    top100 = load_targets(conn, '2025-26')
-    print(f"  {len(top100)} targets for 2025-26 loaded")
+    targets = load_targets(conn, '2025-26')
+    print(f"  {len(targets)} targets for 2025-26 loaded")
 
     print("Building feature matrix...")
     matrix = build_matrix(rows)
 
-    # Build lookup: (player_id, season) -> index
     idx_map = {(r['player_id'], r['season']): i for i, r in enumerate(rows)}
-
-    # Precompute effective age for all rows
     ages = [effective_age(r) for r in rows]
 
     setup_table(conn)
-    cur = conn.cursor()
+    done = load_done(conn, '2025-26')
+    print(f"  {len(done)} players already complete, skipping")
 
     print("Computing similarities...")
-    for n, (pid, season) in enumerate(top100):
+    for n, (pid, season) in enumerate(targets):
+        if pid in done:
+            continue
+
         key = (pid, season)
         if key not in idx_map:
             print(f"  [{n+1}] {pid} not found, skipping")
@@ -140,45 +159,65 @@ def main():
         t_age = ages[ti]
         t_pos = tr['pos_group']
 
-        # Masks
-        all_mask       = np.ones(len(rows), dtype=bool)
-        pos_mask       = np.array([r['pos_group'] == t_pos for r in rows])
+        all_mask = np.ones(len(rows), dtype=bool)
+        pos_mask = np.array([r['pos_group'] == t_pos for r in rows])
 
         if t_age is not None:
-            age_mask = np.array([
-                a is not None and abs(a - t_age) <= 1
-                for a in ages
-            ])
+            age_mask = np.array([a is not None and abs(a - t_age) <= 1 for a in ages])
         else:
             t_class = tr['class_year']
             age_mask = np.array([r['class_year'] == t_class for r in rows])
 
+        t_tmin = tr.get('t_min')
+        if t_tmin and float(t_tmin) > 0:
+            t_tmin = float(t_tmin)
+            pt_mask = np.array([
+                r['t_min'] is not None and abs(float(r['t_min']) - t_tmin) / t_tmin <= 0.15
+                for r in rows
+            ])
+        else:
+            pt_mask = np.zeros(len(rows), dtype=bool)
+
         segments = [
-            ('production', all_mask),
-            ('position',   pos_mask),
-            ('age',        age_mask),
+            ('production',   all_mask),
+            ('position',     pos_mask),
+            ('age',          age_mask),
+            ('playing_time', pt_mask),
         ]
 
-        for seg_name, mask in segments:
-            results = top8_similar(ti, matrix, rows, pid, mask)
-            for rank, (ci, score) in enumerate(results, 1):
-                cr = rows[ci]
-                cur.execute("""
-                    INSERT INTO player_similarity
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    ON CONFLICT DO NOTHING
-                """, (
-                    pid, season, seg_name, rank,
-                    cr['player_id'], cr['season'],
-                    cr['full_name'], cr['team'], cr['position'],
-                    cr['final_rating'], round(score, 6)
-                ))
+        # Retry loop for transient connection failures
+        for attempt in range(3):
+            try:
+                cur = conn.cursor()
+                for seg_name, mask in segments:
+                    results = top8_similar(ti, matrix, rows, pid, mask)
+                    for rank, (ci, score) in enumerate(results, 1):
+                        cr = rows[ci]
+                        cur.execute("""
+                            INSERT INTO player_similarity
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                            ON CONFLICT DO NOTHING
+                        """, (
+                            pid, season, seg_name, rank,
+                            cr['player_id'], cr['season'],
+                            cr['full_name'], cr['team'], cr['position'],
+                            cr['final_rating'], round(score, 6)
+                        ))
+                conn.commit()
+                cur.close()
+                break
+            except psycopg2.OperationalError as e:
+                print(f"  Connection error on {pid} (attempt {attempt+1}): {e}")
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+                time.sleep(5)
+                conn = psycopg2.connect(PG_DSN)
 
-        conn.commit()
         if (n + 1) % 100 == 0:
-            print(f"  [{n+1}/{len(top100)}] done")
+            print(f"  [{n+1}/{len(targets)}] done")
 
-    cur.close()
     conn.close()
     print("\nDone. Verifying...")
 

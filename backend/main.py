@@ -12,6 +12,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 import os
 import time
+import psycopg2
+import psycopg2.extras
 from decimal import Decimal
 from datetime import datetime, date
 
@@ -451,20 +453,24 @@ def get_leaderboard(
 
 @app.get("/api/similarity/{player_id}/{season}")
 def get_similarity(player_id: str, season: str):
-    with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos, sim_rating, score
+    conn = psycopg2.connect(DATABASE_URL)
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos,
+                   sim_rating::float, score::float
             FROM player_similarity
-            WHERE player_id = :player_id AND season = :season
+            WHERE player_id = %s AND season = %s
             ORDER BY segment, rank
-        """), {'player_id': player_id, 'season': season})
-        rows = rows_to_dict(result.fetchall(), result)
-
+        """, (player_id, season))
+        rows = cur.fetchall()
         segments = {}
         for r in rows:
+            r = dict(r)
             segments.setdefault(r['segment'], []).append(r)
-
         return {'player_id': player_id, 'season': season, 'segments': segments}
+    finally:
+        conn.close()
 
 
 @app.get("/api/profile/{player_id}")
@@ -522,14 +528,20 @@ def get_profile(player_id: str):
                 'rating':   ratings.get(s),
             })
 
-        # Similarity (2025-26 only)
-        r = conn.execute(text("""
-            SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos, sim_rating, score
-            FROM player_similarity
-            WHERE player_id = :pid AND season = '2025-26'
-            ORDER BY segment, rank
-        """), {'pid': player_id})
-        sim_rows = [dict(zip(r.keys(), row)) for row in r.fetchall()]
+        # Similarity (2025-26 only) — use fresh psycopg2 connection to bypass stale pool
+        sim_conn = psycopg2.connect(DATABASE_URL)
+        try:
+            sim_cur = sim_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            sim_cur.execute("""
+                SELECT segment, rank, sim_player_id, sim_season, sim_name, sim_team, sim_pos,
+                       sim_rating::float, score::float
+                FROM player_similarity
+                WHERE player_id = %s AND season = '2025-26'
+                ORDER BY segment, rank
+            """, (player_id,))
+            sim_rows = [dict(r) for r in sim_cur.fetchall()]
+        finally:
+            sim_conn.close()
         similarity = {}
         for row in sim_rows:
             similarity.setdefault(row['segment'], []).append(row)
