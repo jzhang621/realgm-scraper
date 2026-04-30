@@ -1638,7 +1638,7 @@ function setView(view) {
         mapEl.style.display = 'none';
     } else {
         tableEl.style.display = 'none';
-        headerEl.style.display = 'none';
+        headerEl.style.display = 'flex';
         mapEl.style.display = 'block';
         initMap().then(updateMapMarkers);
     }
