@@ -1565,13 +1565,16 @@ function applyPlayerFilters(playerId) {
     document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('searchBox').value = '';
 
-    // Set slider mins to player's stat values
+    // Set slider mins to player's stat values.
+    // Nudge down by a small epsilon to avoid floating-point precision failures
+    // (e.g. 0.464 * 100 / 100 = 0.46400000000000006 > 0.4640 in the DB).
     getStatDefs().forEach(def => {
         const s = sliderState[def.key];
         if (!s || p[def.key] == null) return;
         const playerVal = def.pct ? Number(p[def.key]) * 100 : Number(p[def.key]);
         const clamped = Math.max(s.dataMin, Math.min(s.dataMax, playerVal));
-        s.curMin = clamped;
+        const eps = def.pct ? 0.05 : 0.005;  // imperceptible on slider display
+        s.curMin = Math.max(s.dataMin, clamped - eps);
         updateSliderUI(def);
     });
 
