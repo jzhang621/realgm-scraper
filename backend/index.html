@@ -909,7 +909,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Data load ─────────────────────────────────────────────────────────────
 async function loadPlayers() {
-    document.getElementById('loading').style.display = 'block';
+    const loadingEl = document.getElementById('loading');
+    loadingEl.style.display = 'block';
+    loadingEl.textContent = 'Loading...';
     document.getElementById('tableContainer').style.display = 'none';
 
     allPlayers = [];
@@ -920,26 +922,40 @@ async function loadPlayers() {
     selectedPlayerIds.clear();
     updateExportButton();
 
-    try {
-        const [, rangesRes, countRes] = await Promise.all([
-            fetchBatch(),
-            fetch(`${API_BASE}/stat-ranges/${currentSeason}`).then(r => r.json()),
-            fetch(`${API_BASE}/player-count/${currentSeason}`).then(r => r.json()),
-        ]);
-        statRanges = rangesRes.ranges || {};
-        totalSeasonCount = countRes.count || 0;
+    const MAX_ATTEMPTS = 4;
+    const RETRY_DELAY = 5000; // 5s between retries while server wakes up
 
-        buildSliders();
-        renderTableHeader();
-        buildPositionChips();
-        buildClassChips();
-        applyFilters();
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        try {
+            const [, rangesRes, countRes] = await Promise.all([
+                fetchBatch(),
+                fetch(`${API_BASE}/stat-ranges/${currentSeason}`).then(r => r.json()),
+                fetch(`${API_BASE}/player-count/${currentSeason}`).then(r => r.json()),
+            ]);
+            statRanges = rangesRes.ranges || {};
+            totalSeasonCount = countRes.count || 0;
 
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('tableContainer').style.display = 'block';
-    } catch (err) {
-        document.getElementById('loading').textContent = 'Error loading data — is the API running?';
-        console.error(err);
+            buildSliders();
+            renderTableHeader();
+            buildPositionChips();
+            buildClassChips();
+            applyFilters();
+
+            loadingEl.style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+            return;
+        } catch (err) {
+            console.error(`Load attempt ${attempt} failed:`, err);
+            if (attempt < MAX_ATTEMPTS) {
+                loadingEl.textContent = `Waking up server… retrying (${attempt}/${MAX_ATTEMPTS - 1})`;
+                await new Promise(res => setTimeout(res, RETRY_DELAY));
+                allPlayers = [];
+                serverOffset = 0;
+                hasMoreData = true;
+            } else {
+                loadingEl.textContent = 'Error loading data — please refresh the page.';
+            }
+        }
     }
 }
 
