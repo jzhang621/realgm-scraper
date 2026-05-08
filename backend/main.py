@@ -277,6 +277,49 @@ def compare_players(
 
         return {"season": season, "players": ratings}
 
+@app.get("/api/compare-many")
+def compare_many_players(
+    player_ids: str,
+    season: str
+):
+    """Compare up to 5 players. player_ids is comma-separated list of player_ids."""
+    ids = [p.strip() for p in player_ids.split(',') if p.strip()][:5]
+    if len(ids) < 2:
+        raise HTTPException(status_code=400, detail="Provide at least 2 player_ids")
+
+    placeholders = ', '.join(f':p{i}' for i in range(len(ids)))
+    params = {'season': season}
+    for i, pid in enumerate(ids):
+        params[f'p{i}'] = pid
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(f"""
+                SELECT
+                    pss.player_id, pss.full_name, pss.team, pss.position, pss.pos_group,
+                    pss.class_year, pss.height, pss.weight, pss.age,
+                    pss.gp, pss.min, pss.pts, pss.reb, pss.ast, pss.stl, pss.blk, pss.tov,
+                    pss.fg_pct, pss.fg3m, pss.fg3_pct, pss.ft_pct,
+                    pss.ts_pct, pss.efg_pct, pss.usg_pct, pss.per, pss.ortg, pss.drtg,
+                    pss.ast_to_ratio, pss.win_pct, pss.ws,
+                    pss.base_rating, pss.game_adj, pss.final_rating,
+                    pss.min_per, pss.pts_per, pss.ast_per, pss.reb_per, pss.blk_per, pss.stl_per,
+                    pss.fgpct_per, pss.p3pct_per, pss.ftpct_per,
+                    t.conference
+                FROM player_season_stats pss
+                LEFT JOIN teams t ON pss.team = t.team_name AND pss.season = t.season
+                WHERE pss.player_id IN ({placeholders}) AND pss.season = :season
+            """),
+            params
+        )
+        players = rows_to_dict(result.fetchall(), result)
+
+    if not players:
+        raise HTTPException(status_code=404, detail="No players found for given IDs and season")
+
+    return {"season": season, "count": len(players), "players": players}
+
+
 @app.get("/api/teams/{season}")
 def get_teams(season: str):
     """Get all teams for a season"""
@@ -333,7 +376,7 @@ def get_players(
         else f"{sort_col} {order_dir} NULLS LAST"
 
     qp = dict(request.query_params)
-    where_clauses = ["season = :season"]
+    where_clauses = ["pss.season = :season"]
     params: dict = {'season': season, 'limit': limit, 'offset': offset}
 
     # Full-name search
@@ -359,6 +402,16 @@ def get_players(
             for i, y in enumerate(years):
                 params[f'cy_{i}'] = y
 
+    # Team filter (case-insensitive exact match)
+    if qp.get('team'):
+        where_clauses.append("LOWER(pss.team) = LOWER(:team)")
+        params['team'] = qp['team']
+
+    # Conference filter (case-insensitive exact match)
+    if qp.get('conference'):
+        where_clauses.append("LOWER(t.conference) = LOWER(:conference)")
+        params['conference'] = qp['conference']
+
     # Stat range filters — {col}_min / {col}_max sent as DB-scale values
     for key, val in qp.items():
         for suffix, op in [('_min', '>='), ('_max', '<=')]:
@@ -381,23 +434,25 @@ def get_players(
     with engine.connect() as conn:
         query = f"""
             SELECT
-                player_id, season, full_name, team, position, height, weight,
-                hometown, age, pos_group, class_year, two_way,
-                gp, min, pts, reb, ast, stl, blk, tov,
-                fg_pct, fg3m, fg3a, fg3_pct, ft_pct, fgm, fga, ftm, fta,
-                off_reb, def_reb,
-                ts_pct, efg_pct, orb_pct, drb_pct, ast_pct, tov_pct,
-                stl_pct, blk_pct, usg_pct, per, ortg, drtg, ppr, pps,
-                dbl_dbl, tpl_dbl, ast_to_ratio, stl_to_ratio, win_pct,
-                ws, ows, dws,
-                t_min, t_pts, t_reb, t_ast, t_stl, t_blk, t_tov,
-                t_fgm, t_fga, t_fg3m, t_fg3a, t_ftm, t_fta,
-                min_per, pts_per, ast_per, reb_per, blk_per, stl_per,
-                fgm_per, fgpct_per, p3pct_per, pm3_per, ftpct_per,
-                base_rating, game_adj, final_rating,
-                min_boost, three_boost, fg_boost, ast_boost, blk_boost,
-                double_double_boost, triple_double_boost, free_throw_boost
-            FROM player_season_stats
+                pss.player_id, pss.season, pss.full_name, pss.team, pss.position, pss.height, pss.weight,
+                pss.hometown, pss.age, pss.pos_group, pss.class_year, pss.two_way,
+                pss.gp, pss.min, pss.pts, pss.reb, pss.ast, pss.stl, pss.blk, pss.tov,
+                pss.fg_pct, pss.fg3m, pss.fg3a, pss.fg3_pct, pss.ft_pct, pss.fgm, pss.fga, pss.ftm, pss.fta,
+                pss.off_reb, pss.def_reb,
+                pss.ts_pct, pss.efg_pct, pss.orb_pct, pss.drb_pct, pss.ast_pct, pss.tov_pct,
+                pss.stl_pct, pss.blk_pct, pss.usg_pct, pss.per, pss.ortg, pss.drtg, pss.ppr, pss.pps,
+                pss.dbl_dbl, pss.tpl_dbl, pss.ast_to_ratio, pss.stl_to_ratio, pss.win_pct,
+                pss.ws, pss.ows, pss.dws,
+                pss.t_min, pss.t_pts, pss.t_reb, pss.t_ast, pss.t_stl, pss.t_blk, pss.t_tov,
+                pss.t_fgm, pss.t_fga, pss.t_fg3m, pss.t_fg3a, pss.t_ftm, pss.t_fta,
+                pss.min_per, pss.pts_per, pss.ast_per, pss.reb_per, pss.blk_per, pss.stl_per,
+                pss.fgm_per, pss.fgpct_per, pss.p3pct_per, pss.pm3_per, pss.ftpct_per,
+                pss.base_rating, pss.game_adj, pss.final_rating,
+                pss.min_boost, pss.three_boost, pss.fg_boost, pss.ast_boost, pss.blk_boost,
+                pss.double_double_boost, pss.triple_double_boost, pss.free_throw_boost,
+                t.conference
+            FROM player_season_stats pss
+            LEFT JOIN teams t ON pss.team = t.team_name AND pss.season = t.season
             WHERE {' AND '.join(where_clauses)}
             ORDER BY {order_expr}
             LIMIT :limit OFFSET :offset
