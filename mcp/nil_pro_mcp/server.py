@@ -46,6 +46,33 @@ def _get(path: str, params: dict | None = None) -> dict:
                 raise
 
 
+def _get_all_players(season: str, params: dict, max_cohort: int = 2000) -> tuple[list, int, bool]:
+    """
+    Paginate through /api/players/{season} until all matching rows are fetched.
+    Returns (players, total_count, is_exhaustive).
+    Stops early and marks non-exhaustive if total_count > max_cohort.
+    """
+    PAGE = 500
+    first = _get(f"/api/players/{season}", {**params, "limit": PAGE, "offset": 0})
+    total_count = first.get("total_count", len(first.get("data", [])))
+    all_players = first.get("data", [])
+
+    if total_count > max_cohort:
+        return all_players, total_count, False
+
+    offset = PAGE
+    while len(all_players) < total_count:
+        page = _get(f"/api/players/{season}", {**params, "limit": PAGE, "offset": offset})
+        batch = page.get("data", [])
+        if not batch:
+            break
+        all_players.extend(batch)
+        offset += PAGE
+
+    is_exhaustive = len(all_players) >= total_count
+    return all_players, total_count, is_exhaustive
+
+
 # ---------------------------------------------------------------------------
 # Formatting helpers
 # ---------------------------------------------------------------------------
@@ -138,98 +165,116 @@ def rank_players(
     min_gp: Optional[int] = None,
     max_gp: Optional[int] = None,
     min_min: Optional[float] = None,
+    max_min: Optional[float] = None,
+    min_total_min: Optional[float] = None,
+    max_total_min: Optional[float] = None,
     min_fg3_pct: Optional[float] = None,
+    min_fg_pct: Optional[float] = None,
+    min_ft_pct: Optional[float] = None,
+    min_stl: Optional[float] = None,
+    min_blk: Optional[float] = None,
+    max_tov: Optional[float] = None,
+    min_per: Optional[float] = None,
+    min_ts_pct: Optional[float] = None,
+    min_usg_pct: Optional[float] = None,
+    max_usg_pct: Optional[float] = None,
+    two_way: Optional[bool] = None,
     min_rating: Optional[float] = None,
     limit: int = 25,
 ) -> str:
     """
-    Find and rank players using filters. Use this for queries like:
-    "top guards in the ACC", "freshman bigs averaging 15+ points",
-    "senior guards with good 3-point shooting".
+    Find and rank players using filters. Automatically paginates to return the
+    full cohort when possible, so completeness claims can be made confidently.
 
     Args:
         season: Season in "YYYY-YY" format (default: 2025-26)
         position_group: "Guard", "Wing", or "Big"
         class_year: "Freshman", "Sophomore", "Junior", "Senior", or "Graduate"
-        conference: Conference name, e.g. "ACC", "Big Ten", "SEC", "Big 12",
-                    "Big East", "Pac-12", "American", "Mountain West"
+        conference: Conference name, e.g. "ACC", "Big Ten", "SEC", "Big 12"
         team: Exact team name, e.g. "Duke", "Kentucky"
         sort_by: Column to sort by. Common options: final_rating, pts, reb, ast,
-                 stl, blk, min, fg_pct, fg3_pct, ft_pct, per, usg_pct, ws
+                 stl, blk, min, fg_pct, fg3_pct, ft_pct, per, usg_pct, ws, t_min
         sort_dir: "desc" (default) or "asc"
-        min_pts: Minimum points per game
-        max_pts: Maximum points per game
+        min_pts / max_pts: Points per game range
         min_reb: Minimum rebounds per game
         min_ast: Minimum assists per game
-        min_gp: Minimum games played
-        max_gp: Maximum games played
-        min_min: Minimum minutes per game
-        min_fg3_pct: Minimum 3-point % (as decimal, e.g. 0.35 for 35%)
+        min_gp / max_gp: Games played range
+        min_min / max_min: Minutes per game range
+        min_total_min / max_total_min: Total season minutes range (e.g. 300-400)
+        min_fg3_pct: Minimum 3-point % (decimal, e.g. 0.35)
+        min_fg_pct: Minimum field goal % (decimal)
+        min_ft_pct: Minimum free throw % (decimal)
+        min_stl: Minimum steals per game
+        min_blk: Minimum blocks per game
+        max_tov: Maximum turnovers per game
+        min_per: Minimum Player Efficiency Rating
+        min_ts_pct: Minimum True Shooting %
+        min_usg_pct / max_usg_pct: Usage rate range
+        two_way: True to filter for two-way players only
         min_rating: Minimum NIL PRO rating
-        limit: Number of results to return (default 25, max 200)
+        limit: Max results to display (default 25). Full cohort is always fetched
+               for completeness — this only controls how many rows are printed.
     """
-    params: dict = {
-        "sort_col": sort_by,
-        "sort_dir": sort_dir,
-        "limit": min(limit, 200),
-        "offset": 0,
-    }
+    params: dict = {"sort_col": sort_by, "sort_dir": sort_dir}
 
-    if position_group:
-        params["pos_group"] = position_group
-    if class_year:
-        params["class_year"] = class_year
-    if conference:
-        params["conference"] = conference
-    if team:
-        params["team"] = team
-    if min_pts is not None:
-        params["pts_min"] = min_pts
-    if max_pts is not None:
-        params["pts_max"] = max_pts
-    if min_reb is not None:
-        params["reb_min"] = min_reb
-    if min_ast is not None:
-        params["ast_min"] = min_ast
-    if min_gp is not None:
-        params["gp_min"] = min_gp
-    if max_gp is not None:
-        params["gp_max"] = max_gp
-    if min_min is not None:
-        params["min_min"] = min_min
-    if min_fg3_pct is not None:
-        params["fg3_pct_min"] = min_fg3_pct
-    if min_rating is not None:
-        params["final_rating_min"] = min_rating
+    if position_group:   params["pos_group"] = position_group
+    if class_year:       params["class_year"] = class_year
+    if conference:       params["conference"] = conference
+    if team:             params["team"] = team
+    if min_pts is not None:       params["pts_min"] = min_pts
+    if max_pts is not None:       params["pts_max"] = max_pts
+    if min_reb is not None:       params["reb_min"] = min_reb
+    if min_ast is not None:       params["ast_min"] = min_ast
+    if min_gp is not None:        params["gp_min"] = min_gp
+    if max_gp is not None:        params["gp_max"] = max_gp
+    if min_min is not None:       params["min_min"] = min_min
+    if max_min is not None:       params["min_max"] = max_min
+    if min_total_min is not None: params["t_min_min"] = min_total_min
+    if max_total_min is not None: params["t_min_max"] = max_total_min
+    if min_fg3_pct is not None:   params["fg3_pct_min"] = min_fg3_pct
+    if min_fg_pct is not None:    params["fg_pct_min"] = min_fg_pct
+    if min_ft_pct is not None:    params["ft_pct_min"] = min_ft_pct
+    if min_stl is not None:       params["stl_min"] = min_stl
+    if min_blk is not None:       params["blk_min"] = min_blk
+    if max_tov is not None:       params["tov_max"] = max_tov
+    if min_per is not None:       params["per_min"] = min_per
+    if min_ts_pct is not None:    params["ts_pct_min"] = min_ts_pct
+    if min_usg_pct is not None:   params["usg_pct_min"] = min_usg_pct
+    if max_usg_pct is not None:   params["usg_pct_max"] = max_usg_pct
+    if two_way:                   params["two_way_min"] = 1
+    if min_rating is not None:    params["final_rating_min"] = min_rating
 
     try:
-        data = _get(f"/api/players/{season}", params)
+        players, total_count, is_exhaustive = _get_all_players(season, params)
     except Exception as e:
         return f"Error fetching players: {e}"
-
-    players = data.get("data", [])
-    total = data.get("count", len(players))
 
     if not players:
         return "No players found matching those filters."
 
-    # Build filter description
     filters = []
-    if position_group:
-        filters.append(position_group)
-    if class_year:
-        filters.append(class_year)
-    if conference:
-        filters.append(conference)
-    if team:
-        filters.append(team)
+    if position_group: filters.append(position_group)
+    if class_year:     filters.append(class_year)
+    if conference:     filters.append(conference)
+    if team:           filters.append(team)
     filter_str = " | ".join(filters) if filters else "All players"
 
-    lines = [f"{filter_str} — {season} ({total} results, showing {len(players)})\n"]
+    exhaustive_label = (
+        f"✅ EXHAUSTIVE — all {total_count} matching players fetched"
+        if is_exhaustive
+        else f"⚠️ TRUNCATED — showing {len(players)} of {total_count} matching players. Do not make completeness claims."
+    )
+
+    display = players[:limit]
+    lines = [
+        f"{filter_str} — {season}",
+        exhaustive_label,
+        f"Displaying top {len(display)} of {total_count}\n",
+    ]
     lines.append(f"{'#':<4} {'Name':<22} {'Team':<20} {'Conf':<12} {'Pos':<6} {'Yr':<5} {'Rtg':>5}  Stats")
     lines.append("-" * 110)
 
-    for i, p in enumerate(players, 1):
+    for i, p in enumerate(display, 1):
         conf = (p.get("conference") or "")[:11]
         team_name = (p.get("team") or "")[:19]
         name = (p.get("full_name") or "")[:21]
@@ -244,11 +289,120 @@ def rank_players(
             f"FG {_pct(p.get('fg_pct'))}  "
             f"3P {_pct(p.get('fg3_pct'))}"
         )
-        lines.append(
-            f"{i:<4} {name:<22} {team_name:<20} {conf:<12} {pos:<6} {yr:<5} {rating:>5}  {stats}"
-        )
+        lines.append(f"{i:<4} {name:<22} {team_name:<20} {conf:<12} {pos:<6} {yr:<5} {rating:>5}  {stats}")
         lines.append(f"     ID: {p['player_id']}  |  GP: {p.get('gp', 'N/A')}  |  STL {_f(p.get('stl'))}  BLK {_f(p.get('blk'))}  TOV {_f(p.get('tov'))}")
         lines.append("")
+
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def rank_player_in_cohort(
+    player_id: str,
+    stat: str,
+    season: str = DEFAULT_SEASON,
+    position_group: Optional[str] = None,
+    class_year: Optional[str] = None,
+    conference: Optional[str] = None,
+    min_gp: Optional[int] = None,
+    max_gp: Optional[int] = None,
+    min_total_min: Optional[float] = None,
+    max_total_min: Optional[float] = None,
+    min_min: Optional[float] = None,
+) -> str:
+    """
+    Find where a specific player ranks within a cohort for a given stat.
+    Always fetches the complete cohort so the rank is exhaustive and trustworthy.
+
+    Use this for claims like:
+    - "T-234 out of 1,170 freshmen by rating"
+    - "#6 among freshmen with 300-400 total minutes"
+    - "#28 in 3P% among players with 300-400 total minutes"
+
+    Args:
+        player_id: The player to rank (from search_players)
+        stat: The stat to rank by, e.g. "final_rating", "fg3_pct", "pts", "per"
+        season: Season in "YYYY-YY" format (default: 2025-26)
+        position_group: "Guard", "Wing", or "Big"
+        class_year: "Freshman", "Sophomore", "Junior", "Senior", or "Graduate"
+        conference: Conference name
+        min_gp / max_gp: Games played range
+        min_total_min / max_total_min: Total season minutes range (e.g. 300-400)
+        min_min: Minimum minutes per game
+    """
+    params: dict = {"sort_col": stat, "sort_dir": "desc"}
+    if position_group:        params["pos_group"] = position_group
+    if class_year:            params["class_year"] = class_year
+    if conference:            params["conference"] = conference
+    if min_gp is not None:    params["gp_min"] = min_gp
+    if max_gp is not None:    params["gp_max"] = max_gp
+    if min_total_min is not None: params["t_min_min"] = min_total_min
+    if max_total_min is not None: params["t_min_max"] = max_total_min
+    if min_min is not None:   params["min_min"] = min_min
+
+    try:
+        players, total_count, is_exhaustive = _get_all_players(season, params, max_cohort=5000)
+    except Exception as e:
+        return f"Error fetching cohort: {e}"
+
+    if not is_exhaustive:
+        return (
+            f"⚠️ Cohort too large ({total_count} players) to rank exhaustively. "
+            f"Add more filters (position_group, class_year, min_total_min, etc.) to narrow it down."
+        )
+
+    # Find the target player
+    target = next((p for p in players if str(p.get("player_id")) == str(player_id)), None)
+    if not target:
+        return f"Player {player_id} not found in this cohort."
+
+    # Sort by stat descending, handle ties with tied rank
+    sorted_players = sorted(
+        [p for p in players if p.get(stat) is not None],
+        key=lambda p: float(p[stat]),
+        reverse=True
+    )
+
+    target_val = target.get(stat)
+    if target_val is None:
+        return f"Player {player_id} has no data for '{stat}' in {season}."
+
+    # Find rank (tied rank = lowest rank number among ties)
+    rank = next((i + 1 for i, p in enumerate(sorted_players) if str(p.get("player_id")) == str(player_id)), None)
+    tied_count = sum(1 for p in sorted_players if p.get(stat) == target_val)
+
+    cohort_desc_parts = []
+    if class_year:       cohort_desc_parts.append(class_year + "s")
+    if position_group:   cohort_desc_parts.append(position_group + "s")
+    if conference:       cohort_desc_parts.append(f"in {conference}")
+    if min_total_min or max_total_min:
+        cohort_desc_parts.append(f"with {int(min_total_min or 0)}–{int(max_total_min or 9999)} total minutes")
+    if min_gp or max_gp:
+        cohort_desc_parts.append(f"with {min_gp or 0}–{max_gp or '∞'} GP")
+    cohort_desc = " ".join(cohort_desc_parts) if cohort_desc_parts else "all players"
+
+    stat_display = _pct(target_val) if stat.endswith("_pct") else _f(target_val)
+    tie_str = f" (tied with {tied_count - 1} other{'s' if tied_count > 2 else ''})" if tied_count > 1 else ""
+    pct_rank = round((1 - (rank - 1) / total_count) * 100)
+
+    lines = [
+        f"✅ EXHAUSTIVE COHORT RANK — {season}",
+        f"",
+        f"Player: {target.get('full_name')} | {target.get('team')} | {target.get('pos_group')} | {target.get('class_year')}",
+        f"Stat:   {stat} = {stat_display}",
+        f"",
+        f"Rank #{rank}{tie_str} out of {total_count} {cohort_desc}",
+        f"Top {pct_rank}% of cohort",
+        f"",
+        f"Players just above:",
+    ]
+    for p in sorted_players[max(0, rank - 3):rank - 1]:
+        v = _pct(p[stat]) if stat.endswith("_pct") else _f(p[stat])
+        lines.append(f"  #{sorted_players.index(p)+1}  {p.get('full_name'):<22} {p.get('team'):<20} {stat}={v}")
+    lines.append(f"→ #{rank}  {target.get('full_name'):<22} {target.get('team'):<20} {stat}={stat_display}  ← TARGET")
+    for p in sorted_players[rank:rank + 2]:
+        v = _pct(p[stat]) if stat.endswith("_pct") else _f(p[stat])
+        lines.append(f"  #{sorted_players.index(p)+1}  {p.get('full_name'):<22} {p.get('team'):<20} {stat}={v}")
 
     return "\n".join(lines)
 

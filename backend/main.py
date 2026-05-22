@@ -413,7 +413,7 @@ def get_players(
     request: Request,
     sort_col: str = 'final_rating',
     sort_dir: str = 'desc',
-    limit: int = Query(200, le=200),
+    limit: int = Query(500, le=5000),
     offset: int = 0
 ):
     """Get wide player stats row from materialized view for a season"""
@@ -511,10 +511,18 @@ def get_players(
             LIMIT :limit OFFSET :offset
         """
 
+        count_query = f"""
+            SELECT COUNT(*) FROM player_season_stats pss
+            LEFT JOIN teams t ON pss.team = t.team_name AND pss.season = t.season
+            WHERE {' AND '.join(where_clauses)}
+        """
+        count_params = {k: v for k, v in params.items() if k not in ('limit', 'offset')}
+        total_count = conn.execute(text(count_query), count_params).scalar()
+
         result = conn.execute(text(query), params)
         data = rows_to_dict(result.fetchall(), result)
 
-        return {"season": season, "count": len(data), "data": data}
+        return {"season": season, "total_count": total_count, "count": len(data), "data": data}
 
 
 @app.get("/api/stats/leaderboard/{season}")
