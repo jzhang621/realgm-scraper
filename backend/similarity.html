@@ -255,6 +255,19 @@
             color: #aaa;
             font-size: 13px;
         }
+        /* ── Player search autocomplete ── */
+        .player-search-wrap { position: relative; margin-left: auto; margin-right: 8px; }
+        .player-search-input { width: 200px; padding: 6px 12px 6px 28px; border: 1.5px solid #e0e0e0; border-radius: 20px; font-size: 12.5px; outline: none; color: #333; background: #f8f8f8; transition: border-color 0.15s, background 0.15s, width 0.2s; }
+        .player-search-input:focus { border-color: #667eea; background: white; width: 240px; }
+        .player-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #bbb; pointer-events: none; }
+        .player-search-dropdown { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: white; border: 1.5px solid #e8e8e8; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); z-index: 200; overflow: hidden; min-width: 260px; }
+        .player-search-dropdown.open { display: block; }
+        .search-result-item { padding: 9px 14px; cursor: pointer; display: flex; align-items: baseline; gap: 8px; border-bottom: 1px solid #f4f4f4; transition: background 0.1s; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover, .search-result-item.active { background: #f4f5ff; }
+        .search-result-name { font-size: 13px; font-weight: 600; color: #333; }
+        .search-result-meta { font-size: 11px; color: #aaa; }
+        .search-no-results { padding: 10px 14px; font-size: 12px; color: #bbb; text-align: center; }
     </style>
 </head>
 <body>
@@ -264,7 +277,11 @@
     <div class="nav-tabs">
         <div class="nav-brand">NIL <span>PRO</span></div>
         <a href="/index.html" class="nav-tab">Rankings</a>
-        <a href="/similarity.html" class="nav-tab active">Similar Players</a>
+        <div class="player-search-wrap">
+            <span class="player-search-icon">&#128269;</span>
+            <input type="text" class="player-search-input" id="playerSearchInput" placeholder="Find a player..." autocomplete="off">
+            <div class="player-search-dropdown" id="playerSearchDropdown"></div>
+        </div>
     </div>
 
     <!-- Search controls -->
@@ -473,6 +490,26 @@ function renderSegment(seg, rows) {
         </div>
     `).join('');
 }
+
+// ── Player search autocomplete ─────────────────────────────────────────────
+(function () {
+    const input = document.getElementById('playerSearchInput');
+    const dropdown = document.getElementById('playerSearchDropdown');
+    let activeIdx = -1, debounceTimer = null, currentResults = [];
+    function closeDropdown() { dropdown.classList.remove('open'); dropdown.innerHTML = ''; activeIdx = -1; currentResults = []; }
+    function setActive(idx) { dropdown.querySelectorAll('.search-result-item').forEach((el,i)=>el.classList.toggle('active',i===idx)); activeIdx=idx; }
+    function navigate(r) { window.location.href=`/player.html?id=${encodeURIComponent(r.player_id)}`; }
+    function renderResults(results) {
+        currentResults=results; activeIdx=-1; dropdown.innerHTML='';
+        if(!results.length){dropdown.innerHTML='<div class="search-no-results">No players found</div>';dropdown.classList.add('open');return;}
+        results.forEach((r,i)=>{const el=document.createElement('div');el.className='search-result-item';el.innerHTML=`<span class="search-result-name">${r.full_name}</span><span class="search-result-meta">${r.team||''} &middot; ${r.position||''} &middot; ${r.season||''}</span>`;el.addEventListener('mousedown',e=>{e.preventDefault();navigate(r);});dropdown.appendChild(el);});
+        dropdown.classList.add('open');
+    }
+    async function fetchResults(q){try{const res=await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);const data=await res.json();renderResults(data.results||[]);}catch(_){closeDropdown();}}
+    input.addEventListener('input',()=>{clearTimeout(debounceTimer);const q=input.value.trim();if(q.length<2){closeDropdown();return;}debounceTimer=setTimeout(()=>fetchResults(q),200);});
+    input.addEventListener('keydown',e=>{const items=dropdown.querySelectorAll('.search-result-item');if(e.key==='ArrowDown'){e.preventDefault();setActive(Math.min(activeIdx+1,items.length-1));}else if(e.key==='ArrowUp'){e.preventDefault();setActive(Math.max(activeIdx-1,0));}else if(e.key==='Enter'){if(activeIdx>=0&&currentResults[activeIdx])navigate(currentResults[activeIdx]);}else if(e.key==='Escape'){closeDropdown();input.blur();}});
+    input.addEventListener('blur',()=>setTimeout(closeDropdown,150));
+})();
 </script>
 </body>
 </html>

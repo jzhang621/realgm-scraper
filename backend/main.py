@@ -621,34 +621,21 @@ def get_hometown_coords():
 
 @app.get("/api/search")
 def search_players(q: str = '', limit: int = 10):
+    if not q or len(q) < 2:
+        return {'results': []}
     with engine.connect() as conn:
+        # Return one row per player (most recent season), ordered by name match quality
         result = conn.execute(text("""
-            SELECT DISTINCT player_id, full_name
-            FROM player_similarity
-            WHERE full_name ILIKE :q OR player_id = :pid
-            LIMIT :limit
-        """), {'q': f'%{q}%', 'pid': q, 'limit': limit})
-        rows = rows_to_dict(result.fetchall(), result)
-
-        # Also search by name in player_season_stats for 2025-26 top 100
-        result2 = conn.execute(text("""
-            SELECT DISTINCT player_id, full_name
+            SELECT DISTINCT ON (player_id)
+                player_id, full_name, team, position, season
             FROM player_season_stats
-            WHERE full_name ILIKE :q AND season = '2025-26'
-            ORDER BY full_name
+            WHERE full_name ILIKE :q
+            ORDER BY player_id, season DESC
             LIMIT :limit
         """), {'q': f'%{q}%', 'limit': limit})
-        rows2 = rows_to_dict(result2.fetchall(), result2)
-
-        # Merge, deduplicate
-        seen = set()
-        merged = []
-        for r in list(rows) + list(rows2):
-            if r['player_id'] not in seen:
-                seen.add(r['player_id'])
-                merged.append(r)
-
-        return {'results': merged[:limit]}
+        rows = rows_to_dict(result.fetchall(), result)
+        rows.sort(key=lambda r: r['full_name'].lower())
+        return {'results': rows}
 
 
 @app.get("/api/player-count/{season}")
