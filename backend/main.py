@@ -16,6 +16,9 @@ import psycopg2
 import psycopg2.extras
 from decimal import Decimal
 from datetime import datetime, date
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Database connection
 DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost:5432/ncaa_basketball')
@@ -450,6 +453,7 @@ def get_players(
                 pss.base_rating, pss.game_adj, pss.final_rating,
                 pss.min_boost, pss.three_boost, pss.fg_boost, pss.ast_boost, pss.blk_boost,
                 pss.double_double_boost, pss.triple_double_boost, pss.free_throw_boost,
+                pss.rating_rank,
                 t.conference
             FROM player_season_stats pss
             LEFT JOIN teams t ON pss.team = t.team_name AND pss.season = t.season

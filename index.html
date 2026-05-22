@@ -1240,7 +1240,7 @@ function renderTableHeader() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <th class="cb-col" style="cursor:default"><input type="checkbox" id="selectAllCb" title="Select all on page"></th>
-        <th style="cursor:default">#</th>
+        <th data-col="final_rating" style="min-width:38px;text-align:center">Rank</th>
         <th style="cursor:default;width:28px" title="Find similar players"></th>
         <th data-col="full_name" style="min-width:145px">Player</th>
         <th data-col="team" style="min-width:115px">Team</th>
@@ -1303,7 +1303,7 @@ function renderTable(players, offset = 0) {
             <td class="cb-col" onclick="event.stopPropagation()">
                 <input type="checkbox" data-id="${p.player_id}" ${checked ? 'checked' : ''}>
             </td>
-            <td style="color:#ccc;font-size:.88em">${offset + i + 1}</td>
+            <td style="color:#aaa;font-size:.88em;text-align:center;font-variant-numeric:tabular-nums">${p.rating_rank ?? '—'}</td>
             <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
             <td data-col="full_name"><span class="player-name">${p.full_name}</span></td>
             <td data-col="team">${p.team || '-'}</td>
