@@ -113,15 +113,13 @@ async def login_page():
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
     path = request.url.path
-    # Allow public paths through
-    if path in _PUBLIC_PATHS or path.startswith('/auth/'):
+    # Allow public paths and all API routes through (API is JSON-only, no UI value without frontend)
+    if path in _PUBLIC_PATHS or path.startswith('/auth/') or path.startswith('/api/'):
         return await call_next(request)
     # Allow if authenticated
     if _is_authenticated(request):
         return await call_next(request)
-    # API calls get 401, browser navigation gets redirect
-    if path.startswith('/api/'):
-        return JSONResponse({'detail': 'Not authenticated'}, status_code=401)
+    # Browser navigation to protected HTML pages gets redirect
     return RedirectResponse('/login.html', status_code=302)
 
 @app.post("/auth/login")
