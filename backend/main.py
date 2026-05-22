@@ -209,51 +209,6 @@ def get_player_stats(player_id: str, season: str):
             "rating": rating[0] if rating else None
         }
 
-@app.get("/api/search")
-def search_players(
-    q: str = Query(..., min_length=2),
-    season: Optional[str] = None,
-    limit: int = 20
-):
-    """
-    Search players by name
-
-    - **q**: Search query (min 2 characters)
-    - **season**: Optional season filter
-    - **limit**: Max results (default 20)
-    """
-    with engine.connect() as conn:
-        if season:
-            query = """
-                SELECT DISTINCT
-                    p.player_id,
-                    p.full_name,
-                    pr.team,
-                    pr.position,
-                    pr.final_rating
-                FROM players p
-                JOIN player_ratings pr ON p.player_id = pr.player_id
-                WHERE LOWER(p.full_name) LIKE LOWER(:query)
-                  AND pr.season = :season
-                ORDER BY pr.final_rating DESC
-                LIMIT :limit
-            """
-            params = {'query': f'%{q}%', 'season': season, 'limit': limit}
-        else:
-            query = """
-                SELECT player_id, full_name, position
-                FROM players
-                WHERE LOWER(full_name) LIKE LOWER(:query)
-                LIMIT :limit
-            """
-            params = {'query': f'%{q}%', 'limit': limit}
-
-        result = conn.execute(text(query), params)
-        rows = result.fetchall()
-
-        data = rows_to_dict(rows, result)
-
-        return {"query": q, "count": len(data), "results": data}
 
 @app.get("/api/compare")
 def compare_players(
