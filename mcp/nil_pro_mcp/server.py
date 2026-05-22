@@ -32,6 +32,19 @@ API_URL = os.environ.get("NIL_PRO_API_URL", "http://localhost:8000").rstrip("/")
 DEFAULT_SEASON = "2025-26"
 TIMEOUT = 20.0
 
+CLASS_YEAR_MAP = {
+    "freshman": "Fr", "fr": "Fr",
+    "sophomore": "So", "so": "So",
+    "junior": "Jr", "jr": "Jr",
+    "senior": "Sr", "sr": "Sr",
+    "graduate": "Gr", "gr": "Gr", "grad": "Gr",
+}
+
+def _normalize_class(class_year: Optional[str]) -> Optional[str]:
+    if not class_year:
+        return None
+    return CLASS_YEAR_MAP.get(class_year.lower().strip(), class_year)
+
 
 def _get(path: str, params: dict | None = None) -> dict:
     """GET with one retry to handle Render cold starts."""
@@ -216,6 +229,7 @@ def rank_players(
                for completeness — this only controls how many rows are printed.
     """
     params: dict = {"sort_col": sort_by, "sort_dir": sort_dir}
+    class_year = _normalize_class(class_year)
 
     if position_group:   params["pos_group"] = position_group
     if class_year:       params["class_year"] = class_year
@@ -331,6 +345,7 @@ def rank_player_in_cohort(
         min_min: Minimum minutes per game
     """
     params: dict = {"sort_col": stat, "sort_dir": "desc"}
+    class_year = _normalize_class(class_year)
     if position_group:        params["pos_group"] = position_group
     if class_year:            params["class_year"] = class_year
     if conference:            params["conference"] = conference
