@@ -1,10 +1,10 @@
 """
 FastAPI Backend for NCAA Basketball Stats
 """
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 from pydantic import BaseModel
@@ -12,6 +12,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import QueuePool
 import os
 import time
+import hmac
+import hashlib
 import psycopg2
 import psycopg2.extras
 from decimal import Decimal
@@ -19,6 +21,26 @@ from datetime import datetime, date
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# ── Auth config ────────────────────────────────────────────────────────────
+AUTH_USERNAME = os.getenv('AUTH_USERNAME', '')
+AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', '')
+AUTH_SECRET   = os.getenv('AUTH_SECRET', '')
+COOKIE_NAME   = 'nilpro_session'
+
+def _make_token():
+    """Deterministic token: HMAC of username+password using AUTH_SECRET."""
+    msg = f'{AUTH_USERNAME}:{AUTH_PASSWORD}'.encode()
+    return hmac.new(AUTH_SECRET.encode(), msg, hashlib.sha256).hexdigest()
+
+def _is_authenticated(request: Request) -> bool:
+    if not AUTH_SECRET:
+        return True  # auth disabled if secret not configured
+    token = request.cookies.get(COOKIE_NAME, '')
+    return hmac.compare_digest(token, _make_token())
+
+# ── Auth middleware (registered after app is created, below) ───────────────
+_PUBLIC_PATHS = {'/auth/login', '/auth/logout', '/login.html'}
 
 # Database connection
 DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost:5432/ncaa_basketball')
@@ -46,6 +68,78 @@ app.add_middleware(
 
 # Gzip compression — compresses large JSON responses ~70%
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# ── Login page HTML ────────────────────────────────────────────────────────
+LOGIN_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIL PRO — Login</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+.card { background:white; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25); padding:40px 36px; width:340px; }
+.brand { text-align:center; font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#222; margin-bottom:28px; }
+.brand span { color:#667eea; }
+label { display:block; font-size:12px; font-weight:600; color:#666; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px; }
+input[type=text], input[type=password] { width:100%; padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; transition:border-color 0.15s; margin-bottom:16px; }
+input:focus { border-color:#667eea; }
+button { width:100%; padding:11px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:opacity 0.15s; }
+button:hover { opacity:0.9; }
+.error { color:#e53e3e; font-size:13px; text-align:center; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">NIL <span>PRO</span></div>
+  <!-- ERROR -->
+  <form method="POST" action="/auth/login">
+    <label>Username</label>
+    <input type="text" name="username" autofocus autocomplete="username">
+    <label>Password</label>
+    <input type="password" name="password" autocomplete="current-password">
+    <button type="submit">Sign In</button>
+  </form>
+</div>
+</body>
+</html>"""
+
+@app.get("/login.html", response_class=HTMLResponse)
+async def login_page():
+    return LOGIN_HTML
+
+# ── Auth middleware + routes ───────────────────────────────────────────────
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+    # Allow public paths through
+    if path in _PUBLIC_PATHS or path.startswith('/auth/'):
+        return await call_next(request)
+    # Allow if authenticated
+    if _is_authenticated(request):
+        return await call_next(request)
+    # API calls get 401, browser navigation gets redirect
+    if path.startswith('/api/'):
+        return JSONResponse({'detail': 'Not authenticated'}, status_code=401)
+    return RedirectResponse('/login.html', status_code=302)
+
+@app.post("/auth/login")
+async def login(username: str = Form(...), password: str = Form(...)):
+    if not AUTH_SECRET:
+        return RedirectResponse('/', status_code=302)
+    if username == AUTH_USERNAME and password == AUTH_PASSWORD:
+        token = _make_token()
+        resp = RedirectResponse('/', status_code=302)
+        resp.set_cookie(COOKIE_NAME, token, httponly=True, samesite='lax', max_age=60*60*24*30)
+        return resp
+    return HTMLResponse(LOGIN_HTML.replace('<!-- ERROR -->', '<p class="error">Invalid username or password.</p>'), status_code=401)
+
+@app.get("/auth/logout")
+async def logout():
+    resp = RedirectResponse('/login.html', status_code=302)
+    resp.delete_cookie(COOKIE_NAME)
+    return resp
 
 # Helper function to convert rows to dict, normalizing Decimal/date types inline
 def rows_to_dict(rows, result):
