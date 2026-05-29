@@ -422,8 +422,8 @@ def get_players(
         "(CASE WHEN height ~ '^[0-9]+-[0-9]+$' "
         "THEN SPLIT_PART(height,'-',1)::int * 12 + SPLIT_PART(height,'-',2)::int END)"
     )
-    order_expr = f"{HEIGHT_EXPR} {order_dir} NULLS LAST" if sort_col == 'height_in' \
-        else f"{sort_col} {order_dir} NULLS LAST"
+    order_expr = f"{HEIGHT_EXPR} {order_dir} NULLS LAST, rating_rank ASC NULLS LAST" if sort_col == 'height_in' \
+        else f"{sort_col} {order_dir} NULLS LAST, rating_rank ASC NULLS LAST"
 
     qp = dict(request.query_params)
     where_clauses = ["pss.season = :season"]
@@ -629,6 +629,19 @@ def get_profile(player_id: str):
         )
         totals = {row['season']: dict(row) for row in [dict(zip(r.keys(), row)) for row in r.fetchall()]}
 
+        # Rating rank per season for this player
+        r = conn.execute(
+            text("SELECT season, rating_rank FROM player_season_stats WHERE player_id = :pid ORDER BY season"),
+            {'pid': player_id}
+        )
+        rank_by_season = {row[0]: row[1] for row in r.fetchall()}
+
+        # Total prospect count per season
+        r = conn.execute(
+            text("SELECT season, COUNT(*) as total FROM player_season_stats GROUP BY season ORDER BY season")
+        )
+        season_totals = {row[0]: row[1] for row in r.fetchall()}
+
         # Merge into season list
         all_seasons = sorted(set(list(pergame) + list(ratings)))
         seasons = []
@@ -660,7 +673,8 @@ def get_profile(player_id: str):
         for row in sim_rows:
             similarity.setdefault(row['segment'], []).append(row)
 
-        return {'bio': bio, 'seasons': seasons, 'similarity': similarity}
+        return {'bio': bio, 'seasons': seasons, 'similarity': similarity,
+                'rank_by_season': rank_by_season, 'season_totals': season_totals}
 
 
 @app.get("/api/hometown-coords")

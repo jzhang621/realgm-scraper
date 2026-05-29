@@ -408,6 +408,7 @@ let profileData = null;
 let selectedSeason = null;
 let careerMode = 'pergame';  // 'pergame' | 'totals' | 'advanced'
 let simSegment = 'production';
+let trajectoryMode = 'rating'; // 'rating' | 'ranking'
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
@@ -482,8 +483,14 @@ function renderHeader(bio, seasons, currentRating) {
             </div>
             ${ratedSeasons.length > 0 ? `
             <div class="sparkline-section">
-                <div class="sparkline-label">Rating Trajectory</div>
-                ${renderSparkline(ratedSeasons)}
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                    <div class="sparkline-label" style="margin-bottom:0">${trajectoryMode === 'rating' ? 'Rating Trajectory' : 'Ranking Trajectory'}</div>
+                    <div style="display:flex;gap:6px">
+                        <button class="stat-toggle-btn ${trajectoryMode === 'rating' ? 'active' : ''}" onclick="setTrajectoryMode('rating')">Rating</button>
+                        <button class="stat-toggle-btn ${trajectoryMode === 'ranking' ? 'active' : ''}" onclick="setTrajectoryMode('ranking')">Ranking</button>
+                    </div>
+                </div>
+                ${trajectoryMode === 'rating' ? renderSparkline(ratedSeasons) : renderRankSparkline(ratedSeasons, profileData.rank_by_season, profileData.season_totals)}
             </div>` : ''}
         </div>
     `;
@@ -544,6 +551,75 @@ function renderSparkline(ratedSeasons) {
             </defs>
             <polygon points="${areaPoints}" fill="url(#lineGrad)"/>
             <polyline points="${polyline}" fill="none" stroke="#667eea" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            ${dots}
+        </svg>`;
+}
+
+function setTrajectoryMode(mode) {
+    trajectoryMode = mode;
+    render();
+}
+
+function renderRankSparkline(ratedSeasons, rankBySeason, seasonTotals) {
+    const W = 600, H = 100;
+    const PAD = { top: 28, bottom: 36, left: 20, right: 20 };
+    const innerW = W - PAD.left - PAD.right;
+    const innerH = H - PAD.top - PAD.bottom;
+
+    const ranks = ratedSeasons.map(s => rankBySeason[s.season]).filter(r => r != null);
+    if (!ranks.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0">No ranking data available.</div>';
+
+    const minR = Math.min(...ranks);
+    const maxR = Math.max(...ranks);
+    const span = maxR - minR || 10;
+
+    const validSeasons = ratedSeasons.filter(s => rankBySeason[s.season] != null);
+    const n = validSeasons.length;
+    const points = validSeasons.map((s, i) => {
+        const rank = rankBySeason[s.season];
+        const x = PAD.left + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+        // Invert Y: rank 1 at top, higher rank number at bottom
+        const y = PAD.top + ((rank - minR) / span) * innerH;
+        return { x, y, s, rank };
+    });
+
+    const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+    const areaPoints = [
+        `${points[0].x},${PAD.top + innerH}`,
+        ...points.map(p => `${p.x},${p.y}`),
+        `${points[points.length - 1].x},${PAD.top + innerH}`
+    ].join(' ');
+
+    const dots = points.map(p => {
+        const active = p.s.season === selectedSeason;
+        const fill = active ? '#7c3aed' : '#a78bfa';
+        const rAttr = active ? 6 : 4;
+        const total = seasonTotals[p.s.season];
+        const totalStr = total ? `(${Number(total).toLocaleString()})` : '';
+        return `
+            <g class="spark-point" onclick="selectSeason('${p.s.season}')" data-season="${p.s.season}">
+                <circle cx="${p.x}" cy="${p.y}" r="${rAttr}" fill="${fill}" stroke="#fff" stroke-width="2"/>
+                <text x="${p.x}" y="${p.y - 11}" text-anchor="middle"
+                    font-size="10" font-weight="${active ? 700 : 600}"
+                    fill="${active ? '#7c3aed' : '#999'}">#${p.rank}</text>
+                <text x="${p.x}" y="${PAD.top + innerH + 14}" text-anchor="middle"
+                    font-size="9" font-weight="600" fill="${active ? '#7c3aed' : '#bbb'}">${p.s.season.slice(2)}</text>
+                <text x="${p.x}" y="${PAD.top + innerH + 25}" text-anchor="middle"
+                    font-size="8" fill="#bbb">${totalStr}</text>
+                <rect x="${p.x - 20}" y="${p.y - 22}" width="40" height="38" fill="transparent"/>
+            </g>`;
+    }).join('');
+
+    return `
+        <svg class="sparkline-svg" viewBox="0 0 ${W} ${H}" height="${H}">
+            <defs>
+                <linearGradient id="rankGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+                </linearGradient>
+            </defs>
+            <polygon points="${areaPoints}" fill="url(#rankGrad)"/>
+            <polyline points="${polyline}" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
             ${dots}
         </svg>`;
 }
