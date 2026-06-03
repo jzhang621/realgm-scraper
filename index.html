@@ -427,6 +427,10 @@
         .cb-col { width: 28px; text-align: center !important; padding: 7px 4px !important; }
         .cb-col input[type=checkbox] { cursor: pointer; accent-color: #667eea; width: 14px; height: 14px; }
 
+        /* ── Local rank column — hidden unless filters active ── */
+        .local-rank-col { display: none; }
+        table.has-local-rank .local-rank-col { display: table-cell; }
+
         /* ── Export button ── */
         .export-btn {
             padding: 5px 12px;
@@ -610,6 +614,12 @@
             <input type="text" id="searchBox" placeholder="Player name...">
         </div>
 
+        <div class="sidebar-field">
+            <label>Team</label>
+            <input type="text" id="teamFilter" placeholder="e.g. Duke" list="teamList" autocomplete="off">
+            <datalist id="teamList"></datalist>
+        </div>
+
         <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
 
         <!-- Sliders injected here -->
@@ -658,7 +668,7 @@
         </div>
 
         <div class="table-container" id="tableContainer" style="display:none">
-            <table>
+            <table id="rankingsTable">
                 <thead id="tableHead"></thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -850,6 +860,7 @@ const PAGE_SIZE = 100;
 const sliderState = {};
 let statRanges = {};
 let totalSeasonCount = 0;
+let filteredTotalCount = 0;
 let allPlayers = [];
 let serverOffset = 0;
 let hasMoreData = true;
@@ -972,6 +983,10 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(applyFilters, 300);
     });
+    document.getElementById('teamFilter').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(applyFilters, 300);
+    });
     loadPlayers();
 });
 
@@ -1007,6 +1022,7 @@ async function loadPlayers() {
             renderTableHeader();
             buildPositionChips();
             buildClassChips();
+            buildTeamList();
             applyFilters();
 
             loadingEl.style.display = 'none';
@@ -1031,6 +1047,8 @@ function buildFilterParams() {
     const params = new URLSearchParams();
     const search = document.getElementById('searchBox').value.trim();
     if (search) params.set('search', search);
+    const team = document.getElementById('teamFilter').value.trim();
+    if (team) params.set('team', team);
     if (activePositions.size > 0) params.set('pos_group', [...activePositions].join(','));
     if (activeClassYears.size > 0) params.set('class_year', [...activeClassYears].join(','));
 
@@ -1061,6 +1079,7 @@ async function fetchBatch() {
     const batch = data.data.map(p => ({ ...p, height_in: parseHeightToInches(p.height) }));
     allPlayers = [...allPlayers, ...batch];
     serverOffset += batch.length;
+    filteredTotalCount = data.total_count ?? allPlayers.length;
     hasMoreData = batch.length === FETCH_SIZE;
     isFetchingMore = false;
 }
@@ -1255,9 +1274,17 @@ function buildClassChips() {
     });
 }
 
+// ── Team datalist ─────────────────────────────────────────────────────────
+function buildTeamList() {
+    const teams = [...new Set(allPlayers.map(p => p.team).filter(Boolean))].sort();
+    const dl = document.getElementById('teamList');
+    dl.innerHTML = teams.map(t => `<option value="${t}">`).join('');
+}
+
 // ── Filter + render ───────────────────────────────────────────────────────
 function isFiltered() {
     if (document.getElementById('searchBox').value.trim()) return true;
+    if (document.getElementById('teamFilter').value.trim()) return true;
     if (activePositions.size > 0 || activeClassYears.size > 0) return true;
     for (const def of getStatDefs()) {
         const s = sliderState[def.key];
@@ -1274,10 +1301,9 @@ async function applyFilters() {
     filteredPlayers = [...allPlayers];
     currentPage = 1;
     const filtered = isFiltered();
-    const displayCount = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
-    const suffix = filtered && hasMoreData ? '+' : '';
+    const displayCount = filtered ? filteredTotalCount : (totalSeasonCount || filteredPlayers.length);
     document.getElementById('resultsCount').textContent =
-        `${displayCount.toLocaleString()}${suffix} player${displayCount !== 1 ? 's' : ''}`;
+        `${displayCount.toLocaleString()} player${displayCount !== 1 ? 's' : ''}`;
     renderPage();
 }
 
@@ -1303,12 +1329,42 @@ function fmtCol(c, val) {
     return fmt(val, c.d ?? 1);
 }
 
+// Build a RANK-style map (same rating → same rank, skips after ties)
+// Returns Map<player_id_str, rank_number>
+function computeLocalRankMap(players) {
+    const map = new Map();
+    let rank = 1;
+    for (let i = 0; i < players.length; i++) {
+        if (i > 0 && Number(players[i].final_rating).toFixed(1) !== Number(players[i - 1].final_rating).toFixed(1)) {
+            rank = i + 1;
+        }
+        map.set(String(players[i].player_id), rank);
+    }
+    return map;
+}
+
+// Build tie info for global rank from allPlayers
+// Returns Map<final_rating_key, {minRank, count}>
+function buildGlobalRankInfo(players) {
+    const info = new Map();
+    players.forEach(p => {
+        if (p.rating_rank == null) return;
+        const key = Number(p.final_rating).toFixed(1);
+        const entry = info.get(key) || { minRank: p.rating_rank, count: 0 };
+        entry.count++;
+        if (p.rating_rank < entry.minRank) entry.minRank = p.rating_rank;
+        info.set(key, entry);
+    });
+    return info;
+}
+
 function renderTableHeader() {
     const cols = getCols();
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <th class="cb-col" style="cursor:default"><input type="checkbox" id="selectAllCb" title="Select all on page"></th>
         <th data-col="final_rating" style="min-width:38px;text-align:center">Rank</th>
+        <th class="local-rank-col" style="min-width:60px;text-align:center;cursor:default" title="Rank within current filter">Filtered Rank</th>
         <th style="cursor:default;width:28px" title="Find similar players"></th>
         <th data-col="full_name" style="min-width:145px">Player</th>
         <th data-col="team" style="min-width:115px">Team</th>
@@ -1362,16 +1418,44 @@ function renderTable(players, offset = 0) {
     const selectAllCb = document.getElementById('selectAllCb');
     if (selectAllCb) selectAllCb.checked = allChecked;
 
+    const filtered = isFiltered();
+    const globalRankInfo = buildGlobalRankInfo(allPlayers);
+    const localRankMap = filtered ? computeLocalRankMap(filteredPlayers) : null;
+
+    // Pre-compute local rank tie counts (rank_number → how many players share it)
+    const localRankCounts = new Map();
+    if (localRankMap) {
+        localRankMap.forEach(rank => localRankCounts.set(rank, (localRankCounts.get(rank) || 0) + 1));
+    }
+
+    // Toggle local rank column visibility on the table element
+    const tableEl = document.getElementById('rankingsTable');
+    if (tableEl) tableEl.classList.toggle('has-local-rank', filtered);
+
     players.forEach((p, i) => {
         const checked = selectedPlayerIds.has(p.player_id);
         const tr = document.createElement('tr');
         tr.addEventListener('click', () => window.location.href = `/player.html?id=${p.player_id}`);
         const varCells = cols.map(c => `<td data-col="${c.col}">${fmtCol(c, p[c.col])}</td>`).join('');
+
+        // Global rank with tie detection
+        const gKey = Number(p.final_rating).toFixed(1);
+        const gInfo = globalRankInfo.get(gKey);
+        const gTied = gInfo && gInfo.count > 1;
+        const gRankNum = gInfo ? gInfo.minRank : p.rating_rank;
+        const globalRankStr = p.rating_rank != null ? (gTied ? `T-${gRankNum}` : `${gRankNum}`) : '—';
+
+        // Local rank with tie detection
+        const lRank = localRankMap ? localRankMap.get(String(p.player_id)) : null;
+        const lCount = lRank != null ? (localRankCounts.get(lRank) || 1) : 1;
+        const localRankStr = lRank != null ? (lCount > 1 ? `T-${lRank}` : `${lRank}`) : '—';
+
         tr.innerHTML = `
             <td class="cb-col" onclick="event.stopPropagation()">
                 <input type="checkbox" data-id="${p.player_id}" ${checked ? 'checked' : ''}>
             </td>
-            <td style="color:#aaa;font-size:.88em;text-align:center;font-variant-numeric:tabular-nums">${p.rating_rank ?? '—'}</td>
+            <td style="color:#aaa;font-size:.88em;text-align:center;font-variant-numeric:tabular-nums">${globalRankStr}</td>
+            <td class="local-rank-col" style="color:#7c3aed;font-size:.88em;text-align:center;font-variant-numeric:tabular-nums">${localRankStr}</td>
             <td class="sim-cell" onclick="event.stopPropagation();applyPlayerFilters(${p.player_id})">≈</td>
             <td data-col="full_name"><span class="player-name">${p.full_name}</span></td>
             <td data-col="team">${p.team || '-'}</td>
@@ -1413,7 +1497,7 @@ function renderPagination() {
     header.style.display = 'flex';
 
     const filtered = isFiltered();
-    const displayTotal = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
+    const displayTotal = filtered ? filteredTotalCount : (totalSeasonCount || filteredPlayers.length);
     const totalPages = Math.ceil(displayTotal / PAGE_SIZE);
 
     el.style.display = totalPages <= 1 ? 'none' : '';
@@ -1421,7 +1505,6 @@ function renderPagination() {
 
     const start = (currentPage - 1) * PAGE_SIZE + 1;
     const end = Math.min(currentPage * PAGE_SIZE, filteredPlayers.length);
-    const ofSuffix = filtered && hasMoreData ? '+' : '';
 
     // Show up to 7 page buttons around current page
     const pages = [];
@@ -1438,10 +1521,9 @@ function renderPagination() {
         html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
         prev = p;
     });
-    if (filtered && hasMoreData) html += `<span class="pg-info">…</span>`;
-    const nextDisabled = currentPage === totalPages && (!hasMoreData || !filtered);
+    const nextDisabled = currentPage === totalPages;
     html += `<button class="pg-btn" ${nextDisabled ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>`;
-    html += `<span class="pg-info">${start}–${end} of ${displayTotal.toLocaleString()}${ofSuffix}</span>`;
+    html += `<span class="pg-info">${start}–${end} of ${displayTotal.toLocaleString()}</span>`;
 
     el.innerHTML = html;
 }
@@ -1451,11 +1533,6 @@ async function goPage(page) {
     if (neededCount > filteredPlayers.length && hasMoreData && !isFetchingMore) {
         await fetchBatch();
         filteredPlayers = [...allPlayers];
-        const filtered = isFiltered();
-        const displayCount = filtered ? filteredPlayers.length : (totalSeasonCount || filteredPlayers.length);
-        const suffix = filtered && hasMoreData ? '+' : '';
-        document.getElementById('resultsCount').textContent =
-            `${displayCount.toLocaleString()}${suffix} player${displayCount !== 1 ? 's' : ''}`;
     }
     currentPage = page;
     renderPage();
@@ -1475,6 +1552,7 @@ function resetFilters() {
     activeClassYears.clear();
     document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('searchBox').value = '';
+    document.getElementById('teamFilter').value = '';
     selectedPlayerIds.clear();
     updateExportButton();
     applyFilters();

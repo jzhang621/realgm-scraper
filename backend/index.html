@@ -614,6 +614,12 @@
             <input type="text" id="searchBox" placeholder="Player name...">
         </div>
 
+        <div class="sidebar-field">
+            <label>Team</label>
+            <input type="text" id="teamFilter" placeholder="e.g. Duke" list="teamList" autocomplete="off">
+            <datalist id="teamList"></datalist>
+        </div>
+
         <button class="btn-reset" onclick="resetFilters()">Reset all filters</button>
 
         <!-- Sliders injected here -->
@@ -977,6 +983,10 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(applyFilters, 300);
     });
+    document.getElementById('teamFilter').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(applyFilters, 300);
+    });
     loadPlayers();
 });
 
@@ -1012,6 +1022,7 @@ async function loadPlayers() {
             renderTableHeader();
             buildPositionChips();
             buildClassChips();
+            buildTeamList();
             applyFilters();
 
             loadingEl.style.display = 'none';
@@ -1036,6 +1047,8 @@ function buildFilterParams() {
     const params = new URLSearchParams();
     const search = document.getElementById('searchBox').value.trim();
     if (search) params.set('search', search);
+    const team = document.getElementById('teamFilter').value.trim();
+    if (team) params.set('team', team);
     if (activePositions.size > 0) params.set('pos_group', [...activePositions].join(','));
     if (activeClassYears.size > 0) params.set('class_year', [...activeClassYears].join(','));
 
@@ -1261,9 +1274,17 @@ function buildClassChips() {
     });
 }
 
+// ── Team datalist ─────────────────────────────────────────────────────────
+function buildTeamList() {
+    const teams = [...new Set(allPlayers.map(p => p.team).filter(Boolean))].sort();
+    const dl = document.getElementById('teamList');
+    dl.innerHTML = teams.map(t => `<option value="${t}">`).join('');
+}
+
 // ── Filter + render ───────────────────────────────────────────────────────
 function isFiltered() {
     if (document.getElementById('searchBox').value.trim()) return true;
+    if (document.getElementById('teamFilter').value.trim()) return true;
     if (activePositions.size > 0 || activeClassYears.size > 0) return true;
     for (const def of getStatDefs()) {
         const s = sliderState[def.key];
@@ -1531,6 +1552,7 @@ function resetFilters() {
     activeClassYears.clear();
     document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('searchBox').value = '';
+    document.getElementById('teamFilter').value = '';
     selectedPlayerIds.clear();
     updateExportButton();
     applyFilters();
