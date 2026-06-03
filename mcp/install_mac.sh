@@ -26,7 +26,7 @@ echo "✓ Python 3.$PYTHON_VERSION found"
 # 2. Install the package
 echo ""
 echo "Installing nil-pro-mcp..."
-pip3 install --quiet --upgrade "git+https://github.com/jzhang621/realgm-scraper.git#subdirectory=mcp"
+pip3 install --quiet --force-reinstall "git+https://github.com/jzhang621/realgm-scraper.git#subdirectory=mcp"
 
 # 3. Find the installed command path
 CMD=$(which nil-pro-mcp 2>/dev/null || python3 -c "import sysconfig; print(sysconfig.get_path('scripts'))" | xargs -I{} echo "{}/nil-pro-mcp")
