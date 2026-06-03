@@ -1275,10 +1275,14 @@ function buildClassChips() {
 }
 
 // ── Team datalist ─────────────────────────────────────────────────────────
-function buildTeamList() {
-    const teams = [...new Set(allPlayers.map(p => p.team).filter(Boolean))].sort();
-    const dl = document.getElementById('teamList');
-    dl.innerHTML = teams.map(t => `<option value="${t}">`).join('');
+async function buildTeamList() {
+    try {
+        const res = await fetch(`${API_BASE}/teams/${currentSeason}`);
+        const data = await res.json();
+        const teams = (data.teams || []).map(t => t.team_name).sort();
+        const dl = document.getElementById('teamList');
+        dl.innerHTML = teams.map(t => `<option value="${t}">`).join('');
+    } catch (_) {}
 }
 
 // ── Filter + render ───────────────────────────────────────────────────────
